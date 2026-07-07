@@ -380,68 +380,72 @@ function MapPickerModal({ isOpen, onClose, onConfirm, initialSearch }) {
     }
     let mapListener, markerListener, acListener;
     if (isOpen && window.google?.maps && mapRef.current && !map) {
-      const m = new window.google.maps.Map(mapRef.current, {
-        zoom: 6,
-        center: { lat: 52.5, lng: -1.5 },
-        disableDefaultUI: false,
-        streetViewControl: false,
-        mapTypeControl: false,
-        fullscreenControl: false,
-      });
-      const mk = new window.google.maps.Marker({ map: m, draggable: true });
-      setMap(m);
-      setMarker(mk);
+      // Small timeout ensures the modal animation is complete and map container has a non-zero size
+      setTimeout(() => {
+        if (!mapRef.current) return;
+        const m = new window.google.maps.Map(mapRef.current, {
+          zoom: 6,
+          center: { lat: 52.5, lng: -1.5 },
+          disableDefaultUI: false,
+          streetViewControl: false,
+          mapTypeControl: false,
+          fullscreenControl: false,
+        });
+        const mk = new window.google.maps.Marker({ map: m, draggable: true });
+        setMap(m);
+        setMarker(mk);
 
-      const geocoder = new window.google.maps.Geocoder();
+        const geocoder = new window.google.maps.Geocoder();
 
-      const handleSelect = (latLng) => {
-        mk.setPosition(latLng);
-        setLoading(true);
-        geocoder.geocode({ location: latLng }, (results, status) => {
-          setLoading(false);
-          if (status === "OK" && results[0]) {
-            const isUK = results[0].address_components.some(c => c.short_name === "GB" || c.long_name === "United Kingdom");
-            if (!isUK) {
-              setSelectedAddr("❌ Service is exclusively available in the UK");
+        const handleSelect = (latLng) => {
+          mk.setPosition(latLng);
+          setLoading(true);
+          geocoder.geocode({ location: latLng }, (results, status) => {
+            setLoading(false);
+            if (status === "OK" && results[0]) {
+              const isUK = results[0].address_components.some(c => c.short_name === "GB" || c.long_name === "United Kingdom");
+              if (!isUK) {
+                setSelectedAddr("❌ Service is exclusively available in the UK");
+                setSelectedGeo(null);
+                return;
+              }
+              setSelectedAddr(results[0].formatted_address);
+              setSelectedGeo({ lat: latLng.lat(), lng: latLng.lng(), name: results[0].formatted_address });
+            } else {
+              setSelectedAddr("❌ Unknown location");
               setSelectedGeo(null);
-              return;
             }
-            setSelectedAddr(results[0].formatted_address);
-            setSelectedGeo({ lat: latLng.lat(), lng: latLng.lng(), name: results[0].formatted_address });
-          } else {
-            setSelectedAddr("❌ Unknown location");
-            setSelectedGeo(null);
-          }
-        });
-      };
+          });
+        };
 
-      mapListener = m.addListener("click", (e) => handleSelect(e.latLng));
-      markerListener = mk.addListener("dragend", (e) => handleSelect(e.latLng));
+        mapListener = m.addListener("click", (e) => handleSelect(e.latLng));
+        markerListener = mk.addListener("dragend", (e) => handleSelect(e.latLng));
 
-      if (initialSearch) {
-        geocoder.geocode({ address: initialSearch }, (results, status) => {
-          if (status === "OK" && results[0]) {
-            m.setCenter(results[0].geometry.location);
+        if (initialSearch) {
+          geocoder.geocode({ address: initialSearch }, (results, status) => {
+            if (status === "OK" && results[0]) {
+              m.setCenter(results[0].geometry.location);
+              m.setZoom(14);
+              handleSelect(results[0].geometry.location);
+            }
+          });
+        }
+
+        if (window.google?.maps?.places && searchInputRef.current) {
+          const ac = new window.google.maps.places.Autocomplete(searchInputRef.current, {
+            componentRestrictions: { country: "gb" },
+            fields: ["formatted_address", "geometry", "name"],
+          });
+          ac.bindTo("bounds", m);
+          acListener = ac.addListener("place_changed", () => {
+            const p = ac.getPlace();
+            if (!p.geometry || !p.geometry.location) return;
+            m.setCenter(p.geometry.location);
             m.setZoom(14);
-            handleSelect(results[0].geometry.location);
-          }
-        });
-      }
-
-      if (window.google?.maps?.places && searchInputRef.current) {
-        const ac = new window.google.maps.places.Autocomplete(searchInputRef.current, {
-          componentRestrictions: { country: "gb" },
-          fields: ["formatted_address", "geometry", "name"],
-        });
-        ac.bindTo("bounds", m);
-        acListener = ac.addListener("place_changed", () => {
-          const p = ac.getPlace();
-          if (!p.geometry || !p.geometry.location) return;
-          m.setCenter(p.geometry.location);
-          m.setZoom(14);
-          handleSelect(p.geometry.location);
-        });
-      }
+            handleSelect(p.geometry.location);
+          });
+        }
+      }, 50); // 50ms delay for modal render
     }
 
     return () => {
@@ -1194,7 +1198,6 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
   const [selectedWageVehicleId, setSelectedWageVehicleId] = useState(vehicles[0]?.id || "");
   const [gv, setGv]         = useState({...db.globalVars});
   const [depotLoc, setDepotLoc] = useState({ address: gv.yardAddress || "", lat: gv.yardLat, lng: gv.yardLng });
-  const [showDepotMap, setShowDepotMap] = useState(false);
   const [overheads, setOH]  = useState(db.annualOverheads.map(o=>({...o})));
   const [sr, setSr]         = useState({...db.surcharges});
   const [blocks, setBl]     = useState([...db.blockedDates]);
@@ -1968,13 +1971,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                       onChange={(addr, coords)=>setDepotLoc({ address: addr, lat: coords?.lat, lng: coords?.lng })} 
                       placeholder="Yard address..." 
                       icon={<SvgDepot size={14} />} 
-                      onIconClick={() => setShowDepotMap(!showDepotMap)}
                     />
-                    {showDepotMap && (
-                      <div style={{ height: "220px", width: "100%", borderRadius: "8px", border: "1px solid #bfdbfe", overflow: "hidden", position: "relative", marginTop: "10px" }}>
-                        <InlineDepotMap depotLoc={depotLoc} setDepotLoc={setDepotLoc} mapsLoaded={mapsLoaded} />
-                      </div>
-                    )}
                   </div>
                   
                   <div style={{ background:PX.gray50,border:`1px solid ${PX.gray200}`,borderRadius:12,padding:"1.25rem" }}>
