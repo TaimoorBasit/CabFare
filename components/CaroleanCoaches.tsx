@@ -1099,7 +1099,7 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, largeLug
 
 // ── Admin Dashboard ────────────────────────────────────────────────────────────
 function AdminDashboard({ db, setDb, mapsLoaded }) {
-  const [tab, setTab]       = useState("searchings");
+  const [tab, setTab]       = useState("bookings");
   const [vehicles, setV]    = useState(db.vehicles.map(v=>({...v})));
   const [activeVehicleId, setActiveVehicleId] = useState(vehicles[0]?.id || "");
   const [selectedWageVehicleId, setSelectedWageVehicleId] = useState(vehicles[0]?.id || "");
@@ -1142,7 +1142,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
   const [apisLoaded, setApisLoaded] = useState(false);
 
   useEffect(() => {
-    if (!apisLoaded && (tab === "pricing" || tab === "fleet" || tab === "searchings")) {
+    if (!apisLoaded && (tab === "pricing" || tab === "fleet" || tab === "bookings")) {
       Promise.all([
         fetch('/api/admin/pricing-matrix').then(r=>r.json()).catch(()=>[]),
         fetch('/api/admin/route-templates').then(r=>r.json()).catch(()=>[]),
