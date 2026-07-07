@@ -1215,7 +1215,7 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, largeLug
 
 // ── Admin Dashboard ────────────────────────────────────────────────────────────
 function AdminDashboard({ db, setDb, mapsLoaded }) {
-  const [tab, setTab]       = useState("bookings");
+  const [tab, setTab]       = useState("routes");
   const [vehicles, setV]    = useState(db.vehicles.map(v=>({...v})));
   const [activeVehicleId, setActiveVehicleId] = useState(vehicles[0]?.id || "");
   const [selectedWageVehicleId, setSelectedWageVehicleId] = useState(vehicles[0]?.id || "");
