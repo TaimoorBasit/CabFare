@@ -2182,9 +2182,9 @@ function FleetEconomicsPanel({ eco }) {
 }
 
 // ── Root App ──────────────────────────────────────────────────────────────────
-export default function App() {
+export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' | 'customer' }) {
   const [db, setDb]         = useState(DEFAULT_DB);
-  const [adminMode, setAdm] = useState(true);
+  const [adminMode, setAdm] = useState(initialMode === 'admin');
   const [journey, setJ]     = useState({
     journeyType:"one-way", origin:"", destination:"",
     departureDate:"", returnDate:"",
