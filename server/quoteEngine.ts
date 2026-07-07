@@ -34,6 +34,7 @@ export async function generateQuotes(journey: any) {
       liveKm: mileageResult.liveKm,
       deadKm: mileageResult.deadKm,
       liveDurationMinutes: mileageResult.liveDurationMinutes,
+      totalDurationMinutes: mileageResult.totalDurationMinutes,
       vehicleId: vehicle.id,
       journeyType: journey.journeyType,
       passengers: journey.passengers,

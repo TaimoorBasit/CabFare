@@ -4,6 +4,7 @@ interface PricingInput {
   liveKm: number;
   deadKm: number;
   liveDurationMinutes: number;
+  totalDurationMinutes: number;
   vehicleId: string;
   journeyType: string;
   passengers: number;
@@ -135,8 +136,7 @@ export async function calculatePrice(input: PricingInput) {
       
       const totalKm = liveKm + deadKm;
       const gv = data.globalVars || {};
-      const speed = gv.distanceUnit === 'miles' ? 48.5 : 78;
-      const drivHrs = totalKm / speed; // Approx speed used in frontend
+      const drivHrs = input.totalDurationMinutes / 60; // Use actual duration from Google Maps API
       const waitHrs = (Number(waitingMins) || 0) / 60;
       const shiftHrs = drivHrs + waitHrs;
       const dualCrew = shiftHrs > 9;

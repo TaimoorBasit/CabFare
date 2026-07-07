@@ -832,7 +832,9 @@ function calcFare(journey, vehicle, db) {
   const chain    = buildChain(journeyType, pts, depotGeo);
   const totalKm  = chain.reduce((s,c) => s + haversineKm(c.from,c.to), 0);
   const revKm    = chain.filter(c=>!c.dead).reduce((s,c) => s + haversineKm(c.from,c.to), 0);
-  const drivHrs = totalKm / (gv?.distanceUnit === "miles" ? 48.5 : 78);
+  // We use 78 km/h or 48.5 mph but realistically, 60km/h is closer to actual bus speeds. 
+  // However, since this is a UI fallback, we will just divide by 65 km/h to approximate better.
+  const drivHrs = totalKm / (gv?.distanceUnit === "miles" ? 40 : 65);
   const waitHrs  = (Number(waitingMins)||0) / 60;
   const shiftHrs = drivHrs + waitHrs;
   const dualCrew = shiftHrs > 9;

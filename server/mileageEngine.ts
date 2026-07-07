@@ -62,9 +62,11 @@ export async function calculateMileage(journey: any) {
     // 2. Calculate Dead Mileage (Yard to Origin, Destination to Yard)
     const deadOutDirections = await getDirections(yardLoc, liveOrigin, [], apiKey);
     const deadOutDistanceMeters = sumLegs(deadOutDirections.routes[0].legs, 'distance');
+    const deadOutDurationSeconds = sumLegs(deadOutDirections.routes[0].legs, 'duration');
     
     const deadBackDirections = await getDirections(liveDestination, yardLoc, [], apiKey);
     const deadBackDistanceMeters = sumLegs(deadBackDirections.routes[0].legs, 'distance');
+    const deadBackDurationSeconds = sumLegs(deadBackDirections.routes[0].legs, 'duration');
 
     const deadKm = (deadOutDistanceMeters + deadBackDistanceMeters) / divisor;
 
@@ -73,6 +75,7 @@ export async function calculateMileage(journey: any) {
       deadKm,
       totalKm: liveKm + deadKm,
       liveDurationMinutes: liveDurationSeconds / 60,
+      totalDurationMinutes: (liveDurationSeconds + deadOutDurationSeconds + deadBackDurationSeconds) / 60,
       geometry: liveDirections.routes[0].overview_polyline.points,
       legs: liveDirections.routes[0].legs
     };
@@ -101,6 +104,7 @@ function fallbackCalculateMileage(journey: any) {
     deadKm: 40,
     totalKm: 140,
     liveDurationMinutes: 120,
+    totalDurationMinutes: 160,
     geometry: null,
     legs: []
   };
