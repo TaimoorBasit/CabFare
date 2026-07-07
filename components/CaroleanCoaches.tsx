@@ -1725,6 +1725,106 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
           {tab === "fleet" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
               
+              {/* SUBSECTION 4: SEASONAL DEMAND PERIODS */}
+              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem" }}>
+                  <div>
+                    <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, display:"flex", alignItems:"center", gap:6 }}><SvgCalendar /> Seasonal Demand Multipliers</h2>
+                    <p style={{ fontSize:13, color:PX.gray600, marginTop:4 }}>Configure demand factors based on calendar dates (e.g. peak holiday periods).</p>
+                  </div>
+                  <Btn variant="primary" size="sm" onClick={()=>setSeasonalData(d=>[{id:'new_'+Date.now(),name:"Holiday Surge",startDate:"",endDate:"",multiplier:1.2,status:'active'}, ...d])}>＋ Add Demand Period</Btn>
+                </div>
+
+                {seasonalData.length === 0 ? (
+                  <div style={{ padding: "2rem", textAlign: "center", color: PX.gray400, border: `1px dashed ${PX.gray200}`, borderRadius: 12 }}>
+                    No seasonal multipliers configured.
+                  </div>
+                ) : (
+                  seasonalData.map((s) => (
+                    <div key={s.id} style={{ border:`1.5px solid ${PX.gray200}`,borderRadius:12,padding:"1.25rem",marginBottom:"1rem", background: PX.gray50 }}>
+                      <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:"1rem",marginBottom:"1rem" }}>
+                        <div>
+                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Period Name</label>
+                          <input type="text" value={s.name||""} onChange={e=>setSeasonalData(d=>d.map(x=>x.id===s.id?{...x,name:e.target.value}:x))} />
+                        </div>
+                        <div>
+                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Start Date</label>
+                          <input type="date" value={s.startDate||""} onChange={e=>setSeasonalData(d=>d.map(x=>x.id===s.id?{...x,startDate:e.target.value}:x))} />
+                        </div>
+                        <div>
+                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>End Date</label>
+                          <input type="date" value={s.endDate||""} onChange={e=>setSeasonalData(d=>d.map(x=>x.id===s.id?{...x,endDate:e.target.value}:x))} />
+                        </div>
+                        <div>
+                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Multiplier (e.g. 1.2)</label>
+                          <input type="number" step="0.05" value={s.multiplier||1} onChange={e=>setSeasonalData(d=>d.map(x=>x.id===s.id?{...x,multiplier:Number(e.target.value)}:x))} />
+                        </div>
+                      </div>
+                      <div style={{ display:"flex",justifyContent:"flex-end",gap:"0.75rem" }}>
+                        <Btn variant="danger" size="sm" onClick={async ()=>{ if(window.confirm("Delete this seasonal period?")) { await saveApi('seasonal', s, true); setSeasonalData(d=>d.filter(x=>x.id!==s.id)); } }}>Delete</Btn>
+                        <Btn variant="teal" size="sm" onClick={async ()=>{ const saved = await saveApi('seasonal', s); setSeasonalData(d=>d.map(x=>x.id===s.id?saved:x)); setToast("Demand Period saved!"); setTimeout(()=>setToast(""),2000); }}>Save Period</Btn>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* SUBSECTION 5: BLOCKED DATES CALENDAR */}
+              <div>
+                <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem" }}>Blocked Calendar Dates</h2>
+                <p style={{ fontSize:13,color:PX.gray600,marginBottom:"1.5rem" }}>Block out specific dates for contract bookings or PMI maintenance schedules.</p>
+                
+                <div style={{ background:PX.gray50,borderRadius:12,padding:"1.25rem",marginBottom:"1.5rem",border:`1.5px dashed ${PX.gray200}` }}>
+                  <p style={{ fontWeight:700,fontSize:14,color:PX.navy800,marginBottom:8 }}>Add Date Blockout</p>
+                  <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12,marginBottom:12 }}>
+                    <div>
+                      <label style={{ fontSize:11,color:PX.gray600 }}>Target Vehicle</label>
+                      <select value={newBlock.vehicleId} onChange={e=>setNB(b=>({...b,vehicleId:e.target.value}))}>
+                        {db.vehicles.map(v=><option key={v.id} value={v.id}>{v.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontSize:11,color:PX.gray600 }}>Reason / Notes</label>
+                      <input type="text" value={newBlock.reason} onChange={e=>setNB(b=>({...b,reason:e.target.value}))} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize:11,color:PX.gray600 }}>From Date</label>
+                      <input type="date" value={newBlock.from} onChange={e=>setNB(b=>({...b,from:e.target.value}))} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize:11,color:PX.gray600 }}>To Date</label>
+                      <input type="date" value={newBlock.to} onChange={e=>setNB(b=>({...b,to:e.target.value}))} />
+                    </div>
+                  </div>
+                  <Btn variant="primary" size="sm" disabled={!newBlock.from||!newBlock.to} onClick={()=>{
+                    setBl(b=>[...b, {...newBlock, vehicleName:db.vehicles.find(v=>v.id===newBlock.vehicleId)?.name}]);
+                    setNB(n=>({...n,from:"",to:""}));
+                  }}>+ Block Vehicle</Btn>
+                </div>
+
+                <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
+                  {blocks.length === 0 ? (
+                    <div style={{ padding: "2rem", textAlign: "center", color: PX.gray400, border: `1px solid ${PX.gray200}`, borderRadius: 12 }}>
+                      No blocked periods configured. All vehicles available.
+                    </div>
+                  ) : (
+                    blocks.map((b,i)=>(
+                      <div key={i} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 14px",border:`1px solid ${PX.gray200}`,borderRadius:8, background: "#fff" }}>
+                        <div>
+                          <span style={{ fontWeight:700,fontSize:13,color:PX.navy800 }}>{b.vehicleName}</span>
+                          <span style={{ fontSize:12,color:PX.gray600,marginLeft:8 }}>({b.reason})</span>
+                        </div>
+                        <div style={{ display:"flex",alignItems:"center",gap:10 }}>
+                          <span style={{ fontSize:12,color:PX.gray600 }}>{b.from} → {b.to}</span>
+                          <button onClick={()=>setBl(bs=>bs.filter((_,idx)=>idx!==i))} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+
               {/* SUBSECTION 1: VEHICLE SPECIFICATIONS */}
               <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem" }}>
@@ -1928,105 +2028,6 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                   Vehicle annual costs ÷ utilisation days = standing rate • Company overheads ÷ total fleet units = overhead per unit • <strong>Both added = minimum hire charge per vehicle per day</strong>
                 </p>
                 <FleetEconomicsPanel eco={eco} />
-              </div>
-
-              {/* SUBSECTION 4: SEASONAL DEMAND PERIODS */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
-                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem" }}>
-                  <div>
-                    <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, display:"flex", alignItems:"center", gap:6 }}><SvgCalendar /> Seasonal Demand Multipliers</h2>
-                    <p style={{ fontSize:13, color:PX.gray600, marginTop:4 }}>Configure demand factors based on calendar dates (e.g. peak holiday periods).</p>
-                  </div>
-                  <Btn variant="primary" size="sm" onClick={()=>setSeasonalData(d=>[{id:'new_'+Date.now(),name:"Holiday Surge",startDate:"",endDate:"",multiplier:1.2,status:'active'}, ...d])}>＋ Add Demand Period</Btn>
-                </div>
-
-                {seasonalData.length === 0 ? (
-                  <div style={{ padding: "2rem", textAlign: "center", color: PX.gray400, border: `1px dashed ${PX.gray200}`, borderRadius: 12 }}>
-                    No seasonal multipliers configured.
-                  </div>
-                ) : (
-                  seasonalData.map((s) => (
-                    <div key={s.id} style={{ border:`1.5px solid ${PX.gray200}`,borderRadius:12,padding:"1.25rem",marginBottom:"1rem", background: PX.gray50 }}>
-                      <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:"1rem",marginBottom:"1rem" }}>
-                        <div>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Period Name</label>
-                          <input type="text" value={s.name||""} onChange={e=>setSeasonalData(d=>d.map(x=>x.id===s.id?{...x,name:e.target.value}:x))} />
-                        </div>
-                        <div>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Start Date</label>
-                          <input type="date" value={s.startDate||""} onChange={e=>setSeasonalData(d=>d.map(x=>x.id===s.id?{...x,startDate:e.target.value}:x))} />
-                        </div>
-                        <div>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>End Date</label>
-                          <input type="date" value={s.endDate||""} onChange={e=>setSeasonalData(d=>d.map(x=>x.id===s.id?{...x,endDate:e.target.value}:x))} />
-                        </div>
-                        <div>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Multiplier (e.g. 1.2)</label>
-                          <input type="number" step="0.05" value={s.multiplier||1} onChange={e=>setSeasonalData(d=>d.map(x=>x.id===s.id?{...x,multiplier:Number(e.target.value)}:x))} />
-                        </div>
-                      </div>
-                      <div style={{ display:"flex",justifyContent:"flex-end",gap:"0.75rem" }}>
-                        <Btn variant="danger" size="sm" onClick={async ()=>{ if(window.confirm("Delete this seasonal period?")) { await saveApi('seasonal', s, true); setSeasonalData(d=>d.filter(x=>x.id!==s.id)); } }}>Delete</Btn>
-                        <Btn variant="teal" size="sm" onClick={async ()=>{ const saved = await saveApi('seasonal', s); setSeasonalData(d=>d.map(x=>x.id===s.id?saved:x)); setToast("Demand Period saved!"); setTimeout(()=>setToast(""),2000); }}>Save Period</Btn>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* SUBSECTION 5: BLOCKED DATES CALENDAR */}
-              <div>
-                <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem" }}>Blocked Calendar Dates</h2>
-                <p style={{ fontSize:13,color:PX.gray600,marginBottom:"1.5rem" }}>Block out specific dates for contract bookings or PMI maintenance schedules.</p>
-                
-                <div style={{ background:PX.gray50,borderRadius:12,padding:"1.25rem",marginBottom:"1.5rem",border:`1.5px dashed ${PX.gray200}` }}>
-                  <p style={{ fontWeight:700,fontSize:14,color:PX.navy800,marginBottom:8 }}>Add Date Blockout</p>
-                  <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12,marginBottom:12 }}>
-                    <div>
-                      <label style={{ fontSize:11,color:PX.gray600 }}>Target Vehicle</label>
-                      <select value={newBlock.vehicleId} onChange={e=>setNB(b=>({...b,vehicleId:e.target.value}))}>
-                        {db.vehicles.map(v=><option key={v.id} value={v.id}>{v.name}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label style={{ fontSize:11,color:PX.gray600 }}>Reason / Notes</label>
-                      <input type="text" value={newBlock.reason} onChange={e=>setNB(b=>({...b,reason:e.target.value}))} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize:11,color:PX.gray600 }}>From Date</label>
-                      <input type="date" value={newBlock.from} onChange={e=>setNB(b=>({...b,from:e.target.value}))} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize:11,color:PX.gray600 }}>To Date</label>
-                      <input type="date" value={newBlock.to} onChange={e=>setNB(b=>({...b,to:e.target.value}))} />
-                    </div>
-                  </div>
-                  <Btn variant="primary" size="sm" disabled={!newBlock.from||!newBlock.to} onClick={()=>{
-                    setBl(b=>[...b, {...newBlock, vehicleName:db.vehicles.find(v=>v.id===newBlock.vehicleId)?.name}]);
-                    setNB(n=>({...n,from:"",to:""}));
-                  }}>+ Block Vehicle</Btn>
-                </div>
-
-                <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
-                  {blocks.length === 0 ? (
-                    <div style={{ padding: "2rem", textAlign: "center", color: PX.gray400, border: `1px solid ${PX.gray200}`, borderRadius: 12 }}>
-                      No blocked periods configured. All vehicles available.
-                    </div>
-                  ) : (
-                    blocks.map((b,i)=>(
-                      <div key={i} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 14px",border:`1px solid ${PX.gray200}`,borderRadius:8, background: "#fff" }}>
-                        <div>
-                          <span style={{ fontWeight:700,fontSize:13,color:PX.navy800 }}>{b.vehicleName}</span>
-                          <span style={{ fontSize:12,color:PX.gray600,marginLeft:8 }}>({b.reason})</span>
-                        </div>
-                        <div style={{ display:"flex",alignItems:"center",gap:10 }}>
-                          <span style={{ fontSize:12,color:PX.gray600 }}>{b.from} → {b.to}</span>
-                          <button onClick={()=>setBl(bs=>bs.filter((_,idx)=>idx!==i))} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
               </div>
 
             </div>
