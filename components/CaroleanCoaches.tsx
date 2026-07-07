@@ -505,6 +505,11 @@ function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded, onIconCli
   const acRef = useRef(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [localVal, setLocalVal] = useState(value || "");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setLocalVal(value || "");
@@ -567,7 +572,7 @@ function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded, onIconCli
         onChange={e => handleTextChange(e.target.value)}
         onBlur={handleBlur}
       />
-      {typeof document !== 'undefined' ? createPortal(
+      {mounted && typeof document !== 'undefined' ? createPortal(
         <MapPickerModal isOpen={pickerOpen} onClose={()=>setPickerOpen(false)} 
           initialSearch={localVal} onConfirm={(addr, geo)=>{ setLocalVal(addr); onChange(addr, geo); setPickerOpen(false); }} />,
         document.body
