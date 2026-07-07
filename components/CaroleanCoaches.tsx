@@ -484,7 +484,7 @@ function MapPickerModal({ isOpen, onClose, onConfirm, initialSearch }) {
 }
 
 // ── Places Autocomplete Input ─────────────────────────────────────────────────
-function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded }) {
+function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded, onIconClick }) {
   const inputRef = useRef(null);
   const acRef = useRef(null);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -539,7 +539,7 @@ function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded }) {
 
   return (
     <div style={{ position:"relative" }}>
-      <button type="button" onClick={()=>setPickerOpen(true)} title="Choose on map"
+      <button type="button" onClick={()=>{ if (onIconClick) onIconClick(); else setPickerOpen(true); }} title="Choose on map"
         style={{ position:"absolute", left:6, top:"50%", transform:"translateY(-50%)",
           display:"flex", alignItems:"center", zIndex:1, background:"none", border:"none", cursor:"pointer",
           padding:"6px", borderRadius:6, transition:"background .15s" }}
@@ -557,138 +557,96 @@ function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded }) {
   );
 }
 
-// ── Inline Depot Map (System Settings) ────────────────────────────────────────
 function InlineDepotMap({ depotLoc, setDepotLoc, mapsLoaded }) {
   const mapRef = useRef(null);
-  const searchInputRef = useRef(null);
   const [map, setMap] = useState(null);
   const [marker, setMarker] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [localAddr, setLocalAddr] = useState(depotLoc.address || "");
 
   useEffect(() => {
-    if (!mapsLoaded || !mapRef.current || !window.google?.maps || map) return;
+    if (!mapsLoaded || !mapRef.current || !window.google?.maps) return;
 
     const initialLat = Number(depotLoc.lat) || 52.5863;
     const initialLng = Number(depotLoc.lng) || -1.9817;
 
     const m = new window.google.maps.Map(mapRef.current, {
-      zoom: depotLoc.lat ? 14 : 10,
+      zoom: 13,
       center: { lat: initialLat, lng: initialLng },
       disableDefaultUI: true,
       zoomControl: true,
+      streetViewControl: false,
+      mapTypeControl: false,
+      fullscreenControl: false,
     });
 
     const mk = new window.google.maps.Marker({
       map: m,
       position: { lat: initialLat, lng: initialLng },
       draggable: true,
-      title: "Depot / Yard Location",
-      animation: window.google.maps.Animation.DROP,
+      title: "Depot/Yard Location",
     });
-    if (!depotLoc.lat) mk.setVisible(false);
-
-    const geocoder = new window.google.maps.Geocoder();
-    const handleSelect = (latLng) => {
-      mk.setPosition(latLng);
-      mk.setVisible(true);
-      setLoading(true);
-      geocoder.geocode({ location: latLng }, (results, status) => {
-        setLoading(false);
-        if (status === "OK" && results[0]) {
-          const addr = results[0].formatted_address;
-          setLocalAddr(addr);
-          setDepotLoc({ address: addr, lat: latLng.lat(), lng: latLng.lng() });
-        } else {
-          setDepotLoc(prev => ({ ...prev, lat: latLng.lat(), lng: latLng.lng() }));
-        }
-      });
-    };
-
-    m.addListener("click", (e) => { mk.setPosition(e.latLng); handleSelect(e.latLng); });
-    mk.addListener("dragend", (e) => { handleSelect(e.latLng); });
-
-    if (window.google.maps.places && searchInputRef.current) {
-      const ac = new window.google.maps.places.Autocomplete(searchInputRef.current, {
-        componentRestrictions: { country: "gb" },
-        fields: ["formatted_address", "geometry"],
-      });
-      ac.bindTo("bounds", m);
-      ac.addListener("place_changed", () => {
-        const p = ac.getPlace();
-        if (!p.geometry?.location) return;
-        m.setCenter(p.geometry.location);
-        m.setZoom(15);
-        handleSelect(p.geometry.location);
-      });
-    }
 
     setMap(m);
     setMarker(mk);
 
-    return () => { window.google.maps.event.clearInstanceListeners(m); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    const geocoder = new window.google.maps.Geocoder();
+
+    const updateLocation = (latLng) => {
+      const lat = latLng.lat();
+      const lng = latLng.lng();
+      geocoder.geocode({ location: latLng }, (results, status) => {
+        if (status === "OK" && results[0]) {
+          setDepotLoc({
+            address: results[0].formatted_address,
+            lat,
+            lng
+          });
+        } else {
+          setDepotLoc(prev => ({
+            ...prev,
+            lat,
+            lng
+          }));
+        }
+      });
+    };
+
+    m.addListener("click", (e) => {
+      mk.setPosition(e.latLng);
+      updateLocation(e.latLng);
+    });
+
+    mk.addListener("dragend", (e) => {
+      updateLocation(e.latLng);
+    });
+
+    return () => {
+      window.google.maps.event.clearInstanceListeners(m);
+      window.google.maps.event.clearInstanceListeners(mk);
+    };
   }, [mapsLoaded]);
 
+  // Center and update marker when depotLoc changes from external (e.g. typing in input)
   useEffect(() => {
     if (!map || !marker || !depotLoc.lat || !depotLoc.lng) return;
     const latLng = new window.google.maps.LatLng(Number(depotLoc.lat), Number(depotLoc.lng));
     marker.setPosition(latLng);
-    marker.setVisible(true);
     map.panTo(latLng);
-    map.setZoom(14);
-    if (depotLoc.address !== localAddr) setLocalAddr(depotLoc.address || "");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [depotLoc.lat, depotLoc.lng]);
+  }, [depotLoc.lat, depotLoc.lng, map, marker]);
 
   return (
-    <div style={{ position:"relative", height:"100%", width:"100%", borderRadius:12, overflow:"hidden" }}>
-      <div ref={mapRef} style={{ width:"100%", height:"100%", background:PX.gray100 }} />
-
-      {/* Floating search pill — same style as MapPickerModal */}
-      <div style={{ position:"absolute", top:12, left:12, right:12, background:"#fff", padding:"8px 14px",
-        borderRadius:999, border:"1.5px solid #fee2e2", boxShadow:"0 6px 16px rgba(0,0,0,.12)",
-        display:"flex", alignItems:"center", gap:8, zIndex:10 }}>
-        {loading ? <span className="spinning" style={{ color:PX.navy800, fontSize:18 }}>⟳</span> : <SvgMapPinRed />}
-        <input
-          ref={searchInputRef}
-          type="text"
-          placeholder="Search for your yard / depot address..."
-          value={localAddr}
-          onChange={e => setLocalAddr(e.target.value)}
-          style={{ flex:1, border:"none", outline:"none", fontSize:13.5, fontWeight:500, color:PX.navy800, background:"transparent", width:"100%" }}
-        />
-        {localAddr && (
-          <button type="button" onClick={() => { setLocalAddr(""); setDepotLoc({ address:"", lat:undefined, lng:undefined }); marker?.setVisible(false); }}
-            style={{ background:"none", border:"none", cursor:"pointer", color:PX.gray400, lineHeight:1, display:"flex", alignItems:"center" }}>
-            <SvgClose size={14} />
-          </button>
-        )}
-      </div>
-
-      {/* Coordinates chip */}
-      {depotLoc.lat && depotLoc.lng && (
-        <div style={{ position:"absolute", bottom:10, left:"50%", transform:"translateX(-50%)",
-          background:"rgba(13,14,72,0.82)", color:"#fff", borderRadius:999, padding:"5px 14px",
-          fontSize:11, fontWeight:600, letterSpacing:.2, display:"flex", alignItems:"center", gap:6,
-          whiteSpace:"nowrap", zIndex:10, boxShadow:"0 4px 14px rgba(0,0,0,.2)" }}>
-          <SvgMapPinRed />
-          {Number(depotLoc.lat).toFixed(5)}, {Number(depotLoc.lng).toFixed(5)}
-        </div>
-      )}
-
-      {/* Loading overlay */}
+    <div style={{ height: "100%", width: "100%", position: "relative" }}>
       {!mapsLoaded && (
-        <div style={{ position:"absolute", inset:0, background:"#f8fafc", display:"flex",
-          alignItems:"center", justifyContent:"center", fontSize:12, color:PX.gray400, gap:8 }}>
-          <span className="spinning" style={{ fontSize:18 }}>⟳</span> Loading map…
+        <div style={{ position: "absolute", inset: 0, background: "#f8fafc", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: PX.gray500 }}>
+          Loading Map...
         </div>
       )}
+      <div ref={mapRef} style={{ height: "100%", width: "100%" }} />
     </div>
   );
 }
 
 
+// ── UK Cities fallback geocoder ───────────────────────────────────────────────
 const UK_CITIES = {
   "walsall":[52.5863,-1.9817],"london":[51.5074,-0.1278],"birmingham":[52.4862,-1.8904],
   "manchester":[53.4808,-2.2426],"liverpool":[53.4084,-2.9916],"leeds":[53.8008,-1.5491],
@@ -1236,6 +1194,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
   const [selectedWageVehicleId, setSelectedWageVehicleId] = useState(vehicles[0]?.id || "");
   const [gv, setGv]         = useState({...db.globalVars});
   const [depotLoc, setDepotLoc] = useState({ address: gv.yardAddress || "", lat: gv.yardLat, lng: gv.yardLng });
+  const [showDepotMap, setShowDepotMap] = useState(false);
   const [overheads, setOH]  = useState(db.annualOverheads.map(o=>({...o})));
   const [sr, setSr]         = useState({...db.surcharges});
   const [blocks, setBl]     = useState([...db.blockedDates]);
@@ -1998,29 +1957,40 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
               
               {/* SUBSECTION 1: CREDENTIALS */}
               <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
-                <h2 style={{ fontSize: 18, fontWeight: 800, color: PX.navy800, marginBottom: "1rem", display: "flex", alignItems: "center", gap: 6 }}><SvgSettings /> Base Station &amp; Map Credentials</h2>
-
-                {/* Depot map — full width, 320px like customer view */}
-                <div style={{ background:"#f0f7ff", border:"1px solid #bfdbfe", borderRadius:14, padding:"1.25rem", marginBottom:"1.25rem" }}>
-                  <div style={{ fontWeight:700, color:PX.navy800, fontSize:14, display:"flex", alignItems:"center", gap:4, marginBottom:4 }}><SvgDepot /> Depot Address Location</div>
-                  <p style={{ fontSize:11, color:PX.gray600, marginBottom:"0.75rem" }}>Search, click or drag the red pin to pin your exact yard. Dead mileage is routed from this exact location. Saved with "Save all changes".</p>
-                  <div style={{ height:"320px", width:"100%", borderRadius:"10px", border:"1px solid #bfdbfe", overflow:"hidden", position:"relative" }}>
-                    <InlineDepotMap depotLoc={depotLoc} setDepotLoc={setDepotLoc} mapsLoaded={mapsLoaded} />
+                <h2 style={{ fontSize: 18, fontWeight: 800, color: PX.navy800, marginBottom: "1rem", display: "flex", alignItems: "center", gap: 6 }}><SvgSettings /> Base Station & Map Credentials</h2>
+                <div style={{ display:"grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+                  <div style={{ background:"#f0f7ff",border:"1px solid #bfdbfe",borderRadius:12,padding:"1.25rem" }}>
+                    <div style={{ fontWeight:700,color:PX.navy800,marginBottom:6,fontSize:14, display:"flex", alignItems:"center", gap:4 }}><SvgDepot /> Depot Address Location</div>
+                    <p style={{ fontSize:11,color:PX.gray600,marginBottom:10 }}>Calculates empty 'dead mileage' routing runs to and from base.</p>
+                    <PlacesInput 
+                      value={depotLoc.address} 
+                      mapsLoaded={mapsLoaded} 
+                      onChange={(addr, coords)=>setDepotLoc({ address: addr, lat: coords?.lat, lng: coords?.lng })} 
+                      placeholder="Yard address..." 
+                      icon={<SvgDepot size={14} />} 
+                      onIconClick={() => setShowDepotMap(!showDepotMap)}
+                    />
+                    {showDepotMap && (
+                      <div style={{ height: "220px", width: "100%", borderRadius: "8px", border: "1px solid #bfdbfe", overflow: "hidden", position: "relative", marginTop: "10px" }}>
+                        <InlineDepotMap depotLoc={depotLoc} setDepotLoc={setDepotLoc} mapsLoaded={mapsLoaded} />
+                      </div>
+                    )}
                   </div>
-                </div>
-
-                {/* Distance system */}
-                <div style={{ background:PX.gray50, border:`1px solid ${PX.gray200}`, borderRadius:12, padding:"1.25rem" }}>
-                  <div style={{ fontWeight:700, color:PX.navy800, marginBottom:6, fontSize:14 }}>Global Distance System</div>
-                  <p style={{ fontSize:11, color:PX.gray600, marginBottom:10 }}>Convert all pricing variables dynamically between Kilometers and Miles.</p>
-                  <select
-                    value={gv.distanceUnit || 'km'}
-                    onChange={handleUnitChange}
-                    style={{ padding: "10px 14px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontWeight: 700, fontSize: 14, background: "#fff", cursor: "pointer", outline:"none", maxWidth:260, color: PX.navy800 }}
-                  >
-                    <option value="km">Kilometers (km)</option>
-                    <option value="miles">Miles (mi)</option>
-                  </select>
+                  
+                  <div style={{ background:PX.gray50,border:`1px solid ${PX.gray200}`,borderRadius:12,padding:"1.25rem" }}>
+                    <div style={{ fontWeight:700,color:PX.navy800,marginBottom:6,fontSize:14 }}>Global Distance System</div>
+                    <p style={{ fontSize:11,color:PX.gray600,marginBottom:10 }}>Convert all pricing variables dynamically between Kilometers and Miles.</p>
+                    <div style={{ display:"flex", alignItems:"center", gap: 10, marginTop: "1rem" }}>
+                      <select 
+                        value={gv.distanceUnit || 'km'} 
+                        onChange={handleUnitChange}
+                        style={{ padding: "10px 14px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontWeight: 700, fontSize: 14, background: "#fff", cursor: "pointer", outline:"none", width: "100%", color: PX.navy800 }}
+                      >
+                        <option value="km">Kilometers (km)</option>
+                        <option value="miles">Miles (mi)</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </div>
 
