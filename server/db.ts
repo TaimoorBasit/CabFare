@@ -76,8 +76,8 @@ export interface DatabaseSchema {
 class KVAdapter {
   async read() {
     try {
-      const url = process.env.KV_REST_API_URL;
-      const token = process.env.KV_REST_API_TOKEN;
+      const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+      const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
       if (!url || !token) return null;
 
       const res = await fetch(url, {
@@ -100,8 +100,8 @@ class KVAdapter {
 
   async write(data: any) {
     try {
-      const url = process.env.KV_REST_API_URL;
-      const token = process.env.KV_REST_API_TOKEN;
+      const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+      const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
       if (!url || !token) return;
 
       await fetch(url, {
@@ -123,7 +123,7 @@ let db: Low<DatabaseSchema> | null = null;
 export async function initDatabase(): Promise<Low<DatabaseSchema>> {
   if (db) return db;
 
-  const isVercel = !!process.env.KV_REST_API_URL && !!process.env.KV_REST_API_TOKEN;
+  const isVercel = !!(process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL) && !!(process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN);
   let adapter;
 
   if (isVercel) {
@@ -153,7 +153,7 @@ export async function getDatabase(): Promise<Low<DatabaseSchema>> {
   if (!db) {
     await initDatabase();
   }
-  if (db && (process.env.KV_REST_API_URL || process.env.KV_REST_API_TOKEN)) {
+  if (db && (process.env.KV_REST_API_URL || process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_URL || process.env.UPSTASH_REDIS_REST_TOKEN)) {
     await db.read();
   }
   return db!;
