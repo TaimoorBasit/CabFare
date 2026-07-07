@@ -63,7 +63,8 @@ function fleetEconomics(dbData: any) {
   const vehicleBreakdown = dbData.vehicles?.map((v: any) => {
     const count = Number(v.fleetCount) || 1;
     const utilDays = Number(v.utilisationDays) || 225;
-    const annualFixed = (v.annualCosts || []).reduce((s: number, c: any) => s + Number(c.cost), 0);
+    const totalAnnualFixed = (v.annualCosts || []).reduce((s: number, c: any) => s + Number(c.cost), 0);
+    const annualFixed = totalAnnualFixed / count;
     const dailyStanding = utilDays > 0 ? annualFixed / utilDays : 0;
     const dailyOverhead = utilDays > 0 ? overheadPerUnit / utilDays : 0;
     const minHirePerDay = dailyStanding + dailyOverhead;
@@ -146,7 +147,9 @@ export async function calculatePrice(input: PricingInput) {
       }
       
       // Standing rate
-      const annualFixed = (vehicle.annualCosts || []).reduce((s: number, c: any) => s + Number(c.cost), 0);
+      const totalAnnualFixed = (vehicle.annualCosts || []).reduce((s: number, c: any) => s + Number(c.cost), 0);
+      const fleetCount = vehicle.fleetCount || 1;
+      const annualFixed = totalAnnualFixed / fleetCount;
       const rStanding = annualFixed / (vehicle.utilisationDays || 225);
 
       // Variable Cost

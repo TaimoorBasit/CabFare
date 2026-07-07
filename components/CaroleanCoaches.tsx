@@ -766,7 +766,8 @@ function fleetEconomics(db) {
   const vehicleBreakdown = db.vehicles.map(v => {
     const count      = Number(v.fleetCount) || 1;
     const utilDays   = Number(v.utilisationDays) || 225;
-    const annualFixed = (v.annualCosts||[]).reduce((s,c) => s + Number(c.cost), 0);
+    const totalAnnualFixed = (v.annualCosts||[]).reduce((s,c) => s + Number(c.cost), 0);
+    const annualFixed = totalAnnualFixed / count;
     const dailyStanding = utilDays > 0 ? annualFixed / utilDays : 0;
     const dailyOverhead = utilDays > 0 ? overheadPerUnit / utilDays : 0;
     const minHirePerDay = dailyStanding + dailyOverhead;
@@ -840,7 +841,9 @@ function calcFare(journey, vehicle, db) {
   const multiDay = returnDate && departureDate && new Date(returnDate) > new Date(departureDate);
   if (multiDay) opDays = Math.max(1, Math.ceil((new Date(returnDate).getTime() - new Date(departureDate).getTime()) / 86400000) + 1);
 
-  const annualFixed = (vehicle.annualCosts||[]).reduce((s,c) => s + Number(c.cost), 0);
+  const totalAnnualFixed = (vehicle.annualCosts||[]).reduce((s,c) => s + Number(c.cost), 0);
+  const fleetCount = vehicle.fleetCount || 1;
+  const annualFixed = totalAnnualFixed / fleetCount;
   const rStanding   = annualFixed / (vehicle.utilisationDays || 225);
 
   const fuelPerKm  = (vehicle.fuelPricePerLitre ?? gv.fuelPricePerLitre) / vehicle.fuelKpl;
@@ -1336,7 +1339,9 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
       const tyreCost = vehicle.tyreCostPerKm ?? 0.05;
       const maintCost = vehicle.maintenanceCostPerKm || 0.15;
 
-      const annualFixed = (vehicle.annualCosts||[]).reduce((s,c)=>s+Number(c.cost),0);
+      const totalAnnualFixed = (vehicle.annualCosts||[]).reduce((s,c)=>s+Number(c.cost),0);
+      const fleetCount = vehicle.fleetCount || 1;
+      const annualFixed = totalAnnualFixed / fleetCount;
       const rStanding = (vehicle.utilisationDays || 225) > 0 ? annualFixed / (vehicle.utilisationDays || 225) : 0;
       const dailyStanding = rStanding;
 
@@ -1899,7 +1904,9 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                 </div>
 
                 {vehicles.filter(v => v.id === (vehicles.find(x => x.id === activeVehicleId) ? activeVehicleId : vehicles[0]?.id)).map(v => {
-                  const annualFixed = (v.annualCosts||[]).reduce((s,c)=>s+Number(c.cost),0);
+                  const count = Number(v.fleetCount) || 1;
+                  const totalAnnualFixed = (v.annualCosts||[]).reduce((s,c)=>s+Number(c.cost),0);
+                  const annualFixed = totalAnnualFixed / count;
                   const rs = Math.round(annualFixed / v.utilisationDays * 100) / 100;
                   const utilRate = Math.round((v.utilisationDays/365)*100);
                   return (
@@ -1960,6 +1967,8 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                           <div style={{ background:"#fff",borderRadius:8,padding:"8px 14px",border:`1.5px solid ${PX.gray200}`,textAlign:"right" }}>
                             <span style={{ fontSize:10,fontWeight:700,color:PX.gray400,display:"block",textTransform:"uppercase" }}>Standing rate</span>
                             <span style={{ fontSize:14,fontWeight:800,color:PX.navy800 }}>£{rs}/day</span>
+                            <span style={{ fontSize:10,fontWeight:700,color:PX.gray400,display:"block",textTransform:"uppercase",marginTop:8 }}>Annual Total</span>
+                            <span style={{ fontSize:14,fontWeight:800,color:PX.navy800 }}>£{totalAnnualFixed.toLocaleString()}</span>
                           </div>
                         </div>
                       </div>
