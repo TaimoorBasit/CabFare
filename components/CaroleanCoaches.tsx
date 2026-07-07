@@ -445,7 +445,7 @@ function MapPickerModal({ isOpen, onClose, onConfirm, initialSearch }) {
             handleSelect(p.geometry.location);
           });
         }
-      }, 50); // 50ms delay for modal render
+      }, 400); // 400ms delay to ensure modal animation is fully complete
     }
 
     return () => {
