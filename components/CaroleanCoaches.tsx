@@ -1825,6 +1825,59 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
           {/* ════════════════════════ FLEET & AVAILABILITY ════════════════════════ */}
           {tab === "fleet" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
+              {/* SUBSECTION 2: VEHICLE WAGE & RUN RATES */}
+              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
+                  <h2 style={{ fontSize: 18, fontWeight: 800, color: PX.navy800, margin: 0 }}>Operating Wage Rates & Profit Margins</h2>
+                  <select 
+                    value={selectedWageVehicleId} 
+                    onChange={e => setSelectedWageVehicleId(e.target.value)}
+                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontWeight: 600, fontSize: 13, background: "#fff", cursor: "pointer", width: "100%", maxWidth: 220 }}
+                  >
+                    {vehicles.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+                  </select>
+                </div>
+                {(() => {
+                  const sv = vehicles.find(v => v.id === selectedWageVehicleId) || vehicles[0];
+                  if (!sv) return null;
+                  return (
+                    <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"1.25rem" }}>
+                      <div>
+                        <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4 }}>Fuel Price (£/Litre)</label>
+                        <input type="number" step="0.001" value={sv.fuelPricePerLitre ?? gv.fuelPricePerLitre ?? 1.52} onChange={e=>updateV(sv.id, "fuelPricePerLitre", Number(e.target.value))}/>
+                      </div>
+                      <div>
+                        <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4 }}>Driver Wage (£/hr)</label>
+                        <input type="number" step="0.5" value={sv.driverHourlyWage ?? gv.driverHourlyWage ?? 17.5} onChange={e=>updateV(sv.id, "driverHourlyWage", Number(e.target.value))}/>
+                      </div>
+                      <div>
+                        <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4 }}>Holiday Pay Addition (%)</label>
+                        <input type="number" step="0.1" value={sv.holidayPayPct ?? gv.holidayPayPct ?? 12.07} onChange={e=>updateV(sv.id, "holidayPayPct", Number(e.target.value))}/>
+                      </div>
+                      <div>
+                        <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4 }}>Profit Margin (%)</label>
+                        <input type="number" value={sv.profitMarginPct ?? gv.profitMarginPct ?? 28} onChange={e=>updateV(sv.id, "profitMarginPct", Number(e.target.value))}/>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* SUBSECTION 3: TOLL SURCHARGES */}
+              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
+                <h2 style={{ fontSize: 18, fontWeight: 800, color: PX.navy800, marginBottom: "1rem" }}>Operational Toll Surcharges</h2>
+                <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"1.25rem" }}>
+                  {[
+                    ["m6Toll","M6 Toll (PSV)"],["dartford","Dartford Crossing"],
+                    ["ulez","London ULEZ/CAZ"],["birminghamCaz","Birmingham CAZ"],
+                    ["driverOvernightSubsistence","Driver overnight subsistence"]
+                  ].map(([k,l])=>(
+                    <div key={k}>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4 }}>{l} (£)</label>
+                      <input type="number" value={sr[k] ?? 0} onChange={e=>setSr(s=>({...s,[k]:Number(e.target.value)}))}/>
+                    </div>
+                  ))}
+                </div>
               
               
 
@@ -2035,59 +2088,6 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                 </p>
                 <FleetEconomicsPanel eco={eco} />
               </div>
-              {/* SUBSECTION 2: VEHICLE WAGE & RUN RATES */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
-                  <h2 style={{ fontSize: 18, fontWeight: 800, color: PX.navy800, margin: 0 }}>Operating Wage Rates & Profit Margins</h2>
-                  <select 
-                    value={selectedWageVehicleId} 
-                    onChange={e => setSelectedWageVehicleId(e.target.value)}
-                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontWeight: 600, fontSize: 13, background: "#fff", cursor: "pointer", width: "100%", maxWidth: 220 }}
-                  >
-                    {vehicles.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
-                  </select>
-                </div>
-                {(() => {
-                  const sv = vehicles.find(v => v.id === selectedWageVehicleId) || vehicles[0];
-                  if (!sv) return null;
-                  return (
-                    <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"1.25rem" }}>
-                      <div>
-                        <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4 }}>Fuel Price (£/Litre)</label>
-                        <input type="number" step="0.001" value={sv.fuelPricePerLitre ?? gv.fuelPricePerLitre ?? 1.52} onChange={e=>updateV(sv.id, "fuelPricePerLitre", Number(e.target.value))}/>
-                      </div>
-                      <div>
-                        <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4 }}>Driver Wage (£/hr)</label>
-                        <input type="number" step="0.5" value={sv.driverHourlyWage ?? gv.driverHourlyWage ?? 17.5} onChange={e=>updateV(sv.id, "driverHourlyWage", Number(e.target.value))}/>
-                      </div>
-                      <div>
-                        <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4 }}>Holiday Pay Addition (%)</label>
-                        <input type="number" step="0.1" value={sv.holidayPayPct ?? gv.holidayPayPct ?? 12.07} onChange={e=>updateV(sv.id, "holidayPayPct", Number(e.target.value))}/>
-                      </div>
-                      <div>
-                        <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4 }}>Profit Margin (%)</label>
-                        <input type="number" value={sv.profitMarginPct ?? gv.profitMarginPct ?? 28} onChange={e=>updateV(sv.id, "profitMarginPct", Number(e.target.value))}/>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-
-              {/* SUBSECTION 3: TOLL SURCHARGES */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
-                <h2 style={{ fontSize: 18, fontWeight: 800, color: PX.navy800, marginBottom: "1rem" }}>Operational Toll Surcharges</h2>
-                <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"1.25rem" }}>
-                  {[
-                    ["m6Toll","M6 Toll (PSV)"],["dartford","Dartford Crossing"],
-                    ["ulez","London ULEZ/CAZ"],["birminghamCaz","Birmingham CAZ"],
-                    ["driverOvernightSubsistence","Driver overnight subsistence"]
-                  ].map(([k,l])=>(
-                    <div key={k}>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4 }}>{l} (£)</label>
-                      <input type="number" value={sr[k] ?? 0} onChange={e=>setSr(s=>({...s,[k]:Number(e.target.value)}))}/>
-                    </div>
-                  ))}
-                </div>
               </div>
               </div>
           )}
