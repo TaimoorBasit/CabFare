@@ -459,14 +459,17 @@ function MapPickerModal({ isOpen, onClose, onConfirm, initialSearch }) {
 
   return (
     <div style={{ position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(13,14,72,0.45)",backdropFilter:"blur(4px)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:20 }}>
-      <div className="fade-up" style={{ width:"100%",maxWidth:600,background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 20px 50px rgba(0,0,0,0.3)" }}>
-        <div style={{ padding:"16px 20px",borderBottom:"1px solid #e2e8f0",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+      <div className="fade-up" style={{ width:"100%",maxWidth:600,maxHeight:"90vh",background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 20px 50px rgba(0,0,0,0.3)", display:"flex", flexDirection:"column" }}>
+        
+        {/* Header */}
+        <div style={{ padding:"16px 20px",borderBottom:"1px solid #e2e8f0",display:"flex",justifyContent:"space-between",alignItems:"center", flexShrink:0 }}>
           <div style={{ fontWeight:700,color:PX.navy800,fontSize:16, display:"flex", alignItems:"center", gap:6 }}><SvgMapPinRed /> Pinpoint Location</div>
           <button type="button" onClick={onClose} style={{ background:"none",border:"none",fontSize:20,cursor:"pointer",color:PX.gray400,lineHeight:1, display:"flex", alignItems:"center" }}><SvgClose size={18} /></button>
         </div>
-        <div style={{ position:"relative" }}>
-          <div ref={mapRef} style={{ width:"100%",height:400,background:PX.gray100 }}/>
-          <div style={{ position:"absolute",top:16,left:24,right:24,background:"#fff",padding:"8px 16px",borderRadius:999,border:`1.5px solid #fee2e2`,boxShadow:"0 6px 16px rgba(0,0,0,.1)",display:"flex",alignItems:"center",gap:8 }}>
+
+        {/* Search Bar */}
+        <div style={{ padding:"12px 20px", borderBottom:"1px solid #e2e8f0", background: "#f8fafc", flexShrink:0 }}>
+          <div style={{ background:"#fff",padding:"10px 16px",borderRadius:8,border:`1.5px solid #fee2e2`,boxShadow:"0 2px 4px rgba(0,0,0,.02)",display:"flex",alignItems:"center",gap:8 }}>
             {loading ? <span className="spinning" style={{color:PX.navy800}}>⟳</span> : <SvgMapPinRed />}
             <input 
               ref={searchInputRef}
@@ -478,10 +481,18 @@ function MapPickerModal({ isOpen, onClose, onConfirm, initialSearch }) {
             />
           </div>
         </div>
-        <div style={{ padding:"16px 20px",display:"flex",justifyContent:"flex-end",gap:12,background:PX.gray50,borderTop:"1px solid #e2e8f0" }}>
+
+        {/* Map Container (Flexible Height) */}
+        <div style={{ position:"relative", flex:1, minHeight: 250, height: 360 }}>
+          <div ref={mapRef} style={{ position: "absolute", top:0, left:0, right:0, bottom:0, background:PX.gray100 }}/>
+        </div>
+
+        {/* Footer */}
+        <div style={{ padding:"16px 20px",display:"flex",justifyContent:"flex-end",gap:12,background:PX.gray50,borderTop:"1px solid #e2e8f0", flexShrink:0 }}>
           <button type="button" onClick={onClose} style={{ padding:"8px 16px",borderRadius:8,border:`1px solid ${PX.gray200}`,background:"#fff",cursor:"pointer",fontWeight:600,color:PX.gray600 }}>Cancel</button>
           <button type="button" onClick={()=>{ if(selectedGeo) onConfirm(selectedAddr, selectedGeo); }} disabled={!selectedGeo} style={{ padding:"8px 16px",borderRadius:8,border:"none",background:PX.navy800,color:"#fff",cursor:selectedGeo?"pointer":"not-allowed",fontWeight:600,opacity:selectedGeo?1:0.5 }}>Confirm Location</button>
         </div>
+
       </div>
     </div>
   );
