@@ -1725,7 +1725,66 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
           {tab === "fleet" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
               
-              {/* SUBSECTION 1: VEHICLE SPECIFICATIONS */}
+              {/* SUBSECTION 1: COMPANY ANNUAL OVERHEADS */}
+              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem" }}>
+                  <div>
+                    <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, display:"flex", alignItems:"center", gap:6 }}>🏢 Company annual overheads</h2>
+                    <p style={{ fontSize:13, color:PX.gray600, marginTop:4 }}>Added to fleet vehicle costs to form the grand total annual fixed cost</p>
+                  </div>
+                  <div style={{ textAlign:"right" }}>
+                    <span style={{ fontSize:10,fontWeight:700,color:PX.gray400,display:"block",textTransform:"uppercase", letterSpacing:1 }}>Total</span>
+                    <span style={{ fontSize:18,fontWeight:800,color:"#6366f1" }}>£{totalOverheads.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                <div style={{ display:"flex", flexDirection:"column", gap:"0.75rem", marginBottom:"1.25rem" }}>
+                  {overheads.map(oh => (
+                    <div key={oh.id} style={{ display:"flex", gap:"1rem", alignItems:"center" }}>
+                      <input 
+                        type="text" 
+                        value={oh.label} 
+                        onChange={e => setOH(os => os.map(x => x.id === oh.id ? {...x, label: e.target.value} : x))}
+                        style={{ flex:1, padding:"12px 16px", borderRadius:8, border:`1px solid ${PX.gray300}`, fontSize:14, fontWeight: 500, color: PX.navy800 }}
+                      />
+                      <div style={{ position:"relative", width:"140px" }}>
+                        <span style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)", color:PX.gray400, fontWeight: 600 }}>£</span>
+                        <input 
+                          type="number" 
+                          value={oh.cost} 
+                          onChange={e => setOH(os => os.map(x => x.id === oh.id ? {...x, cost: Number(e.target.value)} : x))}
+                          style={{ width:"100%", padding:"12px 12px 12px 28px", borderRadius:8, border:`1px solid ${PX.gray300}`, fontSize:14, fontWeight: 500, color: PX.navy800 }}
+                        />
+                      </div>
+                      <button 
+                        onClick={() => setOH(os => os.filter(x => x.id !== oh.id))}
+                        style={{ width:44, height:44, borderRadius:8, background:PX.red100, color:PX.brandRed, border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", transition: "0.2s" }}
+                        title="Remove overhead item"
+                      >
+                        <SvgTrash size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                
+                <button 
+                  onClick={() => setOH(os => [...os, {id: Date.now(), label:"New Overhead", cost:0}])}
+                  style={{ background: "#fff", border:`1.5px solid ${PX.gray200}`, padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, color: PX.navy700, cursor: "pointer" }}
+                >
+                  ＋ Add overhead item
+                </button>
+              </div>
+
+              {/* SUBSECTION 2: FLEET ECONOMICS SUMMARY */}
+              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
+                <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem" }}>Fleet economics summary</h2>
+                <p style={{ fontSize:13, color:PX.gray500, marginBottom:"1.5rem" }}>
+                  Vehicle annual costs ÷ utilisation days = standing rate • Company overheads ÷ total fleet units = overhead per unit • <strong>Both added = minimum hire charge per vehicle per day</strong>
+                </p>
+                <FleetEconomicsPanel eco={eco} />
+              </div>
+
+              {/* SUBSECTION 3: VEHICLE SPECIFICATIONS */}
               <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem" }}>
                   <div>
@@ -1871,65 +1930,6 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                   );
                 })}
               </div>
-              {/* SUBSECTION 2: COMPANY ANNUAL OVERHEADS */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
-                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem" }}>
-                  <div>
-                    <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, display:"flex", alignItems:"center", gap:6 }}>🏢 Company annual overheads</h2>
-                    <p style={{ fontSize:13, color:PX.gray600, marginTop:4 }}>Added to fleet vehicle costs to form the grand total annual fixed cost</p>
-                  </div>
-                  <div style={{ textAlign:"right" }}>
-                    <span style={{ fontSize:10,fontWeight:700,color:PX.gray400,display:"block",textTransform:"uppercase", letterSpacing:1 }}>Total</span>
-                    <span style={{ fontSize:18,fontWeight:800,color:"#6366f1" }}>£{totalOverheads.toLocaleString()}</span>
-                  </div>
-                </div>
-
-                <div style={{ display:"flex", flexDirection:"column", gap:"0.75rem", marginBottom:"1.25rem" }}>
-                  {overheads.map(oh => (
-                    <div key={oh.id} style={{ display:"flex", gap:"1rem", alignItems:"center" }}>
-                      <input 
-                        type="text" 
-                        value={oh.label} 
-                        onChange={e => setOH(os => os.map(x => x.id === oh.id ? {...x, label: e.target.value} : x))}
-                        style={{ flex:1, padding:"12px 16px", borderRadius:8, border:`1px solid ${PX.gray300}`, fontSize:14, fontWeight: 500, color: PX.navy800 }}
-                      />
-                      <div style={{ position:"relative", width:"140px" }}>
-                        <span style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)", color:PX.gray400, fontWeight: 600 }}>£</span>
-                        <input 
-                          type="number" 
-                          value={oh.cost} 
-                          onChange={e => setOH(os => os.map(x => x.id === oh.id ? {...x, cost: Number(e.target.value)} : x))}
-                          style={{ width:"100%", padding:"12px 12px 12px 28px", borderRadius:8, border:`1px solid ${PX.gray300}`, fontSize:14, fontWeight: 500, color: PX.navy800 }}
-                        />
-                      </div>
-                      <button 
-                        onClick={() => setOH(os => os.filter(x => x.id !== oh.id))}
-                        style={{ width:44, height:44, borderRadius:8, background:PX.red100, color:PX.brandRed, border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", transition: "0.2s" }}
-                        title="Remove overhead item"
-                      >
-                        <SvgTrash size={16} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                
-                <button 
-                  onClick={() => setOH(os => [...os, {id: Date.now(), label:"New Overhead", cost:0}])}
-                  style={{ background: "#fff", border:`1.5px solid ${PX.gray200}`, padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, color: PX.navy700, cursor: "pointer" }}
-                >
-                  ＋ Add overhead item
-                </button>
-              </div>
-
-              {/* SUBSECTION 3: FLEET ECONOMICS SUMMARY */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
-                <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem" }}>Fleet economics summary</h2>
-                <p style={{ fontSize:13, color:PX.gray500, marginBottom:"1.5rem" }}>
-                  Vehicle annual costs ÷ utilisation days = standing rate • Company overheads ÷ total fleet units = overhead per unit • <strong>Both added = minimum hire charge per vehicle per day</strong>
-                </p>
-                <FleetEconomicsPanel eco={eco} />
-              </div>
-
               {/* SUBSECTION 4: SEASONAL DEMAND PERIODS */}
               <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem" }}>
@@ -1974,7 +1974,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                 )}
               </div>
 
-              {/* SUBSECTION 3: BLOCKED DATES CALENDAR */}
+              {/* SUBSECTION 5: BLOCKED DATES CALENDAR */}
               <div>
                 <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem" }}>Blocked Calendar Dates</h2>
                 <p style={{ fontSize:13,color:PX.gray600,marginBottom:"1.5rem" }}>Block out specific dates for contract bookings or PMI maintenance schedules.</p>
