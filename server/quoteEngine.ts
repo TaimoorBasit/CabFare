@@ -64,7 +64,7 @@ export async function generateQuotes(journey: any) {
         isManualQuote: pricingResult.isManualQuote,
         belowMin: false, // New engine doesn't enforce old min hire unless configured
         opDays: 1, // Simplified
-        totalShiftHrs: Math.round((mileageResult.liveDurationMinutes / 60) * 10) / 10
+        totalShiftHrs: Math.round(((mileageResult.totalDurationMinutes + Number(journey.waitingMins || 0)) / 60) * 10) / 10
       }
     });
   }

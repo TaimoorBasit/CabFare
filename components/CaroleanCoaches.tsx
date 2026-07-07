@@ -1665,11 +1665,11 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                     if(!newTemplate.pickupArea || !newTemplate.dropArea) return setToast("Pickup and dropoff required.");
                     const itemToSave = newTemplate.id ? newTemplate : {...newTemplate, id: 'new_'+Date.now()};
                     const saved = await saveApi('templates', itemToSave);
-                    if(newTemplate.id && !newTemplate.id.startsWith("new_")) {
-                      setTemplatesData(d=>d.map(x=>x.id===saved.id?saved:x));
-                    } else {
-                      setTemplatesData(d=>[saved,...d]);
-                    }
+                    setTemplatesData(d => {
+                      const exists = d.some(x => x.id === saved.id);
+                      if (exists) return d.map(x => x.id === saved.id ? saved : x);
+                      return [saved, ...d];
+                    });
                     setNT({...blankTemplate, vehicleId:db.vehicles[0]?.id});
                     setToast("Route saved!"); setTimeout(()=>setToast(""),2000);
                   }}>{newTemplate.id ? "Update Route" : "+ Add Route"}</Btn>
@@ -1684,7 +1684,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                         <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{db.vehicles.find(v=>v.id===t.vehicleId)?.name} • £{t.price} • {t.tripType}</div>
                       </div>
                       <div style={{ display:"flex",alignItems:"center",gap:16 }}>
-                        <button onClick={()=>setNT(t)} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
+                        <button onClick={(e)=>{ setNT(t); e.target.closest('div').parentElement.parentElement.scrollIntoView({behavior:'smooth', block:'start'}); }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
                         <button onClick={async ()=>{ if(window.confirm("Delete this route template?")) { await saveApi('templates', t, true); setTemplatesData(d=>d.filter(x=>x.id!==t.id)); } }} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
                       </div>
                     </div>
@@ -1737,11 +1737,11 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                     if(!newMatrix.pickupArea || !newMatrix.dropArea) return setToast("Pickup and dropoff required.");
                     const itemToSave = newMatrix.id ? newMatrix : {...newMatrix, id: 'new_'+Date.now()};
                     const saved = await saveApi('matrix', itemToSave);
-                    if(newMatrix.id && !newMatrix.id.startsWith("new_")) {
-                      setMatrixData(d=>d.map(x=>x.id===saved.id?saved:x));
-                    } else {
-                      setMatrixData(d=>[saved,...d]);
-                    }
+                    setMatrixData(d => {
+                      const exists = d.some(x => x.id === saved.id);
+                      if (exists) return d.map(x => x.id === saved.id ? saved : x);
+                      return [saved, ...d];
+                    });
                     setNM({...blankMatrix, vehicleId:db.vehicles[0]?.id});
                     setToast("Matrix rule saved!"); setTimeout(()=>setToast(""),2000);
                   }}>{newMatrix.id ? "Update Matrix Rule" : "+ Add Matrix Rule"}</Btn>
@@ -1756,7 +1756,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                         <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{db.vehicles.find(v=>v.id===m.vehicleId)?.name} • Base: £{m.baseFare} • Extra: £{m.extraMileageRate}/unit</div>
                       </div>
                       <div style={{ display:"flex",alignItems:"center",gap:16 }}>
-                        <button onClick={()=>setNM(m)} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
+                        <button onClick={(e)=>{ setNM(m); e.target.closest('div').parentElement.parentElement.scrollIntoView({behavior:'smooth', block:'start'}); }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
                         <button onClick={async ()=>{ if(window.confirm("Delete this matrix pricing rule?")) { await saveApi('matrix', m, true); setMatrixData(d=>d.filter(x=>x.id!==m.id)); } }} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
                       </div>
                     </div>
@@ -1796,11 +1796,11 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                     if(!newSeasonal.name || !newSeasonal.startDate || !newSeasonal.endDate) return setToast("Please fill all fields.");
                     const itemToSave = newSeasonal.id ? newSeasonal : {...newSeasonal, id: 'new_'+Date.now()};
                     const saved = await saveApi('seasonal', itemToSave);
-                    if(newSeasonal.id && !newSeasonal.id.startsWith("new_")) {
-                      setSeasonalData(d=>d.map(x=>x.id===saved.id?saved:x));
-                    } else {
-                      setSeasonalData(d=>[saved,...d]);
-                    }
+                    setSeasonalData(d => {
+                      const exists = d.some(x => x.id === saved.id);
+                      if (exists) return d.map(x => x.id === saved.id ? saved : x);
+                      return [saved, ...d];
+                    });
                     setNS(blankSeasonal);
                     setToast("Demand Period saved!"); setTimeout(()=>setToast(""),2000);
                   }}>{newSeasonal.id ? "Update Period" : "+ Add Period"}</Btn>
@@ -1815,7 +1815,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                         <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{s.startDate ? s.startDate.replace('T', ' ') : ''} → {s.endDate ? s.endDate.replace('T', ' ') : ''}</div>
                       </div>
                       <div style={{ display:"flex",alignItems:"center",gap:16 }}>
-                        <button onClick={()=>setNS(s)} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
+                        <button onClick={(e)=>{ setNS(s); e.target.closest('div').parentElement.parentElement.scrollIntoView({behavior:'smooth', block:'start'}); }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
                         <button onClick={async ()=>{ if(window.confirm("Delete this seasonal period?")) { await saveApi('seasonal', s, true); setSeasonalData(d=>d.filter(x=>x.id!==s.id)); } }} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
                       </div>
                     </div>
@@ -1854,11 +1854,12 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                     </div>
                   </div>
                   <Btn variant="primary" size="sm" disabled={!newBlock.from||!newBlock.to} onClick={()=>{
-                    if(newBlock.id) {
-                       setBl(bs=>bs.map(b=>b.id===newBlock.id ? {...newBlock, vehicleName:db.vehicles.find(v=>v.id===newBlock.vehicleId)?.name} : b));
-                    } else {
-                       setBl(b=>[...b, {...newBlock, id: 'blk_'+Date.now(), vehicleName:db.vehicles.find(v=>v.id===newBlock.vehicleId)?.name}]);
-                    }
+                    setBl(bs => {
+                      const exists = bs.some(b => b.id === newBlock.id);
+                      const updatedBlock = {...newBlock, id: newBlock.id || 'blk_'+Date.now(), vehicleName:db.vehicles.find(v=>v.id===newBlock.vehicleId)?.name};
+                      if (exists) return bs.map(b => b.id === newBlock.id ? updatedBlock : b);
+                      return [...bs, updatedBlock];
+                    });
                     setNB({id:'', vehicleId:db.vehicles[0]?.id || "",from:"",to:"",reason:"Contract booking"});
                   }}>{newBlock.id ? "Update Block" : "+ Block Vehicle"}</Btn>
                 </div>
@@ -1875,8 +1876,10 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                         <span style={{ fontSize:12,color:PX.gray600, fontWeight: 500 }}>{b.from ? b.from.replace('T', ' ') : ''} → {b.to ? b.to.replace('T', ' ') : ''}</span>
                         <button onClick={()=>{
                           // if id doesn't exist, we assign one to make editing consistent
-                          const editB = b.id ? b : {...b, id: 'blk_'+Date.now()};
-                          setNB(editB);
+                          const editB = b.id ? b : {...b, id: 'blk_'+i};
+                          // Mutate original array so future edits find it
+                          if (!b.id) b.id = editB.id; 
+                          setNB(editB); e.target.closest('div').parentElement.parentElement.scrollIntoView({behavior:'smooth', block:'start'});
                         }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
                         <button onClick={()=>setBl(bs=>bs.filter((_,idx)=>idx!==i))} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
                       </div>
