@@ -38,7 +38,11 @@ export async function calculateMileage(journey: any) {
   }
 
   const { origin, destination, waypoints, stops = [] } = journey;
-  const yardLoc = db.data?.globalVars?.yardAddress || "Unit 1, Carolean Coaches Bentley Lane Walsall WS2 8TL , UK";
+  const yardLat = db.data?.globalVars?.yardLat;
+  const yardLng = db.data?.globalVars?.yardLng;
+  const yardLoc = (yardLat && yardLng) 
+    ? { lat: Number(yardLat), lng: Number(yardLng) } 
+    : (db.data?.globalVars?.yardAddress || "Unit 1, Carolean Coaches Bentley Lane Walsall WS2 8TL , UK");
 
   // Build the live route points
   const livePoints = waypoints?.length >= 2 ? waypoints : [origin, destination];
