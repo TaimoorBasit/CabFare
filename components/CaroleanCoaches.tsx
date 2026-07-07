@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const PX = {
@@ -566,8 +567,11 @@ function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded, onIconCli
         onChange={e => handleTextChange(e.target.value)}
         onBlur={handleBlur}
       />
-      <MapPickerModal isOpen={pickerOpen} onClose={()=>setPickerOpen(false)} 
-        initialSearch={localVal} onConfirm={(addr, geo)=>{ setLocalVal(addr); onChange(addr, geo); setPickerOpen(false); }} />
+      {typeof document !== 'undefined' ? createPortal(
+        <MapPickerModal isOpen={pickerOpen} onClose={()=>setPickerOpen(false)} 
+          initialSearch={localVal} onConfirm={(addr, geo)=>{ setLocalVal(addr); onChange(addr, geo); setPickerOpen(false); }} />,
+        document.body
+      ) : null}
     </div>
   );
 }
