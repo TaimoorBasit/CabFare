@@ -1878,11 +1878,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                     </div>
                   ))}
                 </div>
-              
-              
-
-              
-
+              </div>
 
               {/* SUBSECTION 1: VEHICLE SPECIFICATIONS */}
               <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
@@ -2088,8 +2084,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                 </p>
                 <FleetEconomicsPanel eco={eco} />
               </div>
-              </div>
-              </div>
+            </div>
           )}
 
           {/* ════════════════════════ SYSTEM SETTINGS ════════════════════════ */}
