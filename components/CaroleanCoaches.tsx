@@ -1526,9 +1526,9 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
 
       <Card style={{ padding:0,overflow:"hidden", marginBottom: 20 }}>
         <div style={{ display:"flex",borderBottom:`2px solid ${PX.gray200}`,background:PX.gray50,overflowX:"auto" }}>
+          {renderTabHeader("pricing", "Rules & Routes")}
+          {renderTabHeader("fleet", "Pricing (Fixed & Variable)")}
           {renderTabHeader("bookings", "Searchings & Reports")}
-          {renderTabHeader("pricing", "Pricing & Routes")}
-          {renderTabHeader("fleet", "Fleet & Availability")}
           {renderTabHeader("settings", "System Settings")}
         </div>
 
@@ -1718,13 +1718,8 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                 )}
               </div>
 
-            </div>
-          )}
+            
 
-          {/* ════════════════════════ FLEET & AVAILABILITY ════════════════════════ */}
-          {tab === "fleet" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
-              
               {/* SUBSECTION 4: SEASONAL DEMAND PERIODS */}
               <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem" }}>
@@ -1823,6 +1818,17 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                   )}
                 </div>
               </div>
+
+            </div>
+          )}
+
+          {/* ════════════════════════ FLEET & AVAILABILITY ════════════════════════ */}
+          {tab === "fleet" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
+              
+              
+
+              
 
 
               {/* SUBSECTION 1: VEHICLE SPECIFICATIONS */}
@@ -2030,13 +2036,8 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                 <FleetEconomicsPanel eco={eco} />
               </div>
 
-            </div>
-          )}
+            
 
-          {/* ════════════════════════ SYSTEM SETTINGS ════════════════════════ */}
-          {tab === "settings" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
-              
               {/* SUBSECTION 1: CREDENTIALS */}
               <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
                 <h2 style={{ fontSize: 18, fontWeight: 800, color: PX.navy800, marginBottom: "1rem", display: "flex", alignItems: "center", gap: 6 }}><SvgSettings /> Base Station & Map Credentials</h2>
@@ -2147,6 +2148,17 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                   </div>
                 </div>
               </div>
+
+            </div>
+          )}
+
+          {/* ════════════════════════ SYSTEM SETTINGS ════════════════════════ */}
+          {tab === "settings" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
+              
+              
+              {/* System Settings Content (Moved to Pricing) */}
+
 
             </div>
           )}
