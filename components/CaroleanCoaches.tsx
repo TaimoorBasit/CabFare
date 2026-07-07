@@ -2035,42 +2035,6 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                 </p>
                 <FleetEconomicsPanel eco={eco} />
               </div>
-
-            
-
-              {/* SUBSECTION 1: CREDENTIALS */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
-                <h2 style={{ fontSize: 18, fontWeight: 800, color: PX.navy800, marginBottom: "1rem", display: "flex", alignItems: "center", gap: 6 }}><SvgSettings /> Base Station & Map Credentials</h2>
-                <div style={{ display:"grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
-                  <div style={{ background:"#f0f7ff",border:"1px solid #bfdbfe",borderRadius:12,padding:"1.25rem" }}>
-                    <div style={{ fontWeight:700,color:PX.navy800,marginBottom:6,fontSize:14, display:"flex", alignItems:"center", gap:4 }}><SvgDepot /> Depot Address Location</div>
-                    <p style={{ fontSize:11,color:PX.gray600,marginBottom:10 }}>Calculates empty 'dead mileage' routing runs to and from base.</p>
-                    <PlacesInput 
-                      value={depotLoc.address} 
-                      mapsLoaded={mapsLoaded} 
-                      onChange={(addr, coords)=>setDepotLoc({ address: addr, lat: coords?.lat, lng: coords?.lng })} 
-                      placeholder="Yard address..." 
-                      icon={<SvgDepot size={14} />} 
-                    />
-                  </div>
-                  
-                  <div style={{ background:PX.gray50,border:`1px solid ${PX.gray200}`,borderRadius:12,padding:"1.25rem" }}>
-                    <div style={{ fontWeight:700,color:PX.navy800,marginBottom:6,fontSize:14 }}>Global Distance System</div>
-                    <p style={{ fontSize:11,color:PX.gray600,marginBottom:10 }}>Convert all pricing variables dynamically between Kilometers and Miles.</p>
-                    <div style={{ display:"flex", alignItems:"center", gap: 10, marginTop: "1rem" }}>
-                      <select 
-                        value={gv.distanceUnit || 'km'} 
-                        onChange={handleUnitChange}
-                        style={{ padding: "10px 14px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontWeight: 700, fontSize: 14, background: "#fff", cursor: "pointer", outline:"none", width: "100%", color: PX.navy800 }}
-                      >
-                        <option value="km">Kilometers (km)</option>
-                        <option value="miles">Miles (mi)</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               {/* SUBSECTION 2: VEHICLE WAGE & RUN RATES */}
               <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
@@ -2125,6 +2089,49 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                   ))}
                 </div>
               </div>
+              </div>
+          )}
+
+          {/* ════════════════════════ SYSTEM SETTINGS ════════════════════════ */}
+          {tab === "settings" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
+              
+              
+              {/* SUBSECTION 1: CREDENTIALS */}
+              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
+                <h2 style={{ fontSize: 18, fontWeight: 800, color: PX.navy800, marginBottom: "1rem", display: "flex", alignItems: "center", gap: 6 }}><SvgSettings /> Base Station & Map Credentials</h2>
+                <div style={{ display:"grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+                  <div style={{ background:"#f0f7ff",border:"1px solid #bfdbfe",borderRadius:12,padding:"1.25rem" }}>
+                    <div style={{ fontWeight:700,color:PX.navy800,marginBottom:6,fontSize:14, display:"flex", alignItems:"center", gap:4 }}><SvgDepot /> Depot Address Location</div>
+                    <p style={{ fontSize:11,color:PX.gray600,marginBottom:10 }}>Calculates empty 'dead mileage' routing runs to and from base.</p>
+                    <PlacesInput 
+                      value={depotLoc.address} 
+                      mapsLoaded={mapsLoaded} 
+                      onChange={(addr, coords)=>setDepotLoc({ address: addr, lat: coords?.lat, lng: coords?.lng })} 
+                      placeholder="Yard address..." 
+                      icon={<SvgDepot size={14} />} 
+                    />
+                  </div>
+                  
+                  <div style={{ background:PX.gray50,border:`1px solid ${PX.gray200}`,borderRadius:12,padding:"1.25rem" }}>
+                    <div style={{ fontWeight:700,color:PX.navy800,marginBottom:6,fontSize:14 }}>Global Distance System</div>
+                    <p style={{ fontSize:11,color:PX.gray600,marginBottom:10 }}>Convert all pricing variables dynamically between Kilometers and Miles.</p>
+                    <div style={{ display:"flex", alignItems:"center", gap: 10, marginTop: "1rem" }}>
+                      <select 
+                        value={gv.distanceUnit || 'km'} 
+                        onChange={handleUnitChange}
+                        style={{ padding: "10px 14px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontWeight: 700, fontSize: 14, background: "#fff", cursor: "pointer", outline:"none", width: "100%", color: PX.navy800 }}
+                      >
+                        <option value="km">Kilometers (km)</option>
+                        <option value="miles">Miles (mi)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              
+
 
               {/* SUBSECTION 4: OPERATOR BUSINESS DETAILS */}
               <div>
@@ -2148,16 +2155,6 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                   </div>
                 </div>
               </div>
-
-            </div>
-          )}
-
-          {/* ════════════════════════ SYSTEM SETTINGS ════════════════════════ */}
-          {tab === "settings" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
-              
-              
-              {/* System Settings Content (Moved to Pricing) */}
 
 
             </div>
