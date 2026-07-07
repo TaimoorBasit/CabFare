@@ -31,13 +31,28 @@ function haversineKm(a: {lat: number, lng: number}, b: {lat: number, lng: number
 function matchLocation(coord: {lat: number, lng: number} | null | undefined, name: string | null | undefined, ruleGeo: {lat: number, lng: number} | null | undefined, ruleName: string | null | undefined, radiusKm: number) {
   const normRuleName = ruleName || 'Any';
   if (normRuleName.toLowerCase() === 'any') return true;
-  // If rule has GPS and radius > 0, check radius
-  if (ruleGeo && ruleGeo.lat && coord && coord.lat && radiusKm > 0) {
-    return haversineKm(coord, ruleGeo) <= radiusKm; 
+  
+  // If rule has GPS and we have query coordinates, check radius.
+  // Fall back to a default of 10km if radiusKm is not > 0 (for pricing matrix rules).
+  const checkRadius = radiusKm > 0 ? radiusKm : 10;
+  if (ruleGeo && ruleGeo.lat && coord && coord.lat) {
+    if (haversineKm(coord, ruleGeo) <= checkRadius) {
+      return true;
+    }
   }
-  // Fallback to string matching
+
+  // Fallback to string matching: check both ways (rule includes search, or search includes rule)
   const normName = name || '';
-  return normName.toLowerCase().includes(normRuleName.toLowerCase());
+  const n1 = normName.toLowerCase().trim();
+  const n2 = normRuleName.toLowerCase().trim();
+  if (n1.includes(n2) || n2.includes(n1)) return true;
+
+  // Also check if they share the first part before comma (e.g. "Heathrow Airport" matches "Heathrow Airport, Hounslow, UK")
+  const part1 = n1.split(',')[0].trim();
+  const part2 = n2.split(',')[0].trim();
+  if (part1 && part2 && (part1.includes(part2) || part2.includes(part1))) return true;
+
+  return false;
 }
 
 function fleetEconomics(dbData: any) {

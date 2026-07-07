@@ -37,8 +37,8 @@ export async function generateQuotes(journey: any) {
       vehicleId: vehicle.id,
       journeyType: journey.journeyType,
       passengers: journey.passengers,
-      originName: String(journey.origin).split(',')[0],
-      destinationName: String(journey.destination).split(',')[0],
+      originName: String(journey.origin),
+      destinationName: String(journey.destination),
       originCoords: journey.wpCoords?.[0] || null,
       destinationCoords: journey.wpCoords?.[journey.wpCoords?.length - 1] || null,
       waypoints: mileageResult.geometry ? [] : [], // Geometry contains points we can use for waypoints if needed, but we'll stick to WP coords for now.
