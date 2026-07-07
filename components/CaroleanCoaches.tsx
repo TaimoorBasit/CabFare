@@ -1224,7 +1224,16 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
   const [overheads, setOH]  = useState(db.annualOverheads.map(o=>({...o})));
   const [sr, setSr]         = useState({...db.surcharges});
   const [blocks, setBl]     = useState([...db.blockedDates]);
-  const [newBlock, setNB]   = useState({vehicleId:db.vehicles[0]?.id || "",from:"",to:"",reason:"Contract booking"});
+  const [newBlock, setNB]   = useState({id:'', vehicleId:db.vehicles[0]?.id || "",from:"",to:"",reason:"Contract booking"});
+  
+  const blankTemplate = {id:'', pickupArea:"", dropArea:"", vehicleId:db.vehicles[0]?.id, tripType:"one-way", price:0, radiusKm:15};
+  const [newTemplate, setNT] = useState(blankTemplate);
+
+  const blankMatrix = {id:'', pickupArea:"", dropArea:"", tripType:"one-way", vehicleId:db.vehicles[0]?.id, baseFare:0, includedLiveMileage:0, includedDeadMileage:0, waitingChargePerHour:0, extraMileageRate:0, nightRateMultiplier:1, weekendRateMultiplier:1, status:'active'};
+  const [newMatrix, setNM] = useState(blankMatrix);
+
+  const blankSeasonal = {id:'', name:"Holiday Surge", startDate:"", endDate:"", multiplier:1.2, status:'active'};
+  const [newSeasonal, setNS] = useState(blankSeasonal);
   const [toast, setToast]   = useState("");
 
   useEffect(() => {
@@ -1611,223 +1620,273 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
               
               {/* SUBSECTION 1: FIXED ROUTES */}
               <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
-                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem" }}>
-                  <div>
-                    <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, display:"flex", alignItems:"center", gap:6 }}>Fixed Price Routes</h2>
-                    <p style={{ fontSize:13, color:PX.gray600, marginTop:4 }}>Configure direct preset routes with fixed pricing (e.g. airport transfers).</p>
-                  </div>
-                  <Btn variant="primary" size="sm" onClick={()=>setTemplatesData(d=>[{id:'new_'+Date.now(),pickupArea:"",dropArea:"",vehicleId:db.vehicles[0]?.id,tripType:"one-way",price:0,radiusKm:15}, ...d])}>＋ Add Fixed Route</Btn>
-                </div>
-
-                {templatesData.length === 0 ? (
-                  <div style={{ padding: "2rem", textAlign: "center", color: PX.gray400, border: `1px dashed ${PX.gray200}`, borderRadius: 12 }}>
-                    No fixed price templates configured.
-                  </div>
-                ) : (
-                  templatesData.map((t) => (
-                    <div key={t.id} style={{ border:`1.5px solid ${PX.gray200}`,borderRadius:12,padding:"1.25rem",marginBottom:"1rem", background: PX.gray50 }}>
-                      <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:"1rem",marginBottom:"1rem" }}>
-                        <div style={{ gridColumn: "span 2" }}>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Pickup Location</label>
-                          <PlacesInput value={t.pickupArea||""} mapsLoaded={mapsLoaded} onChange={(v,geo)=>setTemplatesData(d=>d.map(x=>x.id===t.id?{...x,pickupArea:v,pickupGeo:geo}:x))} icon={<SvgMapPinGreen />} />
-                        </div>
-                        <div style={{ gridColumn: "span 2" }}>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Drop-off Location</label>
-                          <PlacesInput value={t.dropArea||""} mapsLoaded={mapsLoaded} onChange={(v,geo)=>setTemplatesData(d=>d.map(x=>x.id===t.id?{...x,dropArea:v,dropGeo:geo}:x))} icon={<SvgMapPinRed />} />
-                        </div>
-                        <div>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Trip Type</label>
-                          <select value={t.tripType||"one-way"} onChange={e=>setTemplatesData(d=>d.map(x=>x.id===t.id?{...x,tripType:e.target.value}:x))}>
-                            <option value="one-way">One Way</option>
-                            <option value="return">Return</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Eligible Vehicle</label>
-                          <select value={t.vehicleId||""} onChange={e=>setTemplatesData(d=>d.map(x=>x.id===t.id?{...x,vehicleId:e.target.value}:x))}>
-                            {db.vehicles.map(v=><option key={v.id} value={v.id}>{v.name}</option>)}
-                          </select>
-                        </div>
-                        <div>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Fixed Cost Price (£)</label>
-                          <input type="number" value={t.price||0} onChange={e=>setTemplatesData(d=>d.map(x=>x.id===t.id?{...x,price:Number(e.target.value)}:x))} />
-                        </div>
-                        <div>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Radius Margin ({gv?.distanceUnit === "miles" ? "miles" : "km"})</label>
-                          <input type="number" value={t.radiusKm??15} onChange={e=>setTemplatesData(d=>d.map(x=>x.id===t.id?{...x,radiusKm:Number(e.target.value)}:x))} />
-                        </div>
-                      </div>
-                      <div style={{ display:"flex",justifyContent:"flex-end",gap:"0.75rem" }}>
-                        <Btn variant="danger" size="sm" onClick={async ()=>{ if(window.confirm("Delete this route template?")) { await saveApi('templates', t, true); setTemplatesData(d=>d.filter(x=>x.id!==t.id)); } }}>Delete</Btn>
-                        <Btn variant="teal" size="sm" onClick={async ()=>{ const saved = await saveApi('templates', t); setTemplatesData(d=>d.map(x=>x.id===t.id?saved:x)); setToast("Fixed route saved!"); setTimeout(()=>setToast(""),2000); }}>Save Route</Btn>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* SUBSECTION 2: MILEAGE MATRIX */}
-              <div>
-                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem" }}>
-                  <div>
-                    <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800 }}>Mileage Pricing Rules</h2>
-                    <p style={{ fontSize:13, color:PX.gray600, marginTop:4 }}>Define dynamic mileage rules for zone-to-zone custom routing matrix.</p>
-                  </div>
-                  <Btn variant="primary" size="sm" onClick={()=>setMatrixData(d=>[{id:'new_'+Date.now(),pickupArea:"",dropArea:"",tripType:"one-way",vehicleId:db.vehicles[0]?.id,baseFare:0,includedLiveMileage:0,includedDeadMileage:0,waitingChargePerHour:0,extraMileageRate:0,nightRateMultiplier:1,weekendRateMultiplier:1,status:'active'}, ...d])}>＋ Add Matrix Rule</Btn>
-                </div>
-
-                {matrixData.length === 0 ? (
-                  <div style={{ padding: "2rem", textAlign: "center", color: PX.gray400, border: `1px dashed ${PX.gray200}`, borderRadius: 12 }}>
-                    No pricing matrix rules configured.
-                  </div>
-                ) : (
-                  matrixData.map((m) => (
-                    <div key={m.id} style={{ border:`1.5px solid ${PX.gray200}`,borderRadius:12,padding:"1.25rem",marginBottom:"1rem", background: PX.gray50 }}>
-                      <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:"1rem",marginBottom:"1rem" }}>
-                        <div style={{ gridColumn: "span 2" }}>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Pickup Area</label>
-                          <PlacesInput value={m.pickupArea||""} mapsLoaded={mapsLoaded} onChange={(v,geo)=>setMatrixData(d=>d.map(x=>x.id===m.id?{...x,pickupArea:v,pickupGeo:geo}:x))} icon={<SvgMapPinGreen />} />
-                        </div>
-                        <div style={{ gridColumn: "span 2" }}>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Drop Area</label>
-                          <PlacesInput value={m.dropArea||""} mapsLoaded={mapsLoaded} onChange={(v,geo)=>setMatrixData(d=>d.map(x=>x.id===m.id?{...x,dropArea:v,dropGeo:geo}:x))} icon={<SvgMapPinRed />} />
-                        </div>
-                        <div>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Trip Type</label>
-                          <select value={m.tripType||"one-way"} onChange={e=>setMatrixData(d=>d.map(x=>x.id===m.id?{...x,tripType:e.target.value}:x))}>
-                            <option value="one-way">One Way</option>
-                            <option value="return">Return</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Vehicle</label>
-                          <select value={m.vehicleId||""} onChange={e=>setMatrixData(d=>d.map(x=>x.id===m.id?{...x,vehicleId:e.target.value}:x))}>
-                            {db.vehicles.map(v=><option key={v.id} value={v.id}>{v.name}</option>)}
-                          </select>
-                        </div>
-                        <div>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Base Matrix Fare (£)</label>
-                          <input type="number" value={m.baseFare||0} onChange={e=>setMatrixData(d=>d.map(x=>x.id===m.id?{...x,baseFare:Number(e.target.value)}:x))} />
-                        </div>
-                        <div>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Extra Mileage Rate (£/{gv?.distanceUnit === "miles" ? "mi" : "km"})</label>
-                          <input type="number" step="0.01" value={m.extraMileageRate||0} onChange={e=>setMatrixData(d=>d.map(x=>x.id===m.id?{...x,extraMileageRate:Number(e.target.value)}:x))} />
-                        </div>
-                      </div>
-                      <div style={{ display:"flex",justifyContent:"flex-end",gap:"0.75rem" }}>
-                        <Btn variant="danger" size="sm" onClick={async ()=>{ if(window.confirm("Delete this matrix pricing rule?")) { await saveApi('matrix', m, true); setMatrixData(d=>d.filter(x=>x.id!==m.id)); } }}>Delete</Btn>
-                        <Btn variant="teal" size="sm" onClick={async ()=>{ const saved = await saveApi('matrix', m); setMatrixData(d=>d.map(x=>x.id===m.id?saved:x)); setToast("Matrix rule saved!"); setTimeout(()=>setToast(""),2000); }}>Save Matrix Rule</Btn>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-            
-
-              {/* SUBSECTION 4: SEASONAL DEMAND PERIODS */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
-                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem" }}>
-                  <div>
-                    <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, display:"flex", alignItems:"center", gap:6 }}><SvgCalendar /> Seasonal Demand Multipliers</h2>
-                    <p style={{ fontSize:13, color:PX.gray600, marginTop:4 }}>Configure demand factors based on calendar dates (e.g. peak holiday periods).</p>
-                  </div>
-                  <Btn variant="primary" size="sm" onClick={()=>setSeasonalData(d=>[{id:'new_'+Date.now(),name:"Holiday Surge",startDate:"",endDate:"",multiplier:1.2,status:'active'}, ...d])}>＋ Add Demand Period</Btn>
-                </div>
-
-                {seasonalData.length === 0 ? (
-                  <div style={{ padding: "2rem", textAlign: "center", color: PX.gray400, border: `1px dashed ${PX.gray200}`, borderRadius: 12 }}>
-                    No seasonal multipliers configured.
-                  </div>
-                ) : (
-                  seasonalData.map((s) => (
-                    <div key={s.id} style={{ border:`1.5px solid ${PX.gray200}`,borderRadius:12,padding:"1.25rem",marginBottom:"1rem", background: PX.gray50 }}>
-                      <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:"1rem",marginBottom:"1rem" }}>
-                        <div>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Period Name</label>
-                          <input type="text" value={s.name||""} onChange={e=>setSeasonalData(d=>d.map(x=>x.id===s.id?{...x,name:e.target.value}:x))} />
-                        </div>
-                        <div>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Start Date</label>
-                          <input type="date" value={s.startDate||""} onChange={e=>setSeasonalData(d=>d.map(x=>x.id===s.id?{...x,startDate:e.target.value}:x))} />
-                        </div>
-                        <div>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>End Date</label>
-                          <input type="date" value={s.endDate||""} onChange={e=>setSeasonalData(d=>d.map(x=>x.id===s.id?{...x,endDate:e.target.value}:x))} />
-                        </div>
-                        <div>
-                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Multiplier (e.g. 1.2)</label>
-                          <input type="number" step="0.05" value={s.multiplier||1} onChange={e=>setSeasonalData(d=>d.map(x=>x.id===s.id?{...x,multiplier:Number(e.target.value)}:x))} />
-                        </div>
-                      </div>
-                      <div style={{ display:"flex",justifyContent:"flex-end",gap:"0.75rem" }}>
-                        <Btn variant="danger" size="sm" onClick={async ()=>{ if(window.confirm("Delete this seasonal period?")) { await saveApi('seasonal', s, true); setSeasonalData(d=>d.filter(x=>x.id!==s.id)); } }}>Delete</Btn>
-                        <Btn variant="teal" size="sm" onClick={async ()=>{ const saved = await saveApi('seasonal', s); setSeasonalData(d=>d.map(x=>x.id===s.id?saved:x)); setToast("Demand Period saved!"); setTimeout(()=>setToast(""),2000); }}>Save Period</Btn>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* SUBSECTION 5: BLOCKED DATES CALENDAR */}
-              <div>
-                <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem" }}>Blocked Calendar Dates</h2>
-                <p style={{ fontSize:13,color:PX.gray600,marginBottom:"1.5rem" }}>Block out specific dates for contract bookings or PMI maintenance schedules.</p>
+                <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem" }}>Fixed Price Routes</h2>
+                <p style={{ fontSize:13,color:PX.gray600,marginBottom:"1.5rem" }}>Configure direct preset routes with fixed pricing (e.g. airport transfers).</p>
                 
                 <div style={{ background:PX.gray50,borderRadius:12,padding:"1.25rem",marginBottom:"1.5rem",border:`1.5px dashed ${PX.gray200}` }}>
-                  <p style={{ fontWeight:700,fontSize:14,color:PX.navy800,marginBottom:8 }}>Add Date Blockout</p>
-                  <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12,marginBottom:12 }}>
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+                    <p style={{ fontWeight:700,fontSize:14,color:PX.navy800,margin:0 }}>{newTemplate.id ? "Edit Route" : "Add New Route"}</p>
+                    {newTemplate.id && <button onClick={()=>setNT({...blankTemplate, vehicleId:db.vehicles[0]?.id})} style={{ background:"none",border:"none",color:PX.gray400,fontSize:12,cursor:"pointer",fontWeight:600 }}>Cancel Edit</button>}
+                  </div>
+                  <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,marginBottom:12 }}>
+                    <div style={{ gridColumn: "span 2" }}>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Pickup Location</label>
+                      <PlacesInput value={newTemplate.pickupArea||""} mapsLoaded={mapsLoaded} onChange={(v,geo)=>setNT(x=>({...x,pickupArea:v,pickupGeo:geo}))} icon={<SvgMapPinGreen />} />
+                    </div>
+                    <div style={{ gridColumn: "span 2" }}>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Drop-off Location</label>
+                      <PlacesInput value={newTemplate.dropArea||""} mapsLoaded={mapsLoaded} onChange={(v,geo)=>setNT(x=>({...x,dropArea:v,dropGeo:geo}))} icon={<SvgMapPinRed />} />
+                    </div>
                     <div>
-                      <label style={{ fontSize:11,color:PX.gray600 }}>Target Vehicle</label>
-                      <select value={newBlock.vehicleId} onChange={e=>setNB(b=>({...b,vehicleId:e.target.value}))}>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Trip Type</label>
+                      <select style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} value={newTemplate.tripType||"one-way"} onChange={e=>setNT(x=>({...x,tripType:e.target.value}))}>
+                        <option value="one-way">One Way</option>
+                        <option value="return">Return</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Eligible Vehicle</label>
+                      <select style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} value={newTemplate.vehicleId||""} onChange={e=>setNT(x=>({...x,vehicleId:e.target.value}))}>
                         {db.vehicles.map(v=><option key={v.id} value={v.id}>{v.name}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label style={{ fontSize:11,color:PX.gray600 }}>Reason / Notes</label>
-                      <input type="text" value={newBlock.reason} onChange={e=>setNB(b=>({...b,reason:e.target.value}))} />
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Fixed Cost Price (£)</label>
+                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="number" value={newTemplate.price||0} onChange={e=>setNT(x=>({...x,price:Number(e.target.value)}))} />
                     </div>
                     <div>
-                      <label style={{ fontSize:11,color:PX.gray600 }}>From Date</label>
-                      <input type="date" value={newBlock.from} onChange={e=>setNB(b=>({...b,from:e.target.value}))} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize:11,color:PX.gray600 }}>To Date</label>
-                      <input type="date" value={newBlock.to} onChange={e=>setNB(b=>({...b,to:e.target.value}))} />
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Radius Margin ({gv?.distanceUnit === "miles" ? "miles" : "km"})</label>
+                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="number" value={newTemplate.radiusKm??15} onChange={e=>setNT(x=>({...x,radiusKm:Number(e.target.value)}))} />
                     </div>
                   </div>
-                  <Btn variant="primary" size="sm" disabled={!newBlock.from||!newBlock.to} onClick={()=>{
-                    setBl(b=>[...b, {...newBlock, vehicleName:db.vehicles.find(v=>v.id===newBlock.vehicleId)?.name}]);
-                    setNB(n=>({...n,from:"",to:""}));
-                  }}>+ Block Vehicle</Btn>
+                  <Btn variant="primary" size="sm" onClick={async ()=>{
+                    if(!newTemplate.pickupArea || !newTemplate.dropArea) return setToast("Pickup and dropoff required.");
+                    const itemToSave = newTemplate.id ? newTemplate : {...newTemplate, id: 'new_'+Date.now()};
+                    const saved = await saveApi('templates', itemToSave);
+                    if(newTemplate.id && !newTemplate.id.startsWith("new_")) {
+                      setTemplatesData(d=>d.map(x=>x.id===saved.id?saved:x));
+                    } else {
+                      setTemplatesData(d=>[saved,...d]);
+                    }
+                    setNT({...blankTemplate, vehicleId:db.vehicles[0]?.id});
+                    setToast("Route saved!"); setTimeout(()=>setToast(""),2000);
+                  }}>{newTemplate.id ? "Update Route" : "+ Add Route"}</Btn>
                 </div>
 
                 <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
-                  {blocks.length === 0 ? (
-                    <div style={{ padding: "2rem", textAlign: "center", color: PX.gray400, border: `1px solid ${PX.gray200}`, borderRadius: 12 }}>
-                      No blocked periods configured. All vehicles available.
-                    </div>
-                  ) : (
-                    blocks.map((b,i)=>(
-                      <div key={i} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 14px",border:`1px solid ${PX.gray200}`,borderRadius:8, background: "#fff" }}>
-                        <div>
-                          <span style={{ fontWeight:700,fontSize:13,color:PX.navy800 }}>{b.vehicleName}</span>
-                          <span style={{ fontSize:12,color:PX.gray600,marginLeft:8 }}>({b.reason})</span>
-                        </div>
-                        <div style={{ display:"flex",alignItems:"center",gap:10 }}>
-                          <span style={{ fontSize:12,color:PX.gray600 }}>{b.from} → {b.to}</span>
-                          <button onClick={()=>setBl(bs=>bs.filter((_,idx)=>idx!==i))} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
-                        </div>
+                  {templatesData.length === 0 && <div style={{ padding: "2rem", textAlign: "center", color: PX.gray400, border: `1px solid ${PX.gray200}`, borderRadius: 12 }}>No fixed price templates configured.</div>}
+                  {templatesData.map(t=>(
+                    <div key={t.id} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",border:`1px solid ${PX.gray200}`,borderRadius:8, background: "#fff" }}>
+                      <div>
+                        <div style={{ fontWeight:700,fontSize:13,color:PX.navy800 }}>{String(t.pickupArea).split(',')[0]} → {String(t.dropArea).split(',')[0]}</div>
+                        <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{db.vehicles.find(v=>v.id===t.vehicleId)?.name} • £{t.price} • {t.tripType}</div>
                       </div>
-                    ))
-                  )}
+                      <div style={{ display:"flex",alignItems:"center",gap:16 }}>
+                        <button onClick={()=>setNT(t)} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
+                        <button onClick={async ()=>{ if(window.confirm("Delete this route template?")) { await saveApi('templates', t, true); setTemplatesData(d=>d.filter(x=>x.id!==t.id)); } }} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* SUBSECTION 2: MILEAGE MATRIX */}
+              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem", marginTop: "2.5rem" }}>
+                <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem" }}>Mileage Pricing Rules</h2>
+                <p style={{ fontSize:13, color:PX.gray600, marginBottom:"1.5rem" }}>Define dynamic mileage rules for zone-to-zone custom routing matrix.</p>
+                
+                <div style={{ background:PX.gray50,borderRadius:12,padding:"1.25rem",marginBottom:"1.5rem",border:`1.5px dashed ${PX.gray200}` }}>
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+                    <p style={{ fontWeight:700,fontSize:14,color:PX.navy800,margin:0 }}>{newMatrix.id ? "Edit Matrix Rule" : "Add New Matrix Rule"}</p>
+                    {newMatrix.id && <button onClick={()=>setNM({...blankMatrix, vehicleId:db.vehicles[0]?.id})} style={{ background:"none",border:"none",color:PX.gray400,fontSize:12,cursor:"pointer",fontWeight:600 }}>Cancel Edit</button>}
+                  </div>
+                  <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,marginBottom:12 }}>
+                    <div style={{ gridColumn: "span 2" }}>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Pickup Area</label>
+                      <PlacesInput value={newMatrix.pickupArea||""} mapsLoaded={mapsLoaded} onChange={(v,geo)=>setNM(x=>({...x,pickupArea:v,pickupGeo:geo}))} icon={<SvgMapPinGreen />} />
+                    </div>
+                    <div style={{ gridColumn: "span 2" }}>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Drop Area</label>
+                      <PlacesInput value={newMatrix.dropArea||""} mapsLoaded={mapsLoaded} onChange={(v,geo)=>setNM(x=>({...x,dropArea:v,dropGeo:geo}))} icon={<SvgMapPinRed />} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Trip Type</label>
+                      <select style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} value={newMatrix.tripType||"one-way"} onChange={e=>setNM(x=>({...x,tripType:e.target.value}))}>
+                        <option value="one-way">One Way</option>
+                        <option value="return">Return</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Vehicle</label>
+                      <select style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} value={newMatrix.vehicleId||""} onChange={e=>setNM(x=>({...x,vehicleId:e.target.value}))}>
+                        {db.vehicles.map(v=><option key={v.id} value={v.id}>{v.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Base Matrix Fare (£)</label>
+                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="number" value={newMatrix.baseFare||0} onChange={e=>setNM(x=>({...x,baseFare:Number(e.target.value)}))} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Extra Mileage Rate (£)</label>
+                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="number" step="0.01" value={newMatrix.extraMileageRate||0} onChange={e=>setNM(x=>({...x,extraMileageRate:Number(e.target.value)}))} />
+                    </div>
+                  </div>
+                  <Btn variant="primary" size="sm" onClick={async ()=>{
+                    if(!newMatrix.pickupArea || !newMatrix.dropArea) return setToast("Pickup and dropoff required.");
+                    const itemToSave = newMatrix.id ? newMatrix : {...newMatrix, id: 'new_'+Date.now()};
+                    const saved = await saveApi('matrix', itemToSave);
+                    if(newMatrix.id && !newMatrix.id.startsWith("new_")) {
+                      setMatrixData(d=>d.map(x=>x.id===saved.id?saved:x));
+                    } else {
+                      setMatrixData(d=>[saved,...d]);
+                    }
+                    setNM({...blankMatrix, vehicleId:db.vehicles[0]?.id});
+                    setToast("Matrix rule saved!"); setTimeout(()=>setToast(""),2000);
+                  }}>{newMatrix.id ? "Update Matrix Rule" : "+ Add Matrix Rule"}</Btn>
+                </div>
+
+                <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
+                  {matrixData.length === 0 && <div style={{ padding: "2rem", textAlign: "center", color: PX.gray400, border: `1px solid ${PX.gray200}`, borderRadius: 12 }}>No pricing matrix rules configured.</div>}
+                  {matrixData.map(m=>(
+                    <div key={m.id} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",border:`1px solid ${PX.gray200}`,borderRadius:8, background: "#fff" }}>
+                      <div>
+                        <div style={{ fontWeight:700,fontSize:13,color:PX.navy800 }}>{String(m.pickupArea).split(',')[0]} → {String(m.dropArea).split(',')[0]}</div>
+                        <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{db.vehicles.find(v=>v.id===m.vehicleId)?.name} • Base: £{m.baseFare} • Extra: £{m.extraMileageRate}/unit</div>
+                      </div>
+                      <div style={{ display:"flex",alignItems:"center",gap:16 }}>
+                        <button onClick={()=>setNM(m)} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
+                        <button onClick={async ()=>{ if(window.confirm("Delete this matrix pricing rule?")) { await saveApi('matrix', m, true); setMatrixData(d=>d.filter(x=>x.id!==m.id)); } }} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* SUBSECTION 4: SEASONAL DEMAND PERIODS */}
+              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem", marginTop: "2.5rem" }}>
+                <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem", display:"flex", alignItems:"center", gap:6 }}><SvgCalendar /> Seasonal Demand Multipliers</h2>
+                <p style={{ fontSize:13, color:PX.gray600, marginBottom:"1.5rem" }}>Configure demand factors based on calendar dates and times (e.g. peak holiday periods).</p>
+                
+                <div style={{ background:PX.gray50,borderRadius:12,padding:"1.25rem",marginBottom:"1.5rem",border:`1.5px dashed ${PX.gray200}` }}>
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+                    <p style={{ fontWeight:700,fontSize:14,color:PX.navy800,margin:0 }}>{newSeasonal.id ? "Edit Demand Period" : "Add Demand Period"}</p>
+                    {newSeasonal.id && <button onClick={()=>setNS(blankSeasonal)} style={{ background:"none",border:"none",color:PX.gray400,fontSize:12,cursor:"pointer",fontWeight:600 }}>Cancel Edit</button>}
+                  </div>
+                  <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,marginBottom:12 }}>
+                    <div>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Period Name</label>
+                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="text" value={newSeasonal.name||""} onChange={e=>setNS(x=>({...x,name:e.target.value}))} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Start Date & Time</label>
+                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="datetime-local" value={newSeasonal.startDate||""} onChange={e=>setNS(x=>({...x,startDate:e.target.value}))} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>End Date & Time</label>
+                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="datetime-local" value={newSeasonal.endDate||""} onChange={e=>setNS(x=>({...x,endDate:e.target.value}))} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Multiplier (e.g. 1.2)</label>
+                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="number" step="0.05" value={newSeasonal.multiplier||1} onChange={e=>setNS(x=>({...x,multiplier:Number(e.target.value)}))} />
+                    </div>
+                  </div>
+                  <Btn variant="primary" size="sm" onClick={async ()=>{
+                    if(!newSeasonal.name || !newSeasonal.startDate || !newSeasonal.endDate) return setToast("Please fill all fields.");
+                    const itemToSave = newSeasonal.id ? newSeasonal : {...newSeasonal, id: 'new_'+Date.now()};
+                    const saved = await saveApi('seasonal', itemToSave);
+                    if(newSeasonal.id && !newSeasonal.id.startsWith("new_")) {
+                      setSeasonalData(d=>d.map(x=>x.id===saved.id?saved:x));
+                    } else {
+                      setSeasonalData(d=>[saved,...d]);
+                    }
+                    setNS(blankSeasonal);
+                    setToast("Demand Period saved!"); setTimeout(()=>setToast(""),2000);
+                  }}>{newSeasonal.id ? "Update Period" : "+ Add Period"}</Btn>
+                </div>
+
+                <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
+                  {seasonalData.length === 0 && <div style={{ padding: "2rem", textAlign: "center", color: PX.gray400, border: `1px solid ${PX.gray200}`, borderRadius: 12 }}>No seasonal multipliers configured.</div>}
+                  {seasonalData.map(s=>(
+                    <div key={s.id} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",border:`1px solid ${PX.gray200}`,borderRadius:8, background: "#fff" }}>
+                      <div>
+                        <div style={{ fontWeight:700,fontSize:13,color:PX.navy800 }}>{s.name} <span style={{color:PX.brandRed, marginLeft:8}}>({s.multiplier}x multiplier)</span></div>
+                        <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{s.startDate ? s.startDate.replace('T', ' ') : ''} → {s.endDate ? s.endDate.replace('T', ' ') : ''}</div>
+                      </div>
+                      <div style={{ display:"flex",alignItems:"center",gap:16 }}>
+                        <button onClick={()=>setNS(s)} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
+                        <button onClick={async ()=>{ if(window.confirm("Delete this seasonal period?")) { await saveApi('seasonal', s, true); setSeasonalData(d=>d.filter(x=>x.id!==s.id)); } }} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* SUBSECTION 5: BLOCKED DATES CALENDAR */}
+              <div style={{ marginTop: "2.5rem" }}>
+                <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem" }}>Blocked Calendar Dates</h2>
+                <p style={{ fontSize:13,color:PX.gray600,marginBottom:"1.5rem" }}>Block out specific dates and times for contract bookings or PMI maintenance schedules.</p>
+                
+                <div style={{ background:PX.gray50,borderRadius:12,padding:"1.25rem",marginBottom:"1.5rem",border:`1.5px dashed ${PX.gray200}` }}>
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+                    <p style={{ fontWeight:700,fontSize:14,color:PX.navy800,margin:0 }}>{newBlock.id ? "Edit Date Blockout" : "Add Date Blockout"}</p>
+                    {newBlock.id && <button onClick={()=>setNB({id:'', vehicleId:db.vehicles[0]?.id || "",from:"",to:"",reason:"Contract booking"})} style={{ background:"none",border:"none",color:PX.gray400,fontSize:12,cursor:"pointer",fontWeight:600 }}>Cancel Edit</button>}
+                  </div>
+                  <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12,marginBottom:12 }}>
+                    <div>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Target Vehicle</label>
+                      <select style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} value={newBlock.vehicleId} onChange={e=>setNB(b=>({...b,vehicleId:e.target.value}))}>
+                        {db.vehicles.map(v=><option key={v.id} value={v.id}>{v.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Reason / Notes</label>
+                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="text" value={newBlock.reason} onChange={e=>setNB(b=>({...b,reason:e.target.value}))} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>From Date & Time</label>
+                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="datetime-local" value={newBlock.from} onChange={e=>setNB(b=>({...b,from:e.target.value}))} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>To Date & Time</label>
+                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="datetime-local" value={newBlock.to} onChange={e=>setNB(b=>({...b,to:e.target.value}))} />
+                    </div>
+                  </div>
+                  <Btn variant="primary" size="sm" disabled={!newBlock.from||!newBlock.to} onClick={()=>{
+                    if(newBlock.id) {
+                       setBl(bs=>bs.map(b=>b.id===newBlock.id ? {...newBlock, vehicleName:db.vehicles.find(v=>v.id===newBlock.vehicleId)?.name} : b));
+                    } else {
+                       setBl(b=>[...b, {...newBlock, id: 'blk_'+Date.now(), vehicleName:db.vehicles.find(v=>v.id===newBlock.vehicleId)?.name}]);
+                    }
+                    setNB({id:'', vehicleId:db.vehicles[0]?.id || "",from:"",to:"",reason:"Contract booking"});
+                  }}>{newBlock.id ? "Update Block" : "+ Block Vehicle"}</Btn>
+                </div>
+
+                <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
+                  {blocks.length === 0 && <div style={{ padding: "2rem", textAlign: "center", color: PX.gray400, border: `1px solid ${PX.gray200}`, borderRadius: 12 }}>No blocked periods configured. All vehicles available.</div>}
+                  {blocks.map((b,i)=>(
+                    <div key={b.id || i} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",border:`1px solid ${PX.gray200}`,borderRadius:8, background: "#fff" }}>
+                      <div>
+                        <div style={{ fontWeight:700,fontSize:13,color:PX.navy800 }}>{b.vehicleName}</div>
+                        <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{b.reason}</div>
+                      </div>
+                      <div style={{ display:"flex",alignItems:"center",gap:16 }}>
+                        <span style={{ fontSize:12,color:PX.gray600, fontWeight: 500 }}>{b.from ? b.from.replace('T', ' ') : ''} → {b.to ? b.to.replace('T', ' ') : ''}</span>
+                        <button onClick={()=>{
+                          // if id doesn't exist, we assign one to make editing consistent
+                          const editB = b.id ? b : {...b, id: 'blk_'+Date.now()};
+                          setNB(editB);
+                        }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
+                        <button onClick={()=>setBl(bs=>bs.filter((_,idx)=>idx!==i))} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
             </div>
           )}
 
-          {/* ════════════════════════ FLEET & AVAILABILITY ════════════════════════ */}
+{/* ════════════════════════ FLEET & AVAILABILITY ════════════════════════ */}
           {tab === "fleet" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
               {/* SUBSECTION 2: VEHICLE WAGE & RUN RATES */}
