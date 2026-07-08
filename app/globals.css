@@ -73,3 +73,22 @@ h2 {
     order: -1;
   }
 }
+
+@media (max-width: 768px) {
+  /* Admin Dashboard specific responsive tweaks */
+  div[style*="display: flex"] {
+    flex-wrap: wrap;
+  }
+  div[style*="display: grid"], div[style*="display:grid"] {
+    grid-template-columns: 1fr !important;
+  }
+  .table-wrapper {
+    overflow-x: auto;
+  }
+  /* Fix navbar overflow on small screens */
+  nav > div {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+}

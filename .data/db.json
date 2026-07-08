@@ -25,6 +25,15 @@
       "tripType": "one-way",
       "price": 225,
       "id": "template_1783006176087"
+    },
+    {
+      "pickupArea": "Birm",
+      "dropArea": "Derby",
+      "tripType": "one-way",
+      "vehicleId": "minibus",
+      "price": 500,
+      "radiusKm": 30,
+      "id": "template_1783500023136"
     }
   ],
   "seasonalPricing": [

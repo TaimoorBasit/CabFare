@@ -1793,7 +1793,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                     </div>
                   </div>
                   <Btn variant="primary" size="sm" onClick={async ()=>{
-                    if(!newSeasonal.name || !newSeasonal.startDate || !newSeasonal.endDate) return setToast("Please fill all fields.");
+                    if(!newSeasonal.seasonName || !newSeasonal.startDate || !newSeasonal.endDate) return setToast("Please fill all fields.");
                     const itemToSave = newSeasonal.id ? newSeasonal : {...newSeasonal, id: 'new_'+Date.now()};
                     const saved = await saveApi('seasonal', itemToSave);
                     setSeasonalData(d => {
