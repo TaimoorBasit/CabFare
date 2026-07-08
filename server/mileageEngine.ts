@@ -53,21 +53,28 @@ export async function calculateMileage(journey: any) {
   try {
     // 1. Calculate Live Mileage
     const liveDirections = await getDirections(liveOrigin, liveDestination, liveWaypoints, apiKey);
-    const liveDistanceMeters = sumLegs(liveDirections.routes[0].legs, 'distance');
-    const liveDurationSeconds = sumLegs(liveDirections.routes[0].legs, 'duration');
+    let liveDistanceMeters = sumLegs(liveDirections.routes[0].legs, 'distance');
+    let liveDurationSeconds = sumLegs(liveDirections.routes[0].legs, 'duration');
     const distanceUnit = db.data?.globalVars?.distanceUnit || 'km';
     const divisor = distanceUnit === 'miles' ? 1609.34 : 1000;
-    const liveKm = liveDistanceMeters / divisor;
 
     // 2. Calculate Dead Mileage (Yard to Origin, Destination to Yard)
     const deadOutDirections = await getDirections(yardLoc, liveOrigin, [], apiKey);
     const deadOutDistanceMeters = sumLegs(deadOutDirections.routes[0].legs, 'distance');
     const deadOutDurationSeconds = sumLegs(deadOutDirections.routes[0].legs, 'duration');
     
-    const deadBackDirections = await getDirections(liveDestination, yardLoc, [], apiKey);
+    // For return trips, we double the live distance/duration and the dead back is from origin instead of destination.
+    const isReturn = journey.journeyType === 'return';
+    if (isReturn) {
+      liveDistanceMeters *= 2;
+      liveDurationSeconds *= 2;
+    }
+
+    const deadBackDirections = await getDirections(isReturn ? liveOrigin : liveDestination, yardLoc, [], apiKey);
     const deadBackDistanceMeters = sumLegs(deadBackDirections.routes[0].legs, 'distance');
     const deadBackDurationSeconds = sumLegs(deadBackDirections.routes[0].legs, 'duration');
 
+    const liveKm = liveDistanceMeters / divisor;
     const deadKm = (deadOutDistanceMeters + deadBackDistanceMeters) / divisor;
 
     return {
@@ -99,12 +106,15 @@ function haversineKm(a: any, b: any) {
 function fallbackCalculateMileage(journey: any) {
   // Simple fallback logic if Google Maps is disabled or fails
   // Since we don't have the exact geocoder here, just return dummy or approximated values
+  const isReturn = journey.journeyType === 'return';
+  const liveKm = isReturn ? 200 : 100;
+  const deadKm = 40;
   return {
-    liveKm: 100,
-    deadKm: 40,
-    totalKm: 140,
-    liveDurationMinutes: 120,
-    totalDurationMinutes: 160,
+    liveKm,
+    deadKm,
+    totalKm: liveKm + deadKm,
+    liveDurationMinutes: isReturn ? 240 : 120,
+    totalDurationMinutes: isReturn ? 280 : 160,
     geometry: null,
     legs: []
   };

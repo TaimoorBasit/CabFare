@@ -65,7 +65,7 @@ export async function generateQuotes(journey: any) {
         pts: [journey.wpCoords?.[0] || {lat:0, lng:0}, journey.wpCoords?.[1] || {lat:0, lng:0}], // Approximation for map pins
         isManualQuote: pricingResult.isManualQuote,
         belowMin: false, // New engine doesn't enforce old min hire unless configured
-        opDays: 1, // Simplified
+        opDays: (journey.returnDate && journey.departureDate && new Date(journey.returnDate) > new Date(journey.departureDate)) ? Math.max(1, Math.ceil((new Date(journey.returnDate).getTime() - new Date(journey.departureDate).getTime()) / 86400000) + 1) : 1,
         totalShiftHrs: Math.round(((mileageResult.totalDurationMinutes + Number(journey.waitingMins || 0)) / 60) * 10) / 10
       }
     });

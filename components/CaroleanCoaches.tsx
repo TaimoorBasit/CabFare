@@ -1154,7 +1154,7 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcase
 
   const lugParts = [];
   if (suitcaseCount > 0) lugParts.push(`${suitcaseCount} suitcase${suitcaseCount!==1?"s":""}`);
-  if (handbagCount > 0) lugParts.push(`${handbagCount} handbag${handbagCount!==1?"s":""}`);
+  if (handbagCount > 0) lugParts.push(`${handbagCount} hand carry`);
   const lugLabel = lugParts.length > 0 ? lugParts.join(" & ") : "Zero baggage";
 
   const renderVehicleIcon = () => {
@@ -2553,8 +2553,8 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                         {/* JOURNEY TYPE SELECTION */}
                         <div style={{ display: "flex", gap: "1.5rem", justifyContent: "flex-start", paddingBottom: "0.5rem" }}>
                           {[
-                            {id: "one-way", label: "One-Way"},
                             {id: "return", label: "Return Trip"},
+                            {id: "one-way", label: "One-Way"},
                             {id: "multi-stop", label: "Multi-Stop Route"}
                           ].map(type => (
                             <label key={type.id} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13.5, fontWeight: 700, color: journey.journeyType === type.id ? PX.brandRed : PX.navy800 }}>
@@ -2632,30 +2632,49 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                                   borderRadius:"0 8px 8px 0",background:"#fff",cursor:"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>＋</button>
                             </div>
                           </Field>
-                          <Field label="Suitcases (Large Luggage)" hint="23kg per bag">
+                          <Field label="Luggage Requirements">
                             <div style={{ display:"flex", height: 44 }}>
-                              <button type="button" onClick={()=>setJ(j=>({...j,suitcaseCount:Math.max(0,(j.suitcaseCount||0)-1)}))}
-                                style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderRight:"none",
-                                  borderRadius:"8px 0 0 8px",background:"#fff",cursor:"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>−</button>
-                              <input type="number" min={0} value={journey.suitcaseCount||0}
-                                onChange={e=>setJ(j=>({...j,suitcaseCount:parseInt(e.target.value)||0}))}
-                                style={{ width:70,textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",height:"100%" }}/>
-                              <button type="button" onClick={()=>setJ(j=>({...j,suitcaseCount:(j.suitcaseCount||0)+1}))}
+                              <select 
+                                value={journey.activeLuggageType || 'none'} 
+                                onChange={e=>setJ(j=>({...j,activeLuggageType:e.target.value}))}
+                                style={{ flex: 1, borderRadius:"8px 0 0 8px", borderRight:"none", border:`1.5px solid ${PX.gray200}`, borderRightWidth:0 }}
+                              >
+                                <option value="none">None</option>
+                                <option value="suitcase">Suitcase (23kg)</option>
+                                <option value="handbag">Hand carry</option>
+                              </select>
+                              
+                              <button type="button" 
+                                disabled={!journey.activeLuggageType || journey.activeLuggageType === 'none'}
+                                onClick={()=>{
+                                  if (journey.activeLuggageType === 'suitcase') setJ(j=>({...j,suitcaseCount:Math.max(0,(j.suitcaseCount||0)-1)}));
+                                  else if (journey.activeLuggageType === 'handbag') setJ(j=>({...j,handbagCount:Math.max(0,(j.handbagCount||0)-1)}));
+                                }}
+                                style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderRight:"none", borderLeft:"none",
+                                  background: (!journey.activeLuggageType || journey.activeLuggageType === 'none') ? "#f9fafb" : "#fff",
+                                  cursor:(!journey.activeLuggageType || journey.activeLuggageType === 'none')?"default":"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>−</button>
+                              
+                              <input type="number" min={0} 
+                                disabled={!journey.activeLuggageType || journey.activeLuggageType === 'none'}
+                                value={(!journey.activeLuggageType || journey.activeLuggageType === 'none') ? 0 : (journey.activeLuggageType === 'suitcase' ? (journey.suitcaseCount||0) : (journey.handbagCount||0))}
+                                onChange={e=>{
+                                  const v = parseInt(e.target.value)||0;
+                                  if (journey.activeLuggageType === 'suitcase') setJ(j=>({...j,suitcaseCount:v}));
+                                  else if (journey.activeLuggageType === 'handbag') setJ(j=>({...j,handbagCount:v}));
+                                }}
+                                style={{ width:46,textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",height:"100%", padding:0, border:`1.5px solid ${PX.gray200}`, borderLeftWidth:0, borderRightWidth:0,
+                                  background: (!journey.activeLuggageType || journey.activeLuggageType === 'none') ? "#f9fafb" : "#fff" }}/>
+                              
+                              <button type="button" 
+                                disabled={!journey.activeLuggageType || journey.activeLuggageType === 'none'}
+                                onClick={()=>{
+                                  if (journey.activeLuggageType === 'suitcase') setJ(j=>({...j,suitcaseCount:(j.suitcaseCount||0)+1}));
+                                  else if (journey.activeLuggageType === 'handbag') setJ(j=>({...j,handbagCount:(j.handbagCount||0)+1}));
+                                }}
                                 style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderLeft:"none",
-                                  borderRadius:"0 8px 8px 0",background:"#fff",cursor:"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>＋</button>
-                            </div>
-                          </Field>
-                          <Field label="Handbags (Cabin Luggage)">
-                            <div style={{ display:"flex", height: 44 }}>
-                              <button type="button" onClick={()=>setJ(j=>({...j,handbagCount:Math.max(0,(j.handbagCount||0)-1)}))}
-                                style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderRight:"none",
-                                  borderRadius:"8px 0 0 8px",background:"#fff",cursor:"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>−</button>
-                              <input type="number" min={0} value={journey.handbagCount||0}
-                                onChange={e=>setJ(j=>({...j,handbagCount:parseInt(e.target.value)||0}))}
-                                style={{ width:70,textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",height:"100%" }}/>
-                              <button type="button" onClick={()=>setJ(j=>({...j,handbagCount:(j.handbagCount||0)+1}))}
-                                style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderLeft:"none",
-                                  borderRadius:"0 8px 8px 0",background:"#fff",cursor:"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>＋</button>
+                                  borderRadius:"0 8px 8px 0",
+                                  background: (!journey.activeLuggageType || journey.activeLuggageType === 'none') ? "#f9fafb" : "#fff",
+                                  cursor:(!journey.activeLuggageType || journey.activeLuggageType === 'none')?"default":"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>＋</button>
                             </div>
                           </Field>
                         </div>
