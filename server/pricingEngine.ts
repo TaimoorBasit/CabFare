@@ -8,7 +8,8 @@ interface PricingInput {
   vehicleId: string;
   journeyType: string;
   passengers: number;
-  luggageCount?: number;
+  suitcaseCount?: number;
+  handbagCount?: number;
   originName: string;
   destinationName: string;
   originCoords?: {lat: number, lng: number} | null;
@@ -243,12 +244,18 @@ export async function calculatePrice(input: PricingInput) {
     }
   }
 
-  // Add extra profit for luggage > 16
-  const luggageCount = Number(input.luggageCount) || 0;
-  if (luggageCount > 16) {
-    const extraBags = luggageCount - 16;
+  // Add extra profit for luggage beyond vehicle capacity
+  const suitcaseCount = Number(input.suitcaseCount) || 0;
+  const handbagCount = Number(input.handbagCount) || 0;
+  const cap = vehicle.capacity || 16;
+  
+  const extraSuitcases = Math.max(0, suitcaseCount - cap);
+  const extraHandbags = Math.max(0, handbagCount - cap);
+  const totalExtraBags = extraSuitcases + extraHandbags;
+
+  if (totalExtraBags > 0) {
     const extraLuggagePct = vehicle?.extraLuggageProfitPct ?? gv.extraLuggageProfitPct ?? 0.2;
-    const extraLuggageMultiplier = 1 + (extraBags * extraLuggagePct) / 100;
+    const extraLuggageMultiplier = 1 + (totalExtraBags * extraLuggagePct) / 100;
     finalFare = finalFare * extraLuggageMultiplier;
   }
 

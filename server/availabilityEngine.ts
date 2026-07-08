@@ -5,8 +5,8 @@ interface AvailabilityInput {
   passengers: number;
   departureDate: string;
   returnDate?: string;
-  largeLuggage: string;
-  luggageCount: number;
+  suitcaseCount?: number;
+  handbagCount?: number;
 }
 
 export async function checkAvailability(input: AvailabilityInput) {
@@ -20,9 +20,7 @@ export async function checkAvailability(input: AvailabilityInput) {
   // Check capacity
   if (vehicle.capacity < input.passengers) return false;
 
-  // Check luggage
-  const lugOk = input.largeLuggage !== "large" || (vehicle.luggageMultiplier || 1.0) >= 1.0;
-  if (!lugOk) return false;
+  // We rely on pricingEngine to calculate extra luggage charges rather than blocking availability
 
   // Check blocked dates
   const depDate = new Date(input.departureDate);

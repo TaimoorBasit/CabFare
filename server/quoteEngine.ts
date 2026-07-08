@@ -21,8 +21,8 @@ export async function generateQuotes(journey: any) {
       passengers: journey.passengers,
       departureDate: journey.departureDate,
       returnDate: journey.returnDate,
-      largeLuggage: journey.largeLuggage,
-      luggageCount: journey.luggageCount
+      suitcaseCount: journey.suitcaseCount,
+      handbagCount: journey.handbagCount
     });
 
     if (!isAvailable) {
@@ -38,6 +38,8 @@ export async function generateQuotes(journey: any) {
       vehicleId: vehicle.id,
       journeyType: journey.journeyType,
       passengers: journey.passengers,
+      suitcaseCount: journey.suitcaseCount,
+      handbagCount: journey.handbagCount,
       originName: String(journey.origin),
       destinationName: String(journey.destination),
       originCoords: journey.wpCoords?.[0] || null,

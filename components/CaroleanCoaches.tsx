@@ -550,6 +550,7 @@ function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded, onIconCli
 
   const handleTextChange = (val) => {
     setLocalVal(val);
+    onChange(val, null);
   };
 
   const handleBlur = () => {
@@ -1144,18 +1145,17 @@ function Navbar({ adminMode, setAdminMode }) {
 }
 
 // ── VehicleCard (Step 2 equivalent) ──────────────────────────────────────────
-function VehicleCard({ vehicle, result, selected, onSelect, passengers, largeLuggage, luggageCount }) {
+function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcaseCount, handbagCount }) {
   const paxOk = vehicle.capacity >= passengers;
   const lugOk = true;
   const ok=paxOk&&lugOk, isSel=selected===vehicle.id;
   const pct=Math.min(100,Math.round((passengers/vehicle.capacity)*100));
   const capColor=pct>85?PX.red700:pct>65?PX.amber500:PX.teal700;
 
-  const lugLabel = largeLuggage==="large"
-    ? `${luggageCount||0} × 23 kg suitcase${(luggageCount||0)!==1?"s":""}`
-    : largeLuggage==="hand"
-    ? `${luggageCount||0} hand bag${(luggageCount||0)!==1?"s":""}`
-    : "Zero baggage";
+  const lugParts = [];
+  if (suitcaseCount > 0) lugParts.push(`${suitcaseCount} suitcase${suitcaseCount!==1?"s":""}`);
+  if (handbagCount > 0) lugParts.push(`${handbagCount} handbag${handbagCount!==1?"s":""}`);
+  const lugLabel = lugParts.length > 0 ? lugParts.join(" & ") : "Zero baggage";
 
   const renderVehicleIcon = () => {
     const col = isSel ? PX.brandRed : PX.navy800;
@@ -1442,7 +1442,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
     if (isDelete) {
       await fetch(`${ep}?id=${item.id}`, { method: 'DELETE' });
     } else {
-      const isNew = item.id.startsWith('new_');
+      const isNew = !item.id || item.id.startsWith('new_');
       const res = await fetch(ep, {
         method: isNew ? 'POST' : 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -1618,14 +1618,14 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
 
           {/* ════════════════════════ PRICING & ROUTES ════════════════════════ */}
           {tab === "pricing" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               
               {/* SUBSECTION 1: FIXED ROUTES */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
+              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "1.5rem" }}>
                 <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem" }}>Fixed Price Routes</h2>
                 <p style={{ fontSize:13,color:PX.gray600,marginBottom:"1.5rem" }}>Configure direct preset routes with fixed pricing (e.g. airport transfers).</p>
                 
-                <div style={{ background:PX.gray50,borderRadius:12,padding:"1.25rem",marginBottom:"1.5rem",border:`1.5px dashed ${PX.gray200}` }}>
+                <div id="form-templates" style={{ background:PX.gray50,borderRadius:12,padding:"1rem",marginBottom:"1rem",border:`1.5px dashed ${PX.gray200}` }}>
                   <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
                     <p style={{ fontWeight:700,fontSize:14,color:PX.navy800,margin:0 }}>{newTemplate.id ? "Edit Route" : "Add New Route"}</p>
                     {newTemplate.id && <button onClick={()=>setNT({...blankTemplate, vehicleId:db.vehicles[0]?.id})} style={{ background:"none",border:"none",color:PX.gray400,fontSize:12,cursor:"pointer",fontWeight:600 }}>Cancel Edit</button>}
@@ -1684,7 +1684,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                         <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{db.vehicles.find(v=>v.id===t.vehicleId)?.name} • £{t.price} • {t.tripType}</div>
                       </div>
                       <div style={{ display:"flex",alignItems:"center",gap:16 }}>
-                        <button onClick={(e)=>{ setNT(t); e.target.closest('div').parentElement.parentElement.scrollIntoView({behavior:'smooth', block:'start'}); }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
+                        <button onClick={()=>{ setNT(t); document.getElementById('form-templates')?.scrollIntoView({behavior:'smooth', block:'center'}); }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
                         <button onClick={async ()=>{ if(window.confirm("Delete this route template?")) { await saveApi('templates', t, true); setTemplatesData(d=>d.filter(x=>x.id!==t.id)); } }} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
                       </div>
                     </div>
@@ -1693,11 +1693,11 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
               </div>
 
               {/* SUBSECTION 2: MILEAGE MATRIX */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem", marginTop: "2.5rem" }}>
+              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "1.5rem" }}>
                 <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem" }}>Mileage Pricing Rules</h2>
                 <p style={{ fontSize:13, color:PX.gray600, marginBottom:"1.5rem" }}>Define dynamic mileage rules for zone-to-zone custom routing matrix.</p>
                 
-                <div style={{ background:PX.gray50,borderRadius:12,padding:"1.25rem",marginBottom:"1.5rem",border:`1.5px dashed ${PX.gray200}` }}>
+                <div id="form-matrix" style={{ background:PX.gray50,borderRadius:12,padding:"1rem",marginBottom:"1rem",border:`1.5px dashed ${PX.gray200}` }}>
                   <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
                     <p style={{ fontWeight:700,fontSize:14,color:PX.navy800,margin:0 }}>{newMatrix.id ? "Edit Matrix Rule" : "Add New Matrix Rule"}</p>
                     {newMatrix.id && <button onClick={()=>setNM({...blankMatrix, vehicleId:db.vehicles[0]?.id})} style={{ background:"none",border:"none",color:PX.gray400,fontSize:12,cursor:"pointer",fontWeight:600 }}>Cancel Edit</button>}
@@ -1756,7 +1756,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                         <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{db.vehicles.find(v=>v.id===m.vehicleId)?.name} • Base: £{m.baseFare} • Extra: £{m.extraMileageRate}/unit</div>
                       </div>
                       <div style={{ display:"flex",alignItems:"center",gap:16 }}>
-                        <button onClick={(e)=>{ setNM(m); e.target.closest('div').parentElement.parentElement.scrollIntoView({behavior:'smooth', block:'start'}); }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
+                        <button onClick={()=>{ setNM(m); document.getElementById('form-matrix')?.scrollIntoView({behavior:'smooth', block:'center'}); }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
                         <button onClick={async ()=>{ if(window.confirm("Delete this matrix pricing rule?")) { await saveApi('matrix', m, true); setMatrixData(d=>d.filter(x=>x.id!==m.id)); } }} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
                       </div>
                     </div>
@@ -1765,11 +1765,11 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
               </div>
 
               {/* SUBSECTION 4: SEASONAL DEMAND PERIODS */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem", marginTop: "2.5rem" }}>
+              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "1.5rem" }}>
                 <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem", display:"flex", alignItems:"center", gap:6 }}><SvgCalendar /> Seasonal Demand Multipliers</h2>
                 <p style={{ fontSize:13, color:PX.gray600, marginBottom:"1.5rem" }}>Configure demand factors based on calendar dates and times (e.g. peak holiday periods).</p>
                 
-                <div style={{ background:PX.gray50,borderRadius:12,padding:"1.25rem",marginBottom:"1.5rem",border:`1.5px dashed ${PX.gray200}` }}>
+                <div id="form-seasonal" style={{ background:PX.gray50,borderRadius:12,padding:"1rem",marginBottom:"1rem",border:`1.5px dashed ${PX.gray200}` }}>
                   <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
                     <p style={{ fontWeight:700,fontSize:14,color:PX.navy800,margin:0 }}>{newSeasonal.id ? "Edit Demand Period" : "Add Demand Period"}</p>
                     {newSeasonal.id && <button onClick={()=>setNS(blankSeasonal)} style={{ background:"none",border:"none",color:PX.gray400,fontSize:12,cursor:"pointer",fontWeight:600 }}>Cancel Edit</button>}
@@ -1815,7 +1815,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                         <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{s.startDate ? s.startDate.replace('T', ' ') : ''} → {s.endDate ? s.endDate.replace('T', ' ') : ''}</div>
                       </div>
                       <div style={{ display:"flex",alignItems:"center",gap:16 }}>
-                        <button onClick={(e)=>{ setNS(s); e.target.closest('div').parentElement.parentElement.scrollIntoView({behavior:'smooth', block:'start'}); }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
+                        <button onClick={()=>{ setNS(s); document.getElementById('form-seasonal')?.scrollIntoView({behavior:'smooth', block:'center'}); }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
                         <button onClick={async ()=>{ if(window.confirm("Delete this seasonal period?")) { await saveApi('seasonal', s, true); setSeasonalData(d=>d.filter(x=>x.id!==s.id)); } }} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
                       </div>
                     </div>
@@ -1824,11 +1824,11 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
               </div>
 
               {/* SUBSECTION 5: BLOCKED DATES CALENDAR */}
-              <div style={{ marginTop: "2.5rem" }}>
+              <div>
                 <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem" }}>Blocked Calendar Dates</h2>
                 <p style={{ fontSize:13,color:PX.gray600,marginBottom:"1.5rem" }}>Block out specific dates and times for contract bookings or PMI maintenance schedules.</p>
                 
-                <div style={{ background:PX.gray50,borderRadius:12,padding:"1.25rem",marginBottom:"1.5rem",border:`1.5px dashed ${PX.gray200}` }}>
+                <div id="form-blocked" style={{ background:PX.gray50,borderRadius:12,padding:"1rem",marginBottom:"1rem",border:`1.5px dashed ${PX.gray200}` }}>
                   <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
                     <p style={{ fontWeight:700,fontSize:14,color:PX.navy800,margin:0 }}>{newBlock.id ? "Edit Date Blockout" : "Add Date Blockout"}</p>
                     {newBlock.id && <button onClick={()=>setNB({id:'', vehicleId:db.vehicles[0]?.id || "",from:"",to:"",reason:"Contract booking"})} style={{ background:"none",border:"none",color:PX.gray400,fontSize:12,cursor:"pointer",fontWeight:600 }}>Cancel Edit</button>}
@@ -1879,7 +1879,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                           const editB = b.id ? b : {...b, id: 'blk_'+i};
                           // Mutate original array so future edits find it
                           if (!b.id) b.id = editB.id; 
-                          setNB(editB); e.target.closest('div').parentElement.parentElement.scrollIntoView({behavior:'smooth', block:'start'});
+                          setNB(editB); document.getElementById('form-blocked')?.scrollIntoView({behavior:'smooth', block:'center'});
                         }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
                         <button onClick={()=>setBl(bs=>bs.filter((_,idx)=>idx!==i))} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
                       </div>
@@ -2333,7 +2333,7 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
   const [journey, setJ]     = useState({
     journeyType:"one-way", origin:"", destination:"",
     departureDate:"", returnDate:"",
-    passengers:16, largeLuggage:"none", luggageCount:0, waitingMins:0,
+    passengers:16, suitcaseCount:16, handbagCount:16, waitingMins:0,
     waypoints:[], wpCoords:[], stops:[],
     name: "", phone: "", email: "", company: "", specialRequests: ""
   });
@@ -2418,8 +2418,8 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
     }
   }, [
     journey.passengers,
-    journey.largeLuggage,
-    journey.luggageCount,
+    journey.suitcaseCount,
+    journey.handbagCount,
     journey.waitingMins,
     journey.journeyType,
     journey.departureDate,
@@ -2609,42 +2609,55 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                         )}
 
                         {/* ROW 4: Load & Luggage */}
-                        <div style={{ display: "grid", gridTemplateColumns: showLuggageCount ? "1fr 1fr 1fr" : "1fr 2fr", gap: "1rem" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem" }}>
                           <Field label="Number of Passengers" required>
                             <div style={{ display:"flex", height: 44 }}>
-                              <button type="button" onClick={()=>setJ(j=>({...j,passengers:Math.max(1,j.passengers-1)}))}
+                              <button type="button" onClick={()=>{
+                                const p = Math.max(1,journey.passengers-1);
+                                setJ(j=>({...j,passengers:p, suitcaseCount:p, handbagCount:p}));
+                              }}
                                 style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderRight:"none",
                                   borderRadius:"8px 0 0 8px",background:"#fff",cursor:"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>−</button>
                               <input type="number" min={1} max={70} value={journey.passengers}
-                                onChange={e=>setJ(j=>({...j,passengers:parseInt(e.target.value)||16}))}
+                                onChange={e=>{
+                                  const p = parseInt(e.target.value)||16;
+                                  setJ(j=>({...j,passengers:p, suitcaseCount:p, handbagCount:p}));
+                                }}
                                 style={{ width:70,textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",height:"100%" }}/>
-                              <button type="button" onClick={()=>setJ(j=>({...j,passengers:Math.min(70,j.passengers+1)}))}
+                              <button type="button" onClick={()=>{
+                                const p = Math.min(70,journey.passengers+1);
+                                setJ(j=>({...j,passengers:p, suitcaseCount:p, handbagCount:p}));
+                              }}
                                 style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderLeft:"none",
                                   borderRadius:"0 8px 8px 0",background:"#fff",cursor:"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>＋</button>
                             </div>
                           </Field>
-                          <Field label="Luggage Requirements">
-                            <select value={journey.largeLuggage} onChange={e=>setJ(j=>({...j,largeLuggage:e.target.value, luggageCount:e.target.value==="none"?0:j.luggageCount||1}))}>
-                              <option value="none">No Luggage</option>
-                              <option value="hand">Hand Luggage Only</option>
-                              <option value="large">Large Suitcases (23kg)</option>
-                            </select>
+                          <Field label="Suitcases (Large Luggage)" hint="23kg per bag">
+                            <div style={{ display:"flex", height: 44 }}>
+                              <button type="button" onClick={()=>setJ(j=>({...j,suitcaseCount:Math.max(0,(j.suitcaseCount||0)-1)}))}
+                                style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderRight:"none",
+                                  borderRadius:"8px 0 0 8px",background:"#fff",cursor:"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>−</button>
+                              <input type="number" min={0} value={journey.suitcaseCount||0}
+                                onChange={e=>setJ(j=>({...j,suitcaseCount:parseInt(e.target.value)||0}))}
+                                style={{ width:70,textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",height:"100%" }}/>
+                              <button type="button" onClick={()=>setJ(j=>({...j,suitcaseCount:(j.suitcaseCount||0)+1}))}
+                                style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderLeft:"none",
+                                  borderRadius:"0 8px 8px 0",background:"#fff",cursor:"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>＋</button>
+                            </div>
                           </Field>
-                          {showLuggageCount && (
-                            <Field label="Luggage Piece Count" hint="Total count">
-                              <div style={{ display:"flex", height: 44 }}>
-                                <button type="button" onClick={()=>setJ(j=>({...j,luggageCount:Math.max(0,j.luggageCount-1)}))}
-                                  style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderRight:"none",
-                                    borderRadius:"8px 0 0 8px",background:"#fff",cursor:"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>−</button>
-                                <input type="number" min={0} value={journey.luggageCount}
-                                  onChange={e=>setJ(j=>({...j,luggageCount:parseInt(e.target.value)||0}))}
-                                  style={{ width:70,textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",height:"100%" }}/>
-                                <button type="button" onClick={()=>setJ(j=>({...j,luggageCount:journey.luggageCount+1}))}
-                                  style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderLeft:"none",
-                                    borderRadius:"0 8px 8px 0",background:"#fff",cursor:"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>＋</button>
-                              </div>
-                            </Field>
-                          )}
+                          <Field label="Handbags (Cabin Luggage)">
+                            <div style={{ display:"flex", height: 44 }}>
+                              <button type="button" onClick={()=>setJ(j=>({...j,handbagCount:Math.max(0,(j.handbagCount||0)-1)}))}
+                                style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderRight:"none",
+                                  borderRadius:"8px 0 0 8px",background:"#fff",cursor:"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>−</button>
+                              <input type="number" min={0} value={journey.handbagCount||0}
+                                onChange={e=>setJ(j=>({...j,handbagCount:parseInt(e.target.value)||0}))}
+                                style={{ width:70,textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",height:"100%" }}/>
+                              <button type="button" onClick={()=>setJ(j=>({...j,handbagCount:(j.handbagCount||0)+1}))}
+                                style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderLeft:"none",
+                                  borderRadius:"0 8px 8px 0",background:"#fff",cursor:"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>＋</button>
+                            </div>
+                          </Field>
                         </div>
 
                         {/* ROW 4: Special Requests */}
@@ -2737,8 +2750,8 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                             quotes.map(({vehicle, result}) => (
                               <VehicleCard key={vehicle.id} vehicle={vehicle} result={result}
                                 selected={selected} onSelect={setSel}
-                                passengers={journey.passengers} largeLuggage={journey.largeLuggage}
-                                luggageCount={journey.luggageCount}/>
+                                passengers={journey.passengers} suitcaseCount={journey.suitcaseCount}
+                                handbagCount={journey.handbagCount}/>
                             ))
                           )}
                         </Card>
