@@ -1341,7 +1341,22 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
         String(b.journey?.destination || '').toLowerCase().includes(q)
       );
     }
-    return list;
+    
+    // Sort the list so it's not random
+    let sortedList = [...list];
+    if (searchFare) {
+      // Sort numerically by fare when searching by fare
+      sortedList.sort((a, b) => {
+        const fareA = Number(a.quote?.result?.finalPrice || a.quote?.result?.finalFare || 0);
+        const fareB = Number(b.quote?.result?.finalPrice || b.quote?.result?.finalFare || 0);
+        return fareA - fareB;
+      });
+    } else {
+      // Sort chronologically by date (newest first) otherwise
+      sortedList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+
+    return sortedList;
   }, [bookingsData, reportDate, searchNameRef, searchVehicle, searchFare, searchRoute]);
 
   const exportBookingsToCSV = () => {
