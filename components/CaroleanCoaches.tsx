@@ -1327,8 +1327,10 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
         });
       } else {
         list = list.filter(b => {
-          const fare = String(b.quote?.result?.finalPrice || b.quote?.result?.finalFare || 0);
-          return fare.includes(q);
+          const fareNum = Number(b.quote?.result?.finalPrice || b.quote?.result?.finalFare || 0);
+          const fareStrDec = fareNum.toFixed(2);
+          const fareStrInt = String(Math.floor(fareNum));
+          return fareStrDec.includes(q) || fareStrInt.includes(q) || fareNum === parseFloat(q);
         });
       }
     }
