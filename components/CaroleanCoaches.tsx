@@ -1850,70 +1850,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                 </div>
               </div>
 
-              {/* SUBSECTION 5: BLOCKED DATES CALENDAR */}
-              <div>
-                <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem" }}>Blocked Calendar Dates</h2>
-                <p style={{ fontSize:13,color:PX.gray600,marginBottom:"1.5rem" }}>Block out specific dates and times for contract bookings or PMI maintenance schedules.</p>
-                
-                <div id="form-blocked" style={{ background:PX.gray50,borderRadius:12,padding:"1rem",marginBottom:"1rem",border:`1.5px dashed ${PX.gray200}` }}>
-                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
-                    <p style={{ fontWeight:700,fontSize:14,color:PX.navy800,margin:0 }}>{newBlock.id ? "Edit Date Blockout" : "Add Date Blockout"}</p>
-                    {newBlock.id && <button onClick={()=>setNB({id:'', vehicleId:db.vehicles[0]?.id || "",from:"",to:"",reason:"Contract booking"})} style={{ background:"none",border:"none",color:PX.gray400,fontSize:12,cursor:"pointer",fontWeight:600 }}>Cancel Edit</button>}
-                  </div>
-                  <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12,marginBottom:12 }}>
-                    <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Target Vehicle</label>
-                      <select style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} value={newBlock.vehicleId} onChange={e=>setNB(b=>({...b,vehicleId:e.target.value}))}>
-                        {db.vehicles.map(v=><option key={v.id} value={v.id}>{v.name}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Reason / Notes</label>
-                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="text" value={newBlock.reason} onChange={e=>setNB(b=>({...b,reason:e.target.value}))} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>From Date & Time</label>
-                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="datetime-local" value={newBlock.from} onChange={e=>setNB(b=>({...b,from:e.target.value}))} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>To Date & Time</label>
-                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="datetime-local" value={newBlock.to} onChange={e=>setNB(b=>({...b,to:e.target.value}))} />
-                    </div>
-                  </div>
-                  <Btn variant="primary" size="sm" disabled={!newBlock.from||!newBlock.to} onClick={()=>{
-                    setBl(bs => {
-                      const exists = bs.some(b => b.id === newBlock.id);
-                      const updatedBlock = {...newBlock, id: newBlock.id || 'blk_'+Date.now(), vehicleName:db.vehicles.find(v=>v.id===newBlock.vehicleId)?.name};
-                      if (exists) return bs.map(b => b.id === newBlock.id ? updatedBlock : b);
-                      return [...bs, updatedBlock];
-                    });
-                    setNB({id:'', vehicleId:db.vehicles[0]?.id || "",from:"",to:"",reason:"Contract booking"});
-                  }}>{newBlock.id ? "Update Block" : "+ Block Vehicle"}</Btn>
-                </div>
-
-                <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
-                  {blocks.length === 0 && <div style={{ padding: "2rem", textAlign: "center", color: PX.gray400, border: `1px solid ${PX.gray200}`, borderRadius: 12 }}>No blocked periods configured. All vehicles available.</div>}
-                  {blocks.map((b,i)=>(
-                    <div key={b.id || i} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",border:`1px solid ${PX.gray200}`,borderRadius:8, background: "#fff" }}>
-                      <div>
-                        <div style={{ fontWeight:700,fontSize:13,color:PX.navy800 }}>{b.vehicleName}</div>
-                        <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{b.reason}</div>
-                      </div>
-                      <div style={{ display:"flex",alignItems:"center",gap:16 }}>
-                        <span style={{ fontSize:12,color:PX.gray600, fontWeight: 500 }}>{b.from ? b.from.replace('T', ' ') : ''} → {b.to ? b.to.replace('T', ' ') : ''}</span>
-                        <button onClick={()=>{
-                          // if id doesn't exist, we assign one to make editing consistent
-                          const editB = b.id ? b : {...b, id: 'blk_'+i};
-                          // Mutate original array so future edits find it
-                          if (!b.id) b.id = editB.id; 
-                          setNB(editB); document.getElementById('form-blocked')?.scrollIntoView({behavior:'smooth', block:'center'});
-                        }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
-                        <button onClick={()=>setBl(bs=>bs.filter((_,idx)=>idx!==i))} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {/* Blocked dates section removed as requested */}
 
             </div>
           )}
