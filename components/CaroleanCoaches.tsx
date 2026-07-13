@@ -1316,7 +1316,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
       );
     }
     if (searchFare) {
-      const q = searchFare.toLowerCase().trim();
+      const q = searchFare.toLowerCase().replace(/[£$,]/g, '').trim();
       const rangeMatch = q.match(/^(\d+(?:\.\d+)?)\s*(?:to|-)\s*(\d+(?:\.\d+)?)$/);
       if (rangeMatch) {
         const minFare = parseFloat(rangeMatch[1]);
@@ -1593,13 +1593,13 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                 </div>
                 <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", marginTop: 12 }}>
                   <input type="text" placeholder="Search Name / Ref ID..." value={searchNameRef} onChange={e=>setSearchNameRef(e.target.value)} 
-                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800, width: 200 }} />
-                  <input type="text" placeholder="Search Vehicle..." value={searchVehicle} onChange={e=>setSearchVehicle(e.target.value)} 
                     style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800, width: 160 }} />
-                  <input type="text" placeholder="Search Fare (e.g. 500 or 1500-2000)..." value={searchFare} onChange={e=>setSearchFare(e.target.value)} 
-                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800, width: 240 }} />
+                  <input type="text" placeholder="Search Vehicle..." value={searchVehicle} onChange={e=>setSearchVehicle(e.target.value)} 
+                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800, width: 140 }} />
+                  <input type="text" placeholder="Fare (e.g. 100-500)..." value={searchFare} onChange={e=>setSearchFare(e.target.value)} 
+                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800, width: 180 }} />
                   <input type="text" placeholder="Search Route..." value={searchRoute} onChange={e=>setSearchRoute(e.target.value)} 
-                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800, width: 200 }} />
+                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800, width: 160 }} />
                   <input type="date" value={reportDate} onChange={e=>setReportDate(e.target.value)} 
                     style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800 }} />
                   <Btn variant="primary" size="sm" onClick={exportBookingsToCSV}>📥 Export to CSV</Btn>
