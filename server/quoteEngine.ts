@@ -50,16 +50,18 @@ export async function generateQuotes(journey: any) {
       returnDate: journey.returnDate
     });
 
+    const requiredVehicles = Math.ceil((journey.passengers || 1) / (vehicle.capacity || 1));
+
     // 5. Structure the quote response
     quotes.push({
       vehicle,
       result: {
         totalKm: Math.round(mileageResult.totalKm),
         revenueKm: Math.round(mileageResult.liveKm),
-        finalPrice: pricingResult.finalFare,
-        subtotal: pricingResult.baseFare + pricingResult.extraLiveMileageCharge + pricingResult.extraDeadMileageCharge + pricingResult.waitingCharge,
-        surchargeLines: pricingResult.surchargeLines,
-        surchargeTotal: pricingResult.surchargeTotal,
+        finalPrice: pricingResult.finalFare * requiredVehicles,
+        subtotal: (pricingResult.baseFare + pricingResult.extraLiveMileageCharge + pricingResult.extraDeadMileageCharge + pricingResult.waitingCharge) * requiredVehicles,
+        surchargeLines: pricingResult.surchargeLines.map(s => ({...s, cost: s.cost * requiredVehicles})),
+        surchargeTotal: pricingResult.surchargeTotal * requiredVehicles,
         chain: mileageResult.legs, // Using the Google legs instead of the custom chain for now, or adapt later
         geometry: mileageResult.geometry,
         pts: [journey.wpCoords?.[0] || {lat:0, lng:0}, journey.wpCoords?.[1] || {lat:0, lng:0}], // Approximation for map pins
