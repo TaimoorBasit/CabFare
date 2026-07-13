@@ -62,6 +62,6 @@ After the base subtotal is calculated, conditional surcharges are added:
 
 *   **UK Only Restriction**: The application enforces that all waypoints are within the UK. The map picker fails explicitly if a selected location is outside the UK.
 *   **Dual Driver Requirement**: Handled automatically. If the driving + waiting time exceeds 9 hours, the driver wage is multiplied by 2.
-*   **API Failure Fallbacks**: If the backend Google Maps API fails to load or no API key is present, `mileageEngine.ts` defaults to hardcoded dummy mileage (100km live, 40km dead).
+*   **API Failure Fallbacks**: If the backend Google Maps API fails to load or no API key is present, `mileageEngine.ts` defaults to hardcoded dummy mileage (100km live, 40km S).
 *   **Minimum Fare Enforcement**: When using the Fleet Economics fallback, prices will never drop below the calculated `minHirePerDay`, ensuring no journey operates at a loss.
 *   **Multi-day Trips**: Modifies the standing cost, driver wages, and automatically attaches nightly driver subsistence allowances.

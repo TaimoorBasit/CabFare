@@ -1265,7 +1265,10 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
   const [seasonalData, setSeasonalData] = useState([]);
   const [bookingsData, setBookingsData] = useState([]);
   const [reportDate, setReportDate] = useState("");
-  const [reportSearch, setReportSearch] = useState("");
+  const [searchNameRef, setSearchNameRef] = useState("");
+  const [searchVehicle, setSearchVehicle] = useState("");
+  const [searchFare, setSearchFare] = useState("");
+  const [searchRoute, setSearchRoute] = useState("");
   const [apisLoaded, setApisLoaded] = useState(false);
 
   useEffect(() => {
@@ -1294,20 +1297,38 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
         return bd.getFullYear() === rd.getFullYear() && bd.getMonth() === rd.getMonth() && bd.getDate() === rd.getDate();
       });
     }
-    if (reportSearch) {
-      const q = reportSearch.toLowerCase().trim();
+    if (searchNameRef) {
+      const q = searchNameRef.toLowerCase().trim();
       list = list.filter(b => 
         String(b.id || '').toLowerCase().includes(q) ||
         String(b.customer?.name || '').toLowerCase().includes(q) ||
         String(b.customer?.email || '').toLowerCase().includes(q) ||
         String(b.customer?.phone || '').toLowerCase().includes(q) ||
-        String(b.journey?.origin || '').toLowerCase().includes(q) ||
-        String(b.journey?.destination || '').toLowerCase().includes(q) ||
+        String(b.customer?.company || '').toLowerCase().includes(q)
+      );
+    }
+    if (searchVehicle) {
+      const q = searchVehicle.toLowerCase().trim();
+      list = list.filter(b => 
         String(b.quote?.vehicle?.name || '').toLowerCase().includes(q)
       );
     }
+    if (searchFare) {
+      const q = searchFare.toLowerCase().trim();
+      list = list.filter(b => {
+        const fare = String(b.quote?.result?.finalPrice || b.quote?.result?.finalFare || 0);
+        return fare.includes(q);
+      });
+    }
+    if (searchRoute) {
+      const q = searchRoute.toLowerCase().trim();
+      list = list.filter(b => 
+        String(b.journey?.origin || '').toLowerCase().includes(q) ||
+        String(b.journey?.destination || '').toLowerCase().includes(q)
+      );
+    }
     return list;
-  }, [bookingsData, reportDate, reportSearch]);
+  }, [bookingsData, reportDate, searchNameRef, searchVehicle, searchFare, searchRoute]);
 
   const exportBookingsToCSV = () => {
     const unit = db.globalVars?.distanceUnit === 'miles' ? 'mile' : 'km';
@@ -1558,9 +1579,15 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                   <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, display:"flex", alignItems:"center", gap:6 }}><SvgBookings /> Searchings & Reports</h2>
                   <p style={{ fontSize:13, color:PX.gray600, marginTop:4 }}>View recent quote requests and export detailed CSV reports.</p>
                 </div>
-                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                  <input type="text" placeholder="Search customer, route, vehicle..." value={reportSearch} onChange={e=>setReportSearch(e.target.value)} 
-                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800, width: 240 }} />
+                <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", marginTop: 12 }}>
+                  <input type="text" placeholder="Search Name / Ref ID..." value={searchNameRef} onChange={e=>setSearchNameRef(e.target.value)} 
+                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800, width: 200 }} />
+                  <input type="text" placeholder="Search Vehicle..." value={searchVehicle} onChange={e=>setSearchVehicle(e.target.value)} 
+                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800, width: 160 }} />
+                  <input type="text" placeholder="Search Fare..." value={searchFare} onChange={e=>setSearchFare(e.target.value)} 
+                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800, width: 140 }} />
+                  <input type="text" placeholder="Search Route..." value={searchRoute} onChange={e=>setSearchRoute(e.target.value)} 
+                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800, width: 200 }} />
                   <input type="date" value={reportDate} onChange={e=>setReportDate(e.target.value)} 
                     style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800 }} />
                   <Btn variant="primary" size="sm" onClick={exportBookingsToCSV}>📥 Export to CSV</Btn>

@@ -25,9 +25,9 @@ export async function generateQuotes(journey: any) {
       handbagCount: journey.handbagCount
     });
 
-    if (!isAvailable) {
-      continue; // Skip this vehicle
-    }
+    // We no longer skip vehicles if they are unavailable. The frontend will still display them
+    // and correctly show any capacity warnings ("Exceeds capacity" badge), but the price
+    // will be returned so the customer can see it regardless of fleet availability limits.
 
     // 4. Calculate price
     const pricingResult = await calculatePrice({
