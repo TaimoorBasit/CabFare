@@ -1751,13 +1751,30 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                         {db.vehicles.map(v=><option key={v.id} value={v.id}>{v.name}</option>)}
                       </select>
                     </div>
-                    <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Base Matrix Fare (£)</label>
-                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="number" value={newMatrix.baseFare||0} onChange={e=>setNM(x=>({...x,baseFare:Number(e.target.value)}))} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Extra Mileage Rate (£)</label>
-                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="number" step="0.01" value={newMatrix.extraMileageRate||0} onChange={e=>setNM(x=>({...x,extraMileageRate:Number(e.target.value)}))} />
+                    <div style={{ gridColumn: "1 / -1", background: "#fff", padding: 16, borderRadius: 8, border: `1px solid ${PX.gray200}`, marginTop: 8 }}>
+                      <p style={{ fontSize:12, fontWeight:800, color:PX.navy800, marginBottom:12 }}>Pricing Structure Details</p>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16 }}>
+                        <div>
+                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Starting Flat Fare (£)</label>
+                          <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="number" value={newMatrix.baseFare||0} onChange={e=>setNM(x=>({...x,baseFare:Number(e.target.value)}))} />
+                          <p style={{ fontSize:10, color:PX.gray400, marginTop:4, lineHeight:1.3 }}>Minimum guaranteed charge for this route.</p>
+                        </div>
+                        <div>
+                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Included Free Distance</label>
+                          <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="number" value={newMatrix.includedLiveMileage||0} onChange={e=>setNM(x=>({...x,includedLiveMileage:Number(e.target.value)}))} />
+                          <p style={{ fontSize:10, color:PX.gray400, marginTop:4, lineHeight:1.3 }}>Distance covered by the flat fare before extra charges begin.</p>
+                        </div>
+                        <div>
+                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Extra Rate (£ / unit)</label>
+                          <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="number" step="0.01" value={newMatrix.extraMileageRate||0} onChange={e=>setNM(x=>({...x,extraMileageRate:Number(e.target.value)}))} />
+                          <p style={{ fontSize:10, color:PX.gray400, marginTop:4, lineHeight:1.3 }}>Amount charged per extra unit after the free distance.</p>
+                        </div>
+                        <div>
+                          <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Included Dead Distance</label>
+                          <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="number" value={newMatrix.includedDeadMileage||0} onChange={e=>setNM(x=>({...x,includedDeadMileage:Number(e.target.value)}))} />
+                          <p style={{ fontSize:10, color:PX.gray400, marginTop:4, lineHeight:1.3 }}>Empty return distance included for free.</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <Btn variant="primary" size="sm" onClick={async ()=>{
@@ -1780,7 +1797,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                     <div key={m.id} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",border:`1px solid ${PX.gray200}`,borderRadius:8, background: "#fff" }}>
                       <div>
                         <div style={{ fontWeight:700,fontSize:13,color:PX.navy800 }}>{String(m.pickupArea).split(',')[0]} → {String(m.dropArea).split(',')[0]}</div>
-                        <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{db.vehicles.find(v=>v.id===m.vehicleId)?.name} • Base: £{m.baseFare} • Extra: £{m.extraMileageRate}/unit</div>
+                        <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{db.vehicles.find(v=>v.id===m.vehicleId)?.name} • Flat Start: £{m.baseFare} (includes {m.includedLiveMileage} units) • Extra: £{m.extraMileageRate}/unit</div>
                       </div>
                       <div style={{ display:"flex",alignItems:"center",gap:16 }}>
                         <button onClick={()=>{ setNM(m); document.getElementById('form-matrix')?.scrollIntoView({behavior:'smooth', block:'center'}); }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
