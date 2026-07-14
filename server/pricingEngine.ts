@@ -184,19 +184,19 @@ export async function calculatePrice(input: PricingInput) {
   const londonCenter = {lat: 51.5074, lng: -0.1278};
   const goesLondon = (originCoords && haversineKm(originCoords, londonCenter) < 35) || 
                      (destinationCoords && haversineKm(destinationCoords, londonCenter) < 35) ||
-                     originName.toLowerCase().includes("london") || destinationName.toLowerCase().includes("london");
+                     originName?.toLowerCase().includes("london") || destinationName?.toLowerCase().includes("london");
 
   // Birmingham CAZ (Radius 10km)
   const birmCenter = {lat: 52.4862, lng: -1.8904};
   const goesBirm = (originCoords && haversineKm(originCoords, birmCenter) < 10) || 
                    (destinationCoords && haversineKm(destinationCoords, birmCenter) < 10) ||
-                   originName.toLowerCase().includes("birmingham") || destinationName.toLowerCase().includes("birmingham");
+                   originName?.toLowerCase().includes("birmingham") || destinationName?.toLowerCase().includes("birmingham");
 
   // Dartford Crossing (Radius 15km)
   const dartfordCenter = {lat: 51.4614, lng: 0.2261};
   const goesDartford = (originCoords && haversineKm(originCoords, dartfordCenter) < 15) || 
                        (destinationCoords && haversineKm(destinationCoords, dartfordCenter) < 15) ||
-                       originName.toLowerCase().includes("dartford") || destinationName.toLowerCase().includes("dartford");
+                       originName?.toLowerCase().includes("dartford") || destinationName?.toLowerCase().includes("dartford");
   
   if (goesLondon) {
     surchargeTotal += surcharges.ulez || 12.5;

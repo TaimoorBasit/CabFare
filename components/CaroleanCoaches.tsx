@@ -226,75 +226,79 @@ function GlobalStyle() {
   useEffect(() => {
     const el = document.createElement("style");
     el.textContent = `
-      @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Outfit:wght@100..900&display=swap');
 
       *, *::before, *::after {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-        font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
       }
       body {
-        background: #f0f2f7;
-        color: #0f172a;
+        background: #f8fafc;
+        color: #0d0d1a;
+        font-family: 'Figtree', system-ui, -apple-system, sans-serif;
         line-height: 1.5;
         -webkit-font-smoothing: antialiased;
       }
-      input, select, button, textarea { font-family: 'Montserrat', sans-serif !important; }
+      input, select, button, textarea { font-family: 'Figtree', sans-serif; }
 
       /* ── Base inputs ── */
       input[type=text], input[type=email], input[type=number],
       input[type=date], input[type=datetime-local], select {
         display: block;
         width: 100%;
-        padding: 11px 14px;
-        border: 1.5px solid #e2e8f0;
+        padding: 8px 12px;
+        border: 1.5px solid #dde0e8;
         border-radius: 8px;
-        font-size: 13.5px;
-        color: #0f172a;
+        font-size: 13px;
+        color: #222;
         background: #fff;
         outline: none;
-        transition: border-color 0.2s, box-shadow 0.2s;
-        height: 44px;
+        transition: border .25s, box-shadow .25s;
+        height: 36px;
       }
       input[type=text]:focus, input[type=email]:focus, input[type=number]:focus,
       input[type=date]:focus, input[type=datetime-local]:focus, select:focus {
         border-color: ${PX.brandRed};
-        box-shadow: 0 0 0 3px rgba(205, 32, 44, 0.10);
+        box-shadow: 0 0 0 3px rgba(205, 32, 44, 0.08);
+        background: #ffffff;
       }
       input::placeholder { color: #94a3b8; }
       select { cursor: pointer; }
 
       /* ── Animations ── */
       @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(14px); }
+        from { opacity: 0; transform: translateY(12px); }
         to   { opacity: 1; transform: translateY(0); }
       }
       @keyframes spin { to { transform: rotate(360deg); } }
 
-      .fade-up { animation: fadeUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) both; }
+      .fade-up { animation: fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
       .spinning { animation: spin 1s linear infinite; display: inline-block; }
 
       /* ── Google Places autocomplete ── */
       .pac-container {
-        border-radius: 10px !important;
-        border: 1.5px solid #e2e8f0 !important;
-        box-shadow: 0 10px 30px rgba(13, 14, 72, 0.12) !important;
-        font-family: 'Montserrat', sans-serif !important;
+        border-radius: 12px !important;
+        border: 1px solid #dde0e8 !important;
+        box-shadow: 0 8px 24px rgba(13, 14, 72, 0.06) !important;
+        font-family: 'Figtree', sans-serif !important;
         margin-top: 4px !important;
-        z-index: 9999 !important;
+        z-index: 99999 !important;
+        padding: 6px 0 !important;
       }
-      .pac-item { padding: 10px 14px !important; font-size: 13px !important; cursor: pointer; }
-      .pac-item:hover { background: #f1f5f9 !important; }
-      .pac-item-query { font-size: 14px !important; color: #0f172a !important; }
+      .pac-item { padding: 10px 14px !important; font-size: 13px !important; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+      .pac-item:hover { background: #f8fafc !important; }
+      .pac-item-query { font-size: 13.5px !important; color: #0f172a !important; font-weight: 500 !important; }
       .pac-icon { display: none !important; }
-      .pac-matched { color: ${PX.brandRed} !important; font-weight: 600 !important; }
+      .pac-matched { color: ${PX.brandRed} !important; font-weight: 700 !important; }
 
       /* ── Scrollbar ── */
-      ::-webkit-scrollbar { width: 5px; }
-      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+      ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-      /* ── Quotation results layout: vehicle options left | map+checkout right ── */
+      /* ── Quotation results layout ── */
       .results-layout {
         display: grid;
         grid-template-columns: 1fr;
@@ -302,38 +306,243 @@ function GlobalStyle() {
         align-items: start;
       }
       @media (min-width: 1024px) {
-        .results-layout {
-          grid-template-columns: 1.3fr 1fr;
-          gap: 1.5rem;
-        }
+        .results-layout { grid-template-columns: 1.25fr 1fr; gap: 1.75rem; }
       }
-
-      /* ── Right panel is sticky so it doesn't scroll away ── */
       @media (min-width: 1024px) {
-        .right-panel-map {
-          position: sticky;
-          top: 80px;
-        }
+        .right-panel-map { position: sticky; top: 84px; }
       }
 
-      /* ── Field labels: consistent, clean ── */
       .field-label {
         display: block;
-        font-size: 11.5px;
+        font-size: 11px;
         font-weight: 700;
-        color: #475569;
-        letter-spacing: 0.3px;
+        color: #64748b;
+        letter-spacing: 0.6px;
         margin-bottom: 6px;
         text-transform: uppercase;
       }
 
-      /* ── Admin table row hover ── */
-      tbody tr:hover { background: #f8fafc !important; }
+      /* ═══════════════════════════════════════════════════
+         PREMIUM ADMIN DASHBOARD DESIGN SYSTEM
+      ═══════════════════════════════════════════════════ */
 
-      /* ── Google Places Autocomplete Z-Index Fix ── */
-      .pac-container { z-index: 10000 !important; border-radius: 12px; margin-top: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
-      .pac-item { padding: 10px 14px; cursor: pointer; }
-      .pac-item:hover { background: #f8fafc; }
+      /* Root wrapper — used to scope all admin overrides */
+      .adm-root {
+        display: flex;
+        min-height: 100vh;
+        background: #f7f8fa;
+        font-family: 'Figtree', sans-serif;
+      }
+
+      /* ── Admin-scoped input overrides ── */
+      /* Reset the red focus ring for everything inside the admin panel */
+      .adm-root input[type=text]:focus,
+      .adm-root input[type=email]:focus,
+      .adm-root input[type=number]:focus,
+      .adm-root input[type=date]:focus,
+      .adm-root input[type=datetime-local]:focus,
+      .adm-root select:focus {
+        border-color: #93c5fd !important;
+        box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.18) !important;
+      }
+
+      /* Section card */
+      .adm-section {
+        background: #ffffff;
+        border: 1px solid #eaecf0;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      }
+
+      /* Section header bar */
+      .adm-section-head {
+        padding: 11px 18px;
+        border-bottom: 1px solid #eaecf0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        background: #fcfcfd;
+      }
+      .adm-section-head h2 {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #101828;
+        letter-spacing: -0.1px;
+        margin: 0;
+      }
+      .adm-section-head p {
+        font-size: 12.5px;
+        color: #667085;
+        margin-top: 2px;
+        margin-bottom: 0;
+      }
+
+      /* Form panel inside a section — white background, proper padding */
+      .adm-form-panel {
+        padding: 14px 18px;
+        background: #ffffff;
+        border-bottom: 1px solid #eaecf0;
+      }
+      .adm-form-panel:last-child {
+        border-bottom: none;
+      }
+      .adm-form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .adm-form-grid .span2 { grid-column: span 2; }
+
+      /* Data list container */
+      .adm-list { padding: 8px 16px 14px; }
+
+      /* Single data row */
+      .adm-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 9px 12px;
+        border: 1px solid #eaecf0;
+        border-radius: 7px;
+        background: #fff;
+        margin-top: 6px;
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+      .adm-row:hover {
+        border-color: #c0c9d7;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+      }
+      .adm-row-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #101828;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .adm-row-sub {
+        font-size: 11.5px;
+        color: #667085;
+        margin-top: 2px;
+      }
+      .adm-row-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+
+      /* Ghost / danger buttons used in rows */
+      .adm-btn-ghost {
+        background: none;
+        border: 1px solid #e4e7ec;
+        border-radius: 6px;
+        padding: 5px 11px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        color: #344054;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .adm-btn-ghost:hover { background: #f9fafb; border-color: #c0c9d7; }
+      .adm-btn-danger {
+        background: none;
+        border: 1px solid #fecdca;
+        border-radius: 6px;
+        padding: 5px 9px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        color: #b42318;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+      }
+      .adm-btn-danger:hover { background: #fff1f0; }
+
+      /* Status badges */
+      .adm-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 9px;
+        border-radius: 99px;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .adm-badge-green { background: #ecfdf3; color: #027a48; }
+      .adm-badge-blue  { background: #eff8ff; color: #175cd3; }
+      .adm-badge-amber { background: #fffaeb; color: #b54708; }
+      .adm-badge-gray  { background: #f2f4f7; color: #344054; }
+      .adm-badge-red   { background: #fff1f0; color: #b42318; }
+
+      /* Empty state placeholder */
+      .adm-empty {
+        padding: 40px 24px;
+        text-align: center;
+        color: #98a2b3;
+        font-size: 13px;
+      }
+
+      /* Search / filter bar */
+      .adm-search-bar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        padding: 12px 20px;
+        border-bottom: 1px solid #eaecf0;
+        background: #fafafa;
+      }
+      .adm-search-bar input[type=text],
+      .adm-search-bar input[type=date] {
+        height: 34px !important;
+        font-size: 13px !important;
+        padding: 0 12px !important;
+        border-radius: 7px !important;
+        border: 1px solid #e2e8f0 !important;
+        width: auto !important;
+        min-width: 130px;
+        flex: 1;
+        max-width: 200px;
+        background: #fff !important;
+      }
+      .adm-search-bar input:focus {
+        border-color: #93c5fd !important;
+        box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.18) !important;
+      }
+
+      /* ── Admin table ── */
+      .admin-table {
+        width: 100%;
+        border-collapse: separate !important;
+        border-spacing: 0 !important;
+      }
+      .admin-table th {
+        background: #f9fafb;
+        padding: 10px 20px;
+        font-weight: 600;
+        color: #667085;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        border-bottom: 1px solid #eaecf0;
+        white-space: nowrap;
+        text-align: left;
+      }
+      .admin-table td {
+        padding: 11px 20px;
+        border-bottom: 1px solid #eaecf0;
+        vertical-align: middle;
+      }
+      .admin-table tbody tr:hover { background: #f8fafc; }
+      .admin-table tbody tr:last-child td { border-bottom: none; }
     `;
     document.head.appendChild(el);
     return () => {
@@ -899,23 +1108,23 @@ function Btn({ children, onClick, variant="primary", size="md", disabled, full, 
   const v = {
     primary: {background:PX.brandRed,  color:"#fff", border:"none"},
     amber:   {background:PX.amber500,  color:"#fff", border:"none"},
-    ghost:   {background:"transparent",color:PX.navy800, border:`1.5px solid ${PX.gray200}`},
+    ghost:   {background:"transparent",color:PX.navy800, border:`1px solid ${PX.gray300}`},
     teal:    {background:PX.teal700,   color:"#fff", border:"none"},
     danger:  {background:PX.red700,    color:"#fff", border:"none"},
   };
-  const pad = size==="sm" ? "8px 18px" : size==="lg" ? "13px 32px" : "10px 22px";
-  const fs  = size==="sm" ? 12.5 : size==="lg" ? 15 : 13.5;
+  const pad = size==="sm" ? "7px 16px" : size==="lg" ? "12px 28px" : "9px 20px";
+  const fs  = size==="sm" ? 12 : size==="lg" ? 14.5 : 13;
   return (
     <button onClick={!disabled?onClick:undefined} disabled={disabled}
       style={{ display:"inline-flex", alignItems:"center", justifyContent:"center", gap:6,
-        cursor:disabled?"not-allowed":"pointer", fontWeight:700, borderRadius:9,
-        transition:"all .18s ease", letterSpacing:.25, opacity:disabled?.55:1,
+        cursor:disabled?"not-allowed":"pointer", fontWeight:700, borderRadius:6,
+        transition:"all .2s cubic-bezier(0.4, 0, 0.2, 1)", letterSpacing:.3, opacity:disabled?.55:1,
         padding:pad, fontSize:fs, width:full?"100%":"auto",
-        boxShadow: variant==="primary" && !disabled ? "0 3px 10px rgba(205,32,44,0.2)" :
-                   variant==="teal"    && !disabled ? "0 3px 10px rgba(12,110,85,0.18)" : "none",
+        boxShadow: variant==="primary" && !disabled ? "0 4px 12px rgba(205,32,44,0.18)" :
+                   variant==="teal"    && !disabled ? "0 4px 12px rgba(12,110,85,0.15)" : "none",
         ...v[variant], ...sx }}
-      onMouseEnter={e=>{ if(!disabled){ e.currentTarget.style.opacity=".85"; e.currentTarget.style.transform="translateY(-1px)"; } }}
-      onMouseLeave={e=>{ if(!disabled){ e.currentTarget.style.opacity="1";   e.currentTarget.style.transform="none"; } }}>
+      onMouseEnter={e=>{ if(!disabled){ e.currentTarget.style.opacity=".9"; e.currentTarget.style.transform="translateY(-1px)"; e.currentTarget.style.boxShadow = variant==="primary" ? "0 6px 16px rgba(205,32,44,0.24)" : variant==="teal" ? "0 6px 16px rgba(12,110,85,0.22)" : "none"; } }}
+      onMouseLeave={e=>{ if(!disabled){ e.currentTarget.style.opacity="1";   e.currentTarget.style.transform="none"; e.currentTarget.style.boxShadow = variant==="primary" ? "0 4px 12px rgba(205,32,44,0.18)" : variant==="teal" ? "0 4px 12px rgba(12,110,85,0.15)" : "none"; } }}>
       {children}
     </button>
   );
@@ -923,9 +1132,14 @@ function Btn({ children, onClick, variant="primary", size="md", disabled, full, 
 
 function Card({ children, style={} }) {
   return (
-    <div style={{ background:PX.offWhite, borderRadius:14, padding:"1.5rem",
-      boxShadow:"0 4px 20px rgba(13,14,72,0.06), 0 1px 4px rgba(0,0,0,0.03)",
-      border:`1.5px solid ${PX.gray200}`, ...style }}>
+    <div style={{ 
+      background: "#ffffff", 
+      borderRadius: 12, 
+      padding: "1.5rem",
+      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(13, 14, 72, 0.03)",
+      border: `1px solid rgba(226, 232, 240, 0.8)`, 
+      ...style 
+    }}>
       {children}
     </div>
   );
@@ -943,7 +1157,7 @@ function SectionHead({ children, sub, light = false }) {
 function Field({ label, required, children, hint }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      {label && <label style={{ display:"block", fontSize:11.5, fontWeight:700, color:PX.gray600, textTransform:"uppercase", letterSpacing:.35 }}>
+      {label && <label style={{ display:"block", fontSize:11, fontWeight:800, color:PX.gray600, textTransform:"uppercase", letterSpacing:.35 }}>
         {label}{required && <span style={{ color:PX.brandRed, marginLeft:2 }}>*</span>}
       </label>}
       {children}
@@ -954,22 +1168,34 @@ function Field({ label, required, children, hint }) {
 
 function Badge({ children, color="blue" }) {
   const C = {
-    blue:  {bg:"#dbeafe", tx:"#1e40af"},
-    amber: {bg:PX.amber100, tx:"#92400e"},
-    red:   {bg:PX.red100, tx:PX.red700},
-    green: {bg:PX.teal100, tx:"#064e3b"},
-    gray:  {bg:PX.gray100, tx:PX.gray600}
+    blue:  {bg:"#eff6ff", tx:"#1e40af", border:"1px solid #bfdbfe"},
+    amber: {bg:"#fffbeb", tx:"#b45309", border:"1px solid #fef3c7"},
+    red:   {bg:"#fef2f2", tx:PX.red700, border:"1px solid #fee2e2"},
+    green: {bg:"#f0fdf4", tx:"#15803d", border:"1px solid #bbf7d0"},
+    gray:  {bg:"#f8fafc", tx:"#475569", border:"1px solid #e2e8f0"}
   };
   const c = C[color]||C.blue;
-  return <span style={{ display:"inline-flex", alignItems:"center", fontSize:11, fontWeight:600,
-    padding:"4px 10px", borderRadius:20, background:c.bg, color:c.tx, whiteSpace:"nowrap" }}>{children}</span>;
+  return <span style={{ 
+    display:"inline-flex", 
+    alignItems:"center", 
+    fontSize:10.5, 
+    fontWeight:700,
+    padding:"3px 8px", 
+    borderRadius:6, 
+    background:c.bg, 
+    color:c.tx, 
+    border:c.border,
+    letterSpacing: "0.2px",
+    textTransform: "uppercase",
+    whiteSpace:"nowrap" 
+  }}>{children}</span>;
 }
 
 function Divider({ label }) {
-  return <div style={{ display:"flex", alignItems:"center", gap:10, margin:"1.5rem 0" }}>
-    <div style={{ flex:1, height:1.5, background:PX.gray200 }}/>
-    {label && <span style={{ fontSize:11, fontWeight: 700, color:PX.gray400, textTransform:"uppercase", letterSpacing: 0.8 }}>{label}</span>}
-    <div style={{ flex:1, height:1.5, background:PX.gray200 }}/>
+  return <div style={{ display:"flex", alignItems:"center", gap:12, margin:"1.5rem 0" }}>
+    <div style={{ flex:1, height:1, background:"#e2e8f0" }}/>
+    {label && <span style={{ fontSize:10.5, fontWeight: 800, color:PX.gray400, textTransform:"uppercase", letterSpacing: 1 }}>{label}</span>}
+    <div style={{ flex:1, height:1, background:"#e2e8f0" }}/>
   </div>;
 }
 
@@ -1124,20 +1350,19 @@ function RouteMap({ result, journey, gv }) {
 }
 
 // ── Navbar ────────────────────────────────────────────────────────────────────
-function Navbar({ adminMode, setAdminMode }) {
+function Navbar() {
   return (
-    <header style={{ background: PX.navy800, borderTop: `4px solid ${PX.brandRed}`, position:"sticky", top:0, zIndex:100, boxShadow:"0 2px 16px rgba(0,0,0,.2)" }}>
-      <div style={{ maxWidth:1160, margin:"0 auto", padding:"0 2rem",
-        display:"flex", alignItems:"center", justifyContent:"space-between", height:62 }}>
+    <header style={{ background: PX.navy800, borderTop: `4px solid ${PX.brandRed}`, position:"sticky", top:0, zIndex:100, boxShadow:"0 4px 20px rgba(0,0,0,.15)" }}>
+      <div style={{ maxWidth:1160, margin:"0 auto", padding:"0 1.5rem",
+        display:"flex", alignItems:"center", justifyContent:"space-between", height:72 }}>
+        
+        {/* Logo and Brand Title */}
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <SvgCoach size={26} color={PX.brandRed} />
+          <SvgCoach size={28} color={PX.brandRed} />
           <div>
-            <div style={{ color:"#fff", fontWeight:800, fontSize:16.5, letterSpacing:-.2, lineHeight:1.2 }}>Carolean Coaches</div>
-            <div style={{ color:"rgba(255,255,255,0.5)", fontSize:9.5, fontWeight:700, letterSpacing:1, textTransform:"uppercase" }}>Instant Fare Engine</div>
+            <div style={{ color:"#fff", fontFamily:"'Outfit', sans-serif", fontWeight:900, fontSize:19, letterSpacing:-0.3, lineHeight:1.1 }}>Carolean Coaches</div>
+            <div style={{ color: PX.amber500, fontSize:9, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", marginTop: 1 }}>Premium Travel</div>
           </div>
-        </div>
-        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          {/* Customer View toggle hidden as requested */}
         </div>
       </div>
     </header>
@@ -1269,7 +1494,8 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
   const [reportDate, setReportDate] = useState("");
   const [searchNameRef, setSearchNameRef] = useState("");
   const [searchVehicle, setSearchVehicle] = useState("");
-  const [searchFare, setSearchFare] = useState("");
+  const [searchFareFrom, setSearchFareFrom] = useState("");
+  const [searchFareTo, setSearchFareTo] = useState("");
   const [searchRoute, setSearchRoute] = useState("");
   const [apisLoaded, setApisLoaded] = useState(false);
 
@@ -1315,24 +1541,19 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
         String(b.quote?.vehicle?.name || '').toLowerCase().includes(q)
       );
     }
-    if (searchFare) {
-      const q = searchFare.toLowerCase().replace(/[£$,]/g, '').trim();
-      const rangeMatch = q.match(/^(\d+(?:\.\d+)?)\s*(?:to|-)\s*(\d+(?:\.\d+)?)$/);
-      if (rangeMatch) {
-        const minFare = parseFloat(rangeMatch[1]);
-        const maxFare = parseFloat(rangeMatch[2]);
-        list = list.filter(b => {
-          const fare = Number(b.quote?.result?.finalPrice || b.quote?.result?.finalFare || 0);
-          return fare >= minFare && fare <= maxFare;
-        });
-      } else {
-        list = list.filter(b => {
-          const fareNum = Number(b.quote?.result?.finalPrice || b.quote?.result?.finalFare || 0);
-          const fareStrDec = fareNum.toFixed(2);
-          const fareStrInt = String(Math.floor(fareNum));
-          return fareStrDec.includes(q) || fareStrInt.includes(q) || fareNum === parseFloat(q);
-        });
-      }
+    if (searchFareFrom || searchFareTo) {
+      const fromVal = searchFareFrom !== "" ? parseFloat(searchFareFrom) : null;
+      const toVal   = searchFareTo   !== "" ? parseFloat(searchFareTo)   : null;
+      list = list.filter(b => {
+        const fare = Number(b.quote?.result?.finalPrice || b.quote?.result?.finalFare || 0);
+        // Exact match: only From is filled and To is empty
+        if (fromVal !== null && toVal === null) return Math.round(fare) === Math.round(fromVal);
+        // Range: both filled
+        if (fromVal !== null && toVal !== null) return fare >= fromVal && fare <= toVal;
+        // Only To filled: fares up to that amount
+        if (fromVal === null && toVal !== null) return fare <= toVal;
+        return true;
+      });
     }
     if (searchRoute) {
       const q = searchRoute.toLowerCase().trim();
@@ -1344,7 +1565,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
     
     // Sort the list so it's not random
     let sortedList = [...list];
-    if (searchFare) {
+    if (searchFareFrom || searchFareTo) {
       // Sort numerically by fare when searching by fare
       sortedList.sort((a, b) => {
         const fareA = Number(a.quote?.result?.finalPrice || a.quote?.result?.finalFare || 0);
@@ -1357,7 +1578,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
     }
 
     return sortedList;
-  }, [bookingsData, reportDate, searchNameRef, searchVehicle, searchFare, searchRoute]);
+  }, [bookingsData, reportDate, searchNameRef, searchVehicle, searchFareFrom, searchFareTo, searchRoute]);
 
   const exportBookingsToCSV = () => {
     const unit = db.globalVars?.distanceUnit === 'miles' ? 'mile' : 'km';
@@ -1553,114 +1774,211 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
   const eco        = fleetEconomics(previewDb);
   const totalOverheads = overheads.reduce((s,o)=>s+Number(o.cost),0);
 
-  const renderTabHeader = (k, label) => {
-    const isSel = tab === k;
-    const color = isSel ? PX.brandRed : PX.gray400;
-    
-    let icon = null;
-    if (k === "bookings") icon = <SvgBookings size={16} color={color} style={{ marginRight: 6 }} />;
-    else if (k === "pricing") icon = <SvgPricing size={16} color={color} style={{ marginRight: 6 }} />;
-    else if (k === "fleet") icon = <SvgBus size={16} color={color} style={{ marginRight: 6 }} />;
-    else if (k === "settings") icon = <SvgSettings size={16} color={color} style={{ marginRight: 6 }} />;
-
-    return (
-      <button key={k} onClick={()=>setTab(k)}
-        style={{ padding:"18px 24px",border:"none",cursor:"pointer",fontSize:13,fontWeight:700,
-          background:"transparent",whiteSpace:"nowrap", display: "flex", alignItems: "center",
-          borderBottom:`3px solid ${isSel?PX.brandRed:"transparent"}`,
-          marginBottom:-2,color:isSel?PX.navy800:PX.gray600,transition:"all .15s" }}>
-        {icon}
-        {label}
-      </button>
-    );
+  const tabMeta = {
+    pricing: { label: "Custom Fares & Rules", desc: "Set exact prices from location A to B, or configure pricing rules." },
+    fleet:   { label: "Pricing (Fixed & Variable)", desc: "Set fleet economics, overheads, and variable costs." },
+    bookings:{ label: "Searchings & Reports", desc: "Browse quote requests and export CSV reports." },
+    settings:{ label: "System Settings", desc: "Global calculator settings and surcharges." },
   };
 
+  const navItems = [
+    { k: "pricing", label: "Custom Route Prices",      icon: <SvgPricing size={17} color="currentColor" /> },
+    { k: "fleet",   label: "Pricing",                  icon: <SvgBus size={17} color="currentColor" /> },
+    { k: "bookings",label: "Reports",                  icon: <SvgBookings size={17} color="currentColor" /> },
+    { k: "settings",label: "Settings",                 icon: <SvgSettings size={17} color="currentColor" /> },
+  ];
+
   return (
-    <div className="fade-up">
+    <div className="adm-root">
       {toast && (
-        <div style={{ position:"fixed",top:80,right:24,background:PX.teal700,color:"#fff",
-          padding:"12px 24px",borderRadius:8,fontSize:14,fontWeight:600,zIndex:200,
-          boxShadow:"0 10px 30px rgba(0,0,0,.15)" }}>✓ {toast}</div>
+        <div style={{ position:"fixed",top:20,right:20,background:"#101828",color:"#fff",
+          padding:"12px 20px",borderRadius:10,fontSize:13,fontWeight:600,zIndex:9999,
+          boxShadow:"0 4px 24px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", gap: 8 }}>
+          <SvgCheck size={14} color="#4ade80" /> {toast}
+        </div>
       )}
-      <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem" }}>
-        <div>
-          <h1 style={{ fontSize:22,fontWeight:800,color:PX.navy800 }}>Admin control panel</h1>
-          <p style={{ fontSize:13,color:PX.gray600,marginTop:2 }}>Configure system fare structures and fleet settings easily.</p>
-        </div>
-        <Btn variant="teal" onClick={save}>Save all changes</Btn>
-      </div>
 
-      <Card style={{ padding:0,overflow:"hidden", marginBottom: 20 }}>
-        <div style={{ display:"flex",borderBottom:`2px solid ${PX.gray200}`,background:PX.gray50,overflowX:"auto" }}>
-          {renderTabHeader("pricing", "Rules & Routes")}
-          {renderTabHeader("fleet", "Pricing (Fixed & Variable)")}
-          {renderTabHeader("bookings", "Searchings & Reports")}
-          {renderTabHeader("settings", "System Settings")}
+      {/* ── White Sidebar ─────────────────────────────── */}
+      <aside style={{
+        width: 220,
+        minWidth: 220,
+        background: "#ffffff",
+        borderRight: "1px solid #eaecf0",
+        display: "flex",
+        flexDirection: "column",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        bottom: 0,
+        zIndex: 50,
+      }}>
+        {/* Logo area */}
+        <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid #f2f4f7" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+            <div style={{ background: PX.brandRed, borderRadius: 8, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <SvgCoach size={17} color="#fff" />
+            </div>
+            <div>
+              <div style={{ color: "#101828", fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 13.5, lineHeight: 1.2, letterSpacing: -0.2 }}>Carolean</div>
+              <div style={{ color: "#98a2b3", fontSize: 10, fontWeight: 500 }}>Admin Panel</div>
+            </div>
+          </div>
         </div>
 
-        <div style={{ padding:"1.75rem" }}>
+        {/* Nav group label */}
+        <div style={{ padding: "20px 16px 6px" }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: "#98a2b3", letterSpacing: 1, textTransform: "uppercase" }}>Navigation</span>
+        </div>
+
+        {/* Navigation */}
+        <nav style={{ flex: 1, padding: "4px 10px", display: "flex", flexDirection: "column", gap: 2, overflowY: "auto" }}>
+          {navItems.map(({ k, label, icon }) => {
+            const isSel = tab === k;
+            return (
+              <button key={k} onClick={() => setTab(k)} style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "9px 12px",
+                borderRadius: 7,
+                border: "none",
+                cursor: "pointer",
+                background: isSel ? "#fff1f2" : "transparent",
+                color: isSel ? PX.brandRed : "#667085",
+                fontSize: 13.5,
+                fontWeight: isSel ? 600 : 500,
+                textAlign: "left",
+                width: "100%",
+                transition: "all 0.15s ease",
+              }}
+              onMouseEnter={e => { if(!isSel){ e.currentTarget.style.background="#f9fafb"; e.currentTarget.style.color="#101828"; }}}
+              onMouseLeave={e => { if(!isSel){ e.currentTarget.style.background="transparent"; e.currentTarget.style.color="#667085"; }}}
+              >
+                <span style={{ color: isSel ? PX.brandRed : "#98a2b3", display: "flex", flexShrink: 0, transition: "color 0.15s" }}>{icon}</span>
+                {label}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Save button at bottom */}
+        <div style={{ padding: "14px 12px 20px", borderTop: "1px solid #f2f4f7" }}>
+          <button onClick={save} style={{
+            width: "100%",
+            padding: "10px 0",
+            background: PX.brandRed,
+            color: "#fff",
+            border: "none",
+            borderRadius: 8,
+            fontSize: 13,
+            fontWeight: 700,
+            cursor: "pointer",
+            letterSpacing: 0.2,
+            transition: "opacity 0.2s"
+          }}
+          onMouseEnter={e => (e.currentTarget.style.opacity = "0.88")}
+          onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+          >Save All Changes</button>
+          <p style={{ color: "#d0d5dd", fontSize: 10, marginTop: 10, textAlign: "center" }}>Fare Engine v3.0</p>
+        </div>
+      </aside>
+
+      {/* ── Main area ────────────────────────────────── */}
+      <div style={{ flex: 1, marginLeft: 220, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        {/* Top header */}
+        <div style={{ background: "#ffffff", borderBottom: "1px solid #eaecf0", padding: "0 2rem", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 40 }}>
+          <div>
+            <h1 style={{ fontSize: 15, fontWeight: 700, color: "#101828", margin: 0 }}>{tabMeta[tab]?.label}</h1>
+            <p style={{ fontSize: 11.5, color: "#98a2b3", margin: 0, marginTop: 1 }}>{tabMeta[tab]?.desc}</p>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#f2f4f7", border: "1px solid #eaecf0", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <SvgUser size={15} color="#667085" />
+            </div>
+          </div>
+        </div>
+
+        {/* Page content */}
+        <div style={{ flex: 1, padding: "1.5rem 2rem 4rem", background: "#f7f8fa" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           
           {/* ════════════════════════ BOOKINGS ════════════════════════ */}
           {tab === "bookings" && (
-            <div>
-              <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem" }}>
+            <div className="adm-section">
+              <div className="adm-section-head">
                 <div>
-                  <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, display:"flex", alignItems:"center", gap:6 }}><SvgBookings /> Searchings & Reports</h2>
-                  <p style={{ fontSize:13, color:PX.gray600, marginTop:4 }}>View recent quote requests and export detailed CSV reports.</p>
+                  <h2>Searchings & Reports</h2>
+                  <p>Browse quote requests and export CSV reports.</p>
                 </div>
-                <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", marginTop: 12 }}>
-                  <input type="text" placeholder="Search Name / Ref ID..." value={searchNameRef} onChange={e=>setSearchNameRef(e.target.value)} 
-                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800, width: 160 }} />
-                  <input type="text" placeholder="Search Vehicle..." value={searchVehicle} onChange={e=>setSearchVehicle(e.target.value)} 
-                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800, width: 140 }} />
-                  <input type="text" placeholder="Fare (e.g. 100-500)..." value={searchFare} onChange={e=>setSearchFare(e.target.value)} 
-                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800, width: 180 }} />
-                  <input type="text" placeholder="Search Route..." value={searchRoute} onChange={e=>setSearchRoute(e.target.value)} 
-                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800, width: 160 }} />
-                  <input type="date" value={reportDate} onChange={e=>setReportDate(e.target.value)} 
-                    style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${PX.gray200}`, fontSize: 13, color: PX.navy800 }} />
-                  <Btn variant="primary" size="sm" onClick={exportBookingsToCSV}>📥 Export to CSV</Btn>
+              </div>
+
+              <div className="adm-search-bar">
+                <input type="text" placeholder="Name / Ref ID" value={searchNameRef} onChange={e=>setSearchNameRef(e.target.value)} />
+                <input type="text" placeholder="Vehicle" value={searchVehicle} onChange={e=>setSearchVehicle(e.target.value)} />
+                {/* Fare range: £ From → To */}
+                <div style={{ display: "flex", alignItems: "center", gap: 6, flex: 1, maxWidth: 280, minWidth: 200 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#667085", whiteSpace: "nowrap" }}>£ Fare</span>
+                  <input
+                    type="number"
+                    placeholder="From"
+                    value={searchFareFrom}
+                    onChange={e => setSearchFareFrom(e.target.value)}
+                    style={{ flex: 1, minWidth: 70, maxWidth: 100 }}
+                    min="0"
+                  />
+                  <span style={{ fontSize: 11, color: "#98a2b3", fontWeight: 600 }}>—</span>
+                  <input
+                    type="number"
+                    placeholder="To"
+                    value={searchFareTo}
+                    onChange={e => setSearchFareTo(e.target.value)}
+                    style={{ flex: 1, minWidth: 70, maxWidth: 100 }}
+                    min="0"
+                  />
                 </div>
+                <input type="text" placeholder="Route" value={searchRoute} onChange={e=>setSearchRoute(e.target.value)} />
+                <input type="date" value={reportDate} onChange={e=>setReportDate(e.target.value)} style={{maxWidth:160}} />
+                <Btn variant="primary" size="sm" onClick={exportBookingsToCSV}>↓ Export CSV</Btn>
               </div>
               
               {filteredBookingsData.length === 0 ? (
-                <div style={{ padding: "3rem", textAlign: "center", color: PX.gray400, border: `1px solid ${PX.gray200}`, borderRadius: 12 }}>
+                <div className="adm-empty" style={{ margin: "2rem 0" }}>
                   No bookings found matching your search/date filters.
                 </div>
               ) : (
-                <div style={{ overflowX: "auto", border: `1px solid ${PX.gray200}`, borderRadius: 12 }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, textAlign: "left" }}>
-                    <thead style={{ background: PX.gray50, borderBottom: `1px solid ${PX.gray200}` }}>
+                <div style={{ overflowX: "auto" }}>
+                  <table className="admin-table">
+                    <thead>
                       <tr>
-                        <th style={{ padding: "12px 16px", fontWeight: 700, color: PX.gray600 }}>Ref ID</th>
-                        <th style={{ padding: "12px 16px", fontWeight: 700, color: PX.gray600 }}>Date</th>
-                        <th style={{ padding: "12px 16px", fontWeight: 700, color: PX.gray600 }}>Customer</th>
-                        <th style={{ padding: "12px 16px", fontWeight: 700, color: PX.gray600 }}>Route</th>
-                        <th style={{ padding: "12px 16px", fontWeight: 700, color: PX.gray600 }}>Vehicle</th>
-                        <th style={{ padding: "12px 16px", fontWeight: 700, color: PX.gray600 }}>Total Fare</th>
+                        <th>Ref ID</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Route</th>
+                        <th>Vehicle</th>
+                        <th>Total Fare</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredBookingsData.map((b: any) => (
-                        <tr key={b.id} style={{ borderBottom: `1px solid ${PX.gray100}` }}>
-                          <td style={{ padding: "12px 16px", fontWeight: 700, color: PX.navy800 }}>{b.id}</td>
-                          <td style={{ padding: "12px 16px", color: PX.gray600 }}>
+                        <tr key={b.id}>
+                          <td style={{ fontWeight: 700, color: PX.navy800 }}>{b.id}</td>
+                          <td style={{ color: PX.gray600 }}>
                             {new Date(b.createdAt).toLocaleDateString("en-GB")}
                           </td>
-                          <td style={{ padding: "12px 16px" }}>
+                          <td>
                             <div style={{ fontWeight: 700 }}>{b.customer?.name}</div>
                             <div style={{ fontSize: 11, color: PX.gray400 }}>{b.customer?.email} · {b.customer?.phone}</div>
                           </td>
-                          <td style={{ padding: "12px 16px" }}>
+                          <td>
                             <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 180, fontWeight: 500 }} title={b.journey?.origin}>
                               {String(b.journey?.origin).split(',')[0]}
                             </div>
                             <div style={{ fontSize: 11, color: PX.gray400 }}>→ {String(b.journey?.destination).split(',')[0]}</div>
                           </td>
-                          <td style={{ padding: "12px 16px", color: PX.gray600 }}>
+                          <td style={{ color: PX.gray600 }}>
                             {b.quote?.vehicle?.name} ({b.journey?.passengers} pax)
                           </td>
-                          <td style={{ padding: "12px 16px", fontWeight: 800, color: PX.brandRed }}>
+                          <td style={{ fontWeight: 800, color: PX.brandRed }}>
                             £{fmt(b.quote?.result?.finalPrice || b.quote?.result?.finalFare || 0)}
                           </td>
                         </tr>
@@ -1676,207 +1994,235 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
           {tab === "pricing" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               
-              {/* SUBSECTION 1: FIXED ROUTES */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "1.5rem" }}>
-                <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem" }}>Fixed Price Routes</h2>
-                <p style={{ fontSize:13,color:PX.gray600,marginBottom:"1.5rem" }}>Configure direct preset routes with fixed pricing (e.g. airport transfers).</p>
-                
-                <div id="form-templates" style={{ background:PX.gray50,borderRadius:12,padding:"1rem",marginBottom:"1rem",border:`1.5px dashed ${PX.gray200}` }}>
-                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
-                    <p style={{ fontWeight:700,fontSize:14,color:PX.navy800,margin:0 }}>{newTemplate.id ? "Edit Route" : "Add New Route"}</p>
-                    {newTemplate.id && <button onClick={()=>setNT({...blankTemplate, vehicleId:db.vehicles[0]?.id})} style={{ background:"none",border:"none",color:PX.gray400,fontSize:12,cursor:"pointer",fontWeight:600 }}>Cancel Edit</button>}
+              {/* FIXED ROUTES */}
+              <div className="adm-section">
+                <div className="adm-section-head">
+                  <div>
+                    <h2>Custom Route Prices (From A to B)</h2>
+                    <p>Preset routes with a flat fixed price (e.g. airport transfers).</p>
                   </div>
-                  <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,marginBottom:12 }}>
-                    <div style={{ gridColumn: "span 2" }}>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Pickup Location</label>
+                  <span className="adm-badge adm-badge-gray">{templatesData.length} routes</span>
+                </div>
+                <div className="adm-form-panel" id="form-templates">
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14 }}>
+                    <span style={{ fontSize:13, fontWeight:700, color:"#101828" }}>{newTemplate.id ? "Edit Route" : "Add New Route"}</span>
+                    {newTemplate.id && <button onClick={()=>setNT({...blankTemplate, vehicleId:db.vehicles[0]?.id})} style={{ background:"none",border:"none",color:"#667085",fontSize:12,cursor:"pointer",fontWeight:600 }}>Cancel</button>}
+                  </div>
+                  <div className="adm-form-grid">
+                    <div className="span2">
+                      <label className="field-label">Pickup Location</label>
                       <PlacesInput value={newTemplate.pickupArea||""} mapsLoaded={mapsLoaded} onChange={(v,geo)=>setNT(x=>({...x,pickupArea:v,pickupGeo:geo}))} icon={<SvgMapPinGreen />} />
                     </div>
-                    <div style={{ gridColumn: "span 2" }}>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Drop-off Location</label>
+                    <div className="span2">
+                      <label className="field-label">Drop-off Location</label>
                       <PlacesInput value={newTemplate.dropArea||""} mapsLoaded={mapsLoaded} onChange={(v,geo)=>setNT(x=>({...x,dropArea:v,dropGeo:geo}))} icon={<SvgMapPinRed />} />
                     </div>
                     <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Trip Type</label>
-                      <select style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} value={newTemplate.tripType||"one-way"} onChange={e=>setNT(x=>({...x,tripType:e.target.value}))}>
+                      <label className="field-label">Trip Type</label>
+                      <select value={newTemplate.tripType||"one-way"} onChange={e=>setNT(x=>({...x,tripType:e.target.value}))}>
                         <option value="one-way">One Way</option>
                         <option value="return">Return</option>
                       </select>
                     </div>
                     <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Eligible Vehicle</label>
-                      <select style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} value={newTemplate.vehicleId||""} onChange={e=>setNT(x=>({...x,vehicleId:e.target.value}))}>
+                      <label className="field-label">Eligible Vehicle</label>
+                      <select value={newTemplate.vehicleId||""} onChange={e=>setNT(x=>({...x,vehicleId:e.target.value}))}>
                         {db.vehicles.map(v=><option key={v.id} value={v.id}>{v.name}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Fixed Cost Price (£)</label>
-                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="number" value={newTemplate.price||0} onChange={e=>setNT(x=>({...x,price:Number(e.target.value)}))} />
+                      <label className="field-label">Fixed Cost Price (£)</label>
+                      <input type="number" value={newTemplate.price||0} onChange={e=>setNT(x=>({...x,price:Number(e.target.value)}))} />
                     </div>
                     <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Radius Margin ({gv?.distanceUnit === "miles" ? "miles" : "km"})</label>
-                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="number" value={newTemplate.radiusKm??15} onChange={e=>setNT(x=>({...x,radiusKm:Number(e.target.value)}))} />
+                      <label className="field-label">Radius Margin ({gv?.distanceUnit === "miles" ? "miles" : "km"})</label>
+                      <input type="number" value={newTemplate.radiusKm??15} onChange={e=>setNT(x=>({...x,radiusKm:Number(e.target.value)}))} />
                     </div>
                   </div>
-                  <Btn variant="primary" size="sm" onClick={async ()=>{
-                    if(!newTemplate.pickupArea || !newTemplate.dropArea) return setToast("Pickup and dropoff required.");
-                    const itemToSave = newTemplate.id ? newTemplate : {...newTemplate, id: 'new_'+Date.now()};
-                    const saved = await saveApi('templates', itemToSave);
-                    setTemplatesData(d => {
-                      const exists = d.some(x => x.id === saved.id);
-                      if (exists) return d.map(x => x.id === saved.id ? saved : x);
-                      return [saved, ...d];
-                    });
-                    setNT({...blankTemplate, vehicleId:db.vehicles[0]?.id});
-                    setToast("Route saved!"); setTimeout(()=>setToast(""),2000);
-                  }}>{newTemplate.id ? "Update Route" : "+ Add Route"}</Btn>
+                  <div>
+                    <Btn variant="primary" size="sm" onClick={async ()=>{
+                      if(!newTemplate.pickupArea || !newTemplate.dropArea) return setToast("Pickup and dropoff required.");
+                      const itemToSave = newTemplate.id ? newTemplate : {...newTemplate, id: 'new_'+Date.now()};
+                      const saved = await saveApi('templates', itemToSave);
+                      setTemplatesData(d => { const exists = d.some(x => x.id === saved.id); if (exists) return d.map(x => x.id === saved.id ? saved : x); return [saved, ...d]; });
+                      setNT({...blankTemplate, vehicleId:db.vehicles[0]?.id});
+                      setToast("Route saved!"); setTimeout(()=>setToast(""),2000);
+                    }}>{newTemplate.id ? "Update Route" : "+ Add Route"}</Btn>
+                  </div>
                 </div>
 
-                <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
-                  {templatesData.length === 0 && <div style={{ padding: "2rem", textAlign: "center", color: PX.gray400, border: `1px solid ${PX.gray200}`, borderRadius: 12 }}>No fixed price templates configured.</div>}
+                <div className="adm-list">
+                  {templatesData.length === 0 && <div className="adm-empty">No fixed price routes configured yet.</div>}
                   {templatesData.map(t=>(
-                    <div key={t.id} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",border:`1px solid ${PX.gray200}`,borderRadius:8, background: "#fff" }}>
+                    <div key={t.id} className="adm-row">
                       <div>
-                        <div style={{ fontWeight:700,fontSize:13,color:PX.navy800 }}>{String(t.pickupArea).split(',')[0]} → {String(t.dropArea).split(',')[0]}</div>
-                        <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{db.vehicles.find(v=>v.id===t.vehicleId)?.name} • £{t.price} • {t.tripType}</div>
+                        <div className="adm-row-title">
+                          <span>{String(t.pickupArea).split(',')[0]} → {String(t.dropArea).split(',')[0]}</span>
+                          <span className="adm-badge adm-badge-blue">{t.tripType === 'return' ? 'Return' : 'One Way'}</span>
+                        </div>
+                        <div className="adm-row-sub">{db.vehicles.find(v=>v.id===t.vehicleId)?.name} · <span className="adm-badge adm-badge-green" style={{fontSize:11}}>£{t.price} fixed</span></div>
                       </div>
-                      <div style={{ display:"flex",alignItems:"center",gap:16 }}>
-                        <button onClick={()=>{ setNT(t); document.getElementById('form-templates')?.scrollIntoView({behavior:'smooth', block:'center'}); }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
-                        <button onClick={async ()=>{ if(window.confirm("Delete this route template?")) { await saveApi('templates', t, true); setTemplatesData(d=>d.filter(x=>x.id!==t.id)); } }} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
+                      <div className="adm-row-actions">
+                        <button className="adm-btn-ghost" onClick={()=>{ setNT(t); document.getElementById('form-templates')?.scrollIntoView({behavior:'smooth', block:'center'}); }}>Edit</button>
+                        <button className="adm-btn-danger" onClick={async ()=>{ if(window.confirm("Delete this route?")) { await saveApi('templates', t, true); setTemplatesData(d=>d.filter(x=>x.id!==t.id)); } }}><SvgClose size={13} /></button>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* SUBSECTION 2: MILEAGE MATRIX */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "1.5rem" }}>
-                <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem" }}>Mileage Pricing Rules</h2>
-                <p style={{ fontSize:13, color:PX.gray600, marginBottom:"1.5rem" }}>Define dynamic mileage rules for zone-to-zone custom routing matrix.</p>
-                
-                <div id="form-matrix" style={{ background:PX.gray50,borderRadius:12,padding:"1rem",marginBottom:"1rem",border:`1.5px dashed ${PX.gray200}` }}>
-                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
-                    <p style={{ fontWeight:700,fontSize:14,color:PX.navy800,margin:0 }}>{newMatrix.id ? "Edit Matrix Rule" : "Add New Matrix Rule"}</p>
-                    {newMatrix.id && <button onClick={()=>setNM({...blankMatrix, vehicleId:db.vehicles[0]?.id})} style={{ background:"none",border:"none",color:PX.gray400,fontSize:12,cursor:"pointer",fontWeight:600 }}>Cancel Edit</button>}
-                  </div>
-                  <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,marginBottom:12 }}>
-                    <div style={{ gridColumn: "span 2" }}>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Pickup Area</label>
-                      <PlacesInput value={newMatrix.pickupArea||""} mapsLoaded={mapsLoaded} onChange={(v,geo)=>setNM(x=>({...x,pickupArea:v,pickupGeo:geo}))} icon={<SvgMapPinGreen />} />
-                    </div>
-                    <div style={{ gridColumn: "span 2" }}>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Drop Area</label>
-                      <PlacesInput value={newMatrix.dropArea||""} mapsLoaded={mapsLoaded} onChange={(v,geo)=>setNM(x=>({...x,dropArea:v,dropGeo:geo}))} icon={<SvgMapPinRed />} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Trip Type</label>
-                      <select style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} value={newMatrix.tripType||"one-way"} onChange={e=>setNM(x=>({...x,tripType:e.target.value}))}>
-                        <option value="one-way">One Way</option>
-                        <option value="return">Return</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Vehicle</label>
-                      <select style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} value={newMatrix.vehicleId||""} onChange={e=>setNM(x=>({...x,vehicleId:e.target.value}))}>
-                        {db.vehicles.map(v=><option key={v.id} value={v.id}>{v.name}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Base Matrix Fare (£)</label>
-                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="number" value={newMatrix.baseFare||0} onChange={e=>setNM(x=>({...x,baseFare:Number(e.target.value)}))} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Extra Mileage Rate (£)</label>
-                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="number" step="0.01" value={newMatrix.extraMileageRate||0} onChange={e=>setNM(x=>({...x,extraMileageRate:Number(e.target.value)}))} />
-                    </div>
-                  </div>
-                  <Btn variant="primary" size="sm" onClick={async ()=>{
-                    if(!newMatrix.pickupArea || !newMatrix.dropArea) return setToast("Pickup and dropoff required.");
-                    const itemToSave = newMatrix.id ? newMatrix : {...newMatrix, id: 'new_'+Date.now()};
-                    const saved = await saveApi('matrix', itemToSave);
-                    setMatrixData(d => {
-                      const exists = d.some(x => x.id === saved.id);
-                      if (exists) return d.map(x => x.id === saved.id ? saved : x);
-                      return [saved, ...d];
-                    });
-                    setNM({...blankMatrix, vehicleId:db.vehicles[0]?.id});
-                    setToast("Matrix rule saved!"); setTimeout(()=>setToast(""),2000);
-                  }}>{newMatrix.id ? "Update Matrix Rule" : "+ Add Matrix Rule"}</Btn>
-                </div>
+              {/* TWO COLUMN GRID FOR MILEAGE & SEASONAL */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(480px, 1fr))", gap: "1.5rem", alignItems: "start" }}>
 
-                <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
-                  {matrixData.length === 0 && <div style={{ padding: "2rem", textAlign: "center", color: PX.gray400, border: `1px solid ${PX.gray200}`, borderRadius: 12 }}>No pricing matrix rules configured.</div>}
-                  {matrixData.map(m=>(
-                    <div key={m.id} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",border:`1px solid ${PX.gray200}`,borderRadius:8, background: "#fff" }}>
+                {/* SUBSECTION 2: MILEAGE MATRIX */}
+                <div className="adm-section">
+                  <div className="adm-section-head">
+                    <div>
+                      <h2>Mileage Pricing Rules</h2>
+                      <p>Define dynamic mileage rules for zone-to-zone custom routing matrix.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="adm-form-panel" id="form-matrix">
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14 }}>
+                      <span style={{ fontSize:13, fontWeight:700, color:"#101828" }}>{newMatrix.id ? "Edit Matrix Rule" : "Add New Matrix Rule"}</span>
+                      {newMatrix.id && <button onClick={()=>setNM({...blankMatrix, vehicleId:db.vehicles[0]?.id})} style={{ background:"none",border:"none",color:"#667085",fontSize:12,cursor:"pointer",fontWeight:600 }}>Cancel</button>}
+                    </div>
+                    <div className="adm-form-grid">
+                      <div className="span2">
+                        <label className="field-label">Pickup Area</label>
+                        <PlacesInput value={newMatrix.pickupArea||""} mapsLoaded={mapsLoaded} onChange={(v,geo)=>setNM(x=>({...x,pickupArea:v,pickupGeo:geo}))} icon={<SvgMapPinGreen />} />
+                      </div>
+                      <div className="span2">
+                        <label className="field-label">Drop Area</label>
+                        <PlacesInput value={newMatrix.dropArea||""} mapsLoaded={mapsLoaded} onChange={(v,geo)=>setNM(x=>({...x,dropArea:v,dropGeo:geo}))} icon={<SvgMapPinRed />} />
+                      </div>
                       <div>
-                        <div style={{ fontWeight:700,fontSize:13,color:PX.navy800 }}>{String(m.pickupArea).split(',')[0]} → {String(m.dropArea).split(',')[0]}</div>
-                        <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{db.vehicles.find(v=>v.id===m.vehicleId)?.name} • Base: £{m.baseFare} • Extra: £{m.extraMileageRate}/unit</div>
+                        <label className="field-label">Trip Type</label>
+                        <select value={newMatrix.tripType||"one-way"} onChange={e=>setNM(x=>({...x,tripType:e.target.value}))}>
+                          <option value="one-way">One Way</option>
+                          <option value="return">Return</option>
+                        </select>
                       </div>
-                      <div style={{ display:"flex",alignItems:"center",gap:16 }}>
-                        <button onClick={()=>{ setNM(m); document.getElementById('form-matrix')?.scrollIntoView({behavior:'smooth', block:'center'}); }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
-                        <button onClick={async ()=>{ if(window.confirm("Delete this matrix pricing rule?")) { await saveApi('matrix', m, true); setMatrixData(d=>d.filter(x=>x.id!==m.id)); } }} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* SUBSECTION 4: SEASONAL DEMAND PERIODS */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "1.5rem" }}>
-                <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem", display:"flex", alignItems:"center", gap:6 }}><SvgCalendar /> Seasonal Demand Multipliers</h2>
-                <p style={{ fontSize:13, color:PX.gray600, marginBottom:"1.5rem" }}>Configure demand factors based on calendar dates and times (e.g. peak holiday periods).</p>
-                
-                <div id="form-seasonal" style={{ background:PX.gray50,borderRadius:12,padding:"1rem",marginBottom:"1rem",border:`1.5px dashed ${PX.gray200}` }}>
-                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
-                    <p style={{ fontWeight:700,fontSize:14,color:PX.navy800,margin:0 }}>{newSeasonal.id ? "Edit Demand Period" : "Add Demand Period"}</p>
-                    {newSeasonal.id && <button onClick={()=>setNS(blankSeasonal)} style={{ background:"none",border:"none",color:PX.gray400,fontSize:12,cursor:"pointer",fontWeight:600 }}>Cancel Edit</button>}
-                  </div>
-                  <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,marginBottom:12 }}>
-                    <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Period Name</label>
-                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="text" value={newSeasonal.name||""} onChange={e=>setNS(x=>({...x,name:e.target.value}))} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Start Date & Time</label>
-                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="datetime-local" value={newSeasonal.startDate||""} onChange={e=>setNS(x=>({...x,startDate:e.target.value}))} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>End Date & Time</label>
-                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="datetime-local" value={newSeasonal.endDate||""} onChange={e=>setNS(x=>({...x,endDate:e.target.value}))} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4,textTransform:"uppercase" }}>Multiplier (e.g. 1.2)</label>
-                      <input style={{ padding:"8px 12px", borderRadius:8, border:`1px solid ${PX.gray200}`, fontSize:13, width:"100%" }} type="number" step="0.05" value={newSeasonal.multiplier||1} onChange={e=>setNS(x=>({...x,multiplier:Number(e.target.value)}))} />
-                    </div>
-                  </div>
-                  <Btn variant="primary" size="sm" onClick={async ()=>{
-                    if(!newSeasonal.seasonName || !newSeasonal.startDate || !newSeasonal.endDate) return setToast("Please fill all fields.");
-                    const itemToSave = newSeasonal.id ? newSeasonal : {...newSeasonal, id: 'new_'+Date.now()};
-                    const saved = await saveApi('seasonal', itemToSave);
-                    setSeasonalData(d => {
-                      const exists = d.some(x => x.id === saved.id);
-                      if (exists) return d.map(x => x.id === saved.id ? saved : x);
-                      return [saved, ...d];
-                    });
-                    setNS(blankSeasonal);
-                    setToast("Demand Period saved!"); setTimeout(()=>setToast(""),2000);
-                  }}>{newSeasonal.id ? "Update Period" : "+ Add Period"}</Btn>
-                </div>
-
-                <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
-                  {seasonalData.length === 0 && <div style={{ padding: "2rem", textAlign: "center", color: PX.gray400, border: `1px solid ${PX.gray200}`, borderRadius: 12 }}>No seasonal multipliers configured.</div>}
-                  {seasonalData.map(s=>(
-                    <div key={s.id} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",border:`1px solid ${PX.gray200}`,borderRadius:8, background: "#fff" }}>
                       <div>
-                        <div style={{ fontWeight:700,fontSize:13,color:PX.navy800 }}>{s.name} <span style={{color:PX.brandRed, marginLeft:8}}>({s.multiplier}x multiplier)</span></div>
-                        <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{s.startDate ? s.startDate.replace('T', ' ') : ''} → {s.endDate ? s.endDate.replace('T', ' ') : ''}</div>
+                        <label className="field-label">Vehicle</label>
+                        <select value={newMatrix.vehicleId||""} onChange={e=>setNM(x=>({...x,vehicleId:e.target.value}))}>
+                          {db.vehicles.map(v=><option key={v.id} value={v.id}>{v.name}</option>)}
+                        </select>
                       </div>
-                      <div style={{ display:"flex",alignItems:"center",gap:16 }}>
-                        <button onClick={()=>{ setNS(s); document.getElementById('form-seasonal')?.scrollIntoView({behavior:'smooth', block:'center'}); }} style={{ background:"none",border:"none",color:PX.brandRed,fontSize:12,cursor:"pointer",fontWeight:700,textTransform:"uppercase" }}>Edit</button>
-                        <button onClick={async ()=>{ if(window.confirm("Delete this seasonal period?")) { await saveApi('seasonal', s, true); setSeasonalData(d=>d.filter(x=>x.id!==s.id)); } }} style={{ background:"none",border:"none",color:PX.red700,fontSize:18,cursor:"pointer",fontWeight:700, display:"flex", alignItems:"center" }}><SvgClose size={16} /></button>
+                      <div>
+                        <label className="field-label">Base Matrix Fare (£)</label>
+                        <input type="number" value={newMatrix.baseFare||0} onChange={e=>setNM(x=>({...x,baseFare:Number(e.target.value)}))} />
+                      </div>
+                      <div>
+                        <label className="field-label">Extra Mileage Rate (£)</label>
+                        <input type="number" step="0.01" value={newMatrix.extraMileageRate||0} onChange={e=>setNM(x=>({...x,extraMileageRate:Number(e.target.value)}))} />
                       </div>
                     </div>
-                  ))}
+                    <div>
+                      <Btn variant="primary" size="sm" full={false} onClick={async ()=>{
+                        if(!newMatrix.pickupArea || !newMatrix.dropArea) return setToast("Pickup and dropoff required.");
+                        const itemToSave = newMatrix.id ? newMatrix : {...newMatrix, id: 'new_'+Date.now()};
+                        const saved = await saveApi('matrix', itemToSave);
+                        setMatrixData(d => {
+                          const exists = d.some(x => x.id === saved.id);
+                          if (exists) return d.map(x => x.id === saved.id ? saved : x);
+                          return [saved, ...d];
+                        });
+                        setNM({...blankMatrix, vehicleId:db.vehicles[0]?.id});
+                        setToast("Matrix rule saved!"); setTimeout(()=>setToast(""),2000);
+                      }}>{newMatrix.id ? "Update Matrix Rule" : "+ Add Matrix Rule"}</Btn>
+                    </div>
+                  </div>
+
+                  <div className="adm-list">
+                    {matrixData.length === 0 && <div className="adm-empty">No pricing matrix rules configured yet.</div>}
+                    {matrixData.map(m=>(
+                      <div key={m.id} className="adm-row">
+                        <div>
+                          <div className="adm-row-title">
+                            <span>{String(m.pickupArea).split(',')[0]} → {String(m.dropArea).split(',')[0]}</span>
+                            <span className="adm-badge adm-badge-blue">{m.tripType === 'return' ? 'Return' : 'One Way'}</span>
+                          </div>
+                          <div className="adm-row-sub">{db.vehicles.find(v=>v.id===m.vehicleId)?.name} · <span className="adm-badge adm-badge-amber" style={{fontSize:11}}>Base £{m.baseFare}</span> · £{m.extraMileageRate}/unit extra</div>
+                        </div>
+                        <div className="adm-row-actions">
+                          <button className="adm-btn-ghost" onClick={()=>{ setNM(m); document.getElementById('form-matrix')?.scrollIntoView({behavior:'smooth', block:'center'}); }}>Edit</button>
+                          <button className="adm-btn-danger" onClick={async ()=>{ if(window.confirm("Delete this rule?")) { await saveApi('matrix', m, true); setMatrixData(d=>d.filter(x=>x.id!==m.id)); } }}><SvgClose size={13} /></button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
+                {/* SUBSECTION 4: SEASONAL DEMAND PERIODS */}
+                <div className="adm-section">
+                  <div className="adm-section-head">
+                    <div>
+                      <h2>Seasonal Demand Multipliers</h2>
+                      <p>Configure demand factors based on calendar dates and times (e.g. peak holiday periods).</p>
+                    </div>
+                  </div>
+                  
+                  <div className="adm-form-panel" id="form-seasonal">
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14 }}>
+                      <span style={{ fontSize:13, fontWeight:700, color:"#101828" }}>{newSeasonal.id ? "Edit Demand Period" : "Add Demand Period"}</span>
+                      {newSeasonal.id && <button onClick={()=>setNS(blankSeasonal)} style={{ background:"none",border:"none",color:"#667085",fontSize:12,cursor:"pointer",fontWeight:600 }}>Cancel</button>}
+                    </div>
+                    <div className="adm-form-grid">
+                      <div className="span2">
+                        <label className="field-label">Period Name</label>
+                        <input type="text" value={newSeasonal.name||""} onChange={e=>setNS(x=>({...x,name:e.target.value}))} />
+                      </div>
+                      <div>
+                        <label className="field-label">Start Date & Time</label>
+                        <input type="datetime-local" value={newSeasonal.startDate||""} onChange={e=>setNS(x=>({...x,startDate:e.target.value}))} />
+                      </div>
+                      <div>
+                        <label className="field-label">End Date & Time</label>
+                        <input type="datetime-local" value={newSeasonal.endDate||""} onChange={e=>setNS(x=>({...x,endDate:e.target.value}))} />
+                      </div>
+                      <div>
+                        <label className="field-label">Multiplier (e.g. 1.2)</label>
+                        <input type="number" step="0.05" value={newSeasonal.multiplier||1} onChange={e=>setNS(x=>({...x,multiplier:Number(e.target.value)}))} />
+                      </div>
+                    </div>
+                    <div>
+                      <Btn variant="primary" size="sm" full={false} onClick={async ()=>{
+                        if(!newSeasonal.name || !newSeasonal.startDate || !newSeasonal.endDate) return setToast("Please fill all fields.");
+                        const itemToSave = newSeasonal.id ? newSeasonal : {...newSeasonal, id: 'new_'+Date.now()};
+                        const saved = await saveApi('seasonal', itemToSave);
+                        setSeasonalData(d => {
+                          const exists = d.some(x => x.id === saved.id);
+                          if (exists) return d.map(x => x.id === saved.id ? saved : x);
+                          return [saved, ...d];
+                        });
+                        setNS(blankSeasonal);
+                        setToast("Demand Period saved!"); setTimeout(()=>setToast(""),2000);
+                      }}>{newSeasonal.id ? "Update Period" : "+ Add Period"}</Btn>
+                    </div>
+                  </div>
+
+                  <div className="adm-list">
+                    {seasonalData.length === 0 && <div className="adm-empty">No seasonal multipliers configured yet.</div>}
+                    {seasonalData.map(s=>(
+                      <div key={s.id} className="adm-row">
+                        <div>
+                          <div className="adm-row-title">
+                            <span>{s.name}</span>
+                            <span className="adm-badge adm-badge-amber">{s.multiplier}× multiplier</span>
+                          </div>
+                          <div className="adm-row-sub">{s.startDate?.replace('T',' ')} → {s.endDate?.replace('T',' ')}</div>
+                        </div>
+                        <div className="adm-row-actions">
+                          <button className="adm-btn-ghost" onClick={()=>{ setNS(s); document.getElementById('form-seasonal')?.scrollIntoView({behavior:'smooth', block:'center'}); }}>Edit</button>
+                          <button className="adm-btn-danger" onClick={async ()=>{ if(window.confirm("Delete this period?")) { await saveApi('seasonal', s, true); setSeasonalData(d=>d.filter(x=>x.id!==s.id)); } }}><SvgClose size={13} /></button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
               </div>
 
               {/* Blocked dates section removed as requested */}
@@ -1886,11 +2232,14 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
 
 {/* ════════════════════════ FLEET & AVAILABILITY ════════════════════════ */}
           {tab === "fleet" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               {/* SUBSECTION 2: VEHICLE WAGE & RUN RATES */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
-                  <h2 style={{ fontSize: 18, fontWeight: 800, color: PX.navy800, margin: 0 }}>Operating Wage Rates & Profit Margins</h2>
+              <div className="adm-section">
+                <div className="adm-section-head">
+                  <div>
+                    <h2>Operating Wage Rates & Profit Margins</h2>
+                    <p>Manage driver wages, holidays, and base margins.</p>
+                  </div>
                   <select 
                     value={selectedWageVehicleId} 
                     onChange={e => setSelectedWageVehicleId(e.target.value)}
@@ -1903,7 +2252,8 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                   const sv = vehicles.find(v => v.id === selectedWageVehicleId) || vehicles[0];
                   if (!sv) return null;
                   return (
-                    <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"1.25rem" }}>
+                    <div className="adm-form-panel">
+                      <div className="adm-form-grid">
                       <div>
                         <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4 }}>Fuel Price (£/Litre)</label>
                         <input type="number" step="0.001" value={sv.fuelPricePerLitre ?? gv.fuelPricePerLitre ?? 1.52} onChange={e=>updateV(sv.id, "fuelPricePerLitre", Number(e.target.value))}/>
@@ -1920,15 +2270,22 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                         <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4 }}>Profit Margin (%)</label>
                         <input type="number" value={sv.profitMarginPct ?? gv.profitMarginPct ?? 28} onChange={e=>updateV(sv.id, "profitMarginPct", Number(e.target.value))}/>
                       </div>
-                    </div>
+                      </div>
+                      </div>
                   );
                 })()}
               </div>
 
               {/* SUBSECTION 3: TOLL SURCHARGES */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
-                <h2 style={{ fontSize: 18, fontWeight: 800, color: PX.navy800, marginBottom: "1rem" }}>Operational Toll Surcharges</h2>
-                <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"1.25rem" }}>
+              <div className="adm-section">
+                <div className="adm-section-head">
+                  <div>
+                    <h2>Operational Toll Surcharges</h2>
+                    <p>Additional costs added per journey.</p>
+                  </div>
+                </div>
+                <div className="adm-form-panel">
+                  <div className="adm-form-grid">
                   {[
                     ["m6Toll","M6 Toll (PSV)"],["dartford","Dartford Crossing"],
                     ["ulez","London ULEZ/CAZ"],["birminghamCaz","Birmingham CAZ"],
@@ -1939,15 +2296,16 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                       <input type="number" value={sr[k] ?? 0} onChange={e=>setSr(s=>({...s,[k]:Number(e.target.value)}))}/>
                     </div>
                   ))}
+                  </div>
                 </div>
               </div>
 
               {/* SUBSECTION 1: VEHICLE SPECIFICATIONS */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
-                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem" }}>
+              <div className="adm-section">
+                <div className="adm-section-head">
                   <div>
-                    <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, display:"flex", alignItems:"center", gap:6 }}>Fleet Vehicles Specifications & Costs</h2>
-                    <p style={{ fontSize:13, color:PX.gray600, marginTop:4 }}>Edit standing rates, capacity constraints, insurance overheads, and run costs.</p>
+                    <h2>Fleet Vehicles Specifications & Costs</h2>
+                    <p>Edit standing rates, capacity constraints, insurance overheads, and run costs.</p>
                   </div>
                   <Btn variant="primary" size="sm" onClick={()=>{
                     const newId = "tier_"+Date.now();
@@ -1960,6 +2318,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                   }}>＋ Add New Vehicle</Btn>
                 </div>
 
+                <div style={{ padding: "20px 24px" }}>
                 {vehicles.filter(v => v.id === (vehicles.find(x => x.id === activeVehicleId) ? activeVehicleId : vehicles[0]?.id)).map(v => {
                   const count = Number(v.fleetCount) || 1;
                   const totalAnnualFixed = (v.annualCosts||[]).reduce((s,c)=>s+Number(c.cost),0);
@@ -1981,7 +2340,6 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                             <select 
                               value={v.id} 
                               onChange={e=>setActiveVehicleId(e.target.value)} 
-                              style={{ padding:"8px 12px", width:"100%", borderRadius:8, border:`1.5px solid ${PX.gray300}`, fontWeight:700, fontSize:13, background:"#fff", height: 38 }}
                             >
                               {vehicles.map(vx => <option key={vx.id} value={vx.id}>{vx.name}</option>)}
                             </select>
@@ -1992,7 +2350,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                               type="text" 
                               value={v.name} 
                               onChange={e=>updateV(v.id,"name",e.target.value)} 
-                              style={{ fontWeight:700,fontSize:13, padding:"8px 12px", borderRadius:8, border:`1.5px solid ${PX.gray300}`, width:"100%", height: 38 }} 
+                              style={{ fontWeight: 700 }}
                             />
                           </div>
                           <div>
@@ -2000,7 +2358,6 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                             <select 
                               value={v.emoji} 
                               onChange={e=>updateV(v.id,"emoji",e.target.value)} 
-                              style={{ padding:"8px 12px", width:"100%", borderRadius:8, border:`1.5px solid ${PX.gray300}`, fontWeight:700, fontSize:13, background:"#fff", height: 38 }}
                             >
                               <option value="minibus">Minibus Icon</option>
                               <option value="bus">Standard Bus Icon</option>
@@ -2013,7 +2370,6 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                               type="text" 
                               value={v.desc} 
                               onChange={e=>updateV(v.id,"desc",e.target.value)} 
-                              style={{ padding:"8px 12px", borderRadius:8, border:`1.5px solid ${PX.gray300}`, width:"100%", height: 38 }} 
                             />
                           </div>
                         </div>
@@ -2091,13 +2447,14 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                     </div>
                   );
                 })}
+                </div>
               </div>
               {/* SUBSECTION 2: COMPANY ANNUAL OVERHEADS */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
-                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem" }}>
+              <div className="adm-section">
+                <div className="adm-section-head">
                   <div>
-                    <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, display:"flex", alignItems:"center", gap:6 }}>🏢 Company annual overheads</h2>
-                    <p style={{ fontSize:13, color:PX.gray600, marginTop:4 }}>Added to fleet vehicle costs to form the grand total annual fixed cost</p>
+                    <h2>🏢 Company annual overheads</h2>
+                    <p>Added to fleet vehicle costs to form the grand total annual fixed cost</p>
                   </div>
                   <div style={{ textAlign:"right" }}>
                     <span style={{ fontSize:10,fontWeight:700,color:PX.gray400,display:"block",textTransform:"uppercase", letterSpacing:1 }}>Total</span>
@@ -2105,22 +2462,23 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                   </div>
                 </div>
 
-                <div style={{ display:"flex", flexDirection:"column", gap:"0.75rem", marginBottom:"1.25rem" }}>
+                <div className="adm-form-panel">
+                  <div style={{ display:"flex", flexDirection:"column", gap:"0.75rem", marginBottom:"1.25rem" }}>
                   {overheads.map(oh => (
                     <div key={oh.id} style={{ display:"flex", gap:"1rem", alignItems:"center" }}>
                       <input 
                         type="text" 
                         value={oh.label} 
                         onChange={e => setOH(os => os.map(x => x.id === oh.id ? {...x, label: e.target.value} : x))}
-                        style={{ flex:1, padding:"12px 16px", borderRadius:8, border:`1px solid ${PX.gray300}`, fontSize:14, fontWeight: 500, color: PX.navy800 }}
+                        style={{ flex:1, fontWeight: 500 }}
                       />
                       <div style={{ position:"relative", width:"140px" }}>
-                        <span style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)", color:PX.gray400, fontWeight: 600 }}>£</span>
+                        <span style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:PX.gray400, fontWeight: 700, fontSize: 13.5 }}>£</span>
                         <input 
                           type="number" 
                           value={oh.cost} 
                           onChange={e => setOH(os => os.map(x => x.id === oh.id ? {...x, cost: Number(e.target.value)} : x))}
-                          style={{ width:"100%", padding:"12px 12px 12px 28px", borderRadius:8, border:`1px solid ${PX.gray300}`, fontSize:14, fontWeight: 500, color: PX.navy800 }}
+                          style={{ paddingLeft: 28, fontWeight: 500 }}
                         />
                       </div>
                       <button 
@@ -2140,28 +2498,38 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                 >
                   ＋ Add overhead item
                 </button>
+                </div>
               </div>
 
               {/* SUBSECTION 3: FLEET ECONOMICS SUMMARY */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
-                <h2 style={{ fontSize:18, fontWeight:800, color:PX.navy800, marginBottom:"0.5rem" }}>Fleet economics summary</h2>
-                <p style={{ fontSize:13, color:PX.gray500, marginBottom:"1.5rem" }}>
-                  Vehicle annual costs ÷ utilisation days = standing rate • Company overheads ÷ total fleet units = overhead per unit • <strong>Both added = minimum hire charge per vehicle per day</strong>
-                </p>
-                <FleetEconomicsPanel eco={eco} />
+              <div className="adm-section">
+                <div className="adm-section-head">
+                  <div>
+                    <h2>Fleet economics summary</h2>
+                    <p>Vehicle annual costs ÷ utilisation days = standing rate • Company overheads ÷ total fleet units = overhead per unit</p>
+                  </div>
+                </div>
+                <div style={{ padding: "24px" }}>
+                  <FleetEconomicsPanel eco={eco} />
+                </div>
               </div>
             </div>
           )}
 
           {/* ════════════════════════ SYSTEM SETTINGS ════════════════════════ */}
           {tab === "settings" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               
               
               {/* SUBSECTION 1: CREDENTIALS */}
-              <div style={{ borderBottom: `1.5px solid ${PX.gray200}`, paddingBottom: "2rem" }}>
-                <h2 style={{ fontSize: 18, fontWeight: 800, color: PX.navy800, marginBottom: "1rem", display: "flex", alignItems: "center", gap: 6 }}><SvgSettings /> Base Station & Map Credentials</h2>
-                <div style={{ display:"grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+              <div className="adm-section">
+                <div className="adm-section-head">
+                  <div>
+                    <h2>Base Station & Map Credentials</h2>
+                    <p>System globals and distance settings.</p>
+                  </div>
+                </div>
+                <div className="adm-form-panel" style={{ display:"grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
                   <div style={{ background:"#f0f7ff",border:"1px solid #bfdbfe",borderRadius:12,padding:"1.25rem" }}>
                     <div style={{ fontWeight:700,color:PX.navy800,marginBottom:6,fontSize:14, display:"flex", alignItems:"center", gap:4 }}><SvgDepot /> Depot Address Location</div>
                     <p style={{ fontSize:11,color:PX.gray600,marginBottom:10 }}>Calculates empty 'dead mileage' routing runs to and from base.</p>
@@ -2195,10 +2563,16 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
 
 
               {/* SUBSECTION 4: OPERATOR BUSINESS DETAILS */}
-              <div>
-                <h2 style={{ fontSize: 18, fontWeight: 800, color: PX.navy800, marginBottom: "1rem" }}>Operator Business & Licensing</h2>
-                <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"1.25rem" }}>
+              <div className="adm-section">
+                <div className="adm-section-head">
                   <div>
+                    <h2>Operator Business & Licensing</h2>
+                    <p>Company registered details.</p>
+                  </div>
+                </div>
+                <div className="adm-form-panel">
+                  <div className="adm-form-grid">
+                    <div>
                     <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4 }}>Company Registered Name</label>
                     <input type="text" defaultValue="Carolean Coaches Ltd" />
                   </div>
@@ -2214,15 +2588,16 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                     <label style={{ fontSize:11,fontWeight:700,color:PX.gray600,display:"block",marginBottom:4 }}>Default Admin Notification Email</label>
                     <input type="email" defaultValue="bookings@caroleancoaches.co.uk" />
                   </div>
+                  </div>
                 </div>
               </div>
-
 
             </div>
           )}
 
+          </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
@@ -2502,135 +2877,168 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
   return (
     <>
       <GlobalStyle/>
-      <div style={{ minHeight:"100vh", background:"#f0f2f7" }}>
-        <Navbar adminMode={adminMode} setAdminMode={setAdm}/>
+      <div style={{ minHeight:"100vh", background:"#f4f6f9" }}>
+        {!adminMode && <Navbar />}
         
-        <main style={{ maxWidth:1160, margin:"0 auto", padding:"2rem 2rem 5rem" }}>
-          {adminMode ? (
-            <AdminDashboard db={db} setDb={setDb} mapsLoaded={mapsLoaded} />
-          ) : (
-            <div className="fade-up">
-              
-              {!showQuotes ? (
-                /* PAGE 1: SEARCH & INPUT FORM */
-                <div className="fade-up">
-                  {/* BRAND HERO HEADER FOR THE FORM */}
+        {adminMode ? (
+          <AdminDashboard db={db} setDb={setDb} mapsLoaded={mapsLoaded} />
+        ) : (
+          <div className="fade-up">
+            
+            {!showQuotes ? (
+              /* PAGE 1: SEARCH & INPUT FORM WITH HERO */
+              <div>
+                {/* Full-width brand hero banner */}
+                <div style={{ 
+                  background: `radial-gradient(circle at 80% 20%, #13155c 0%, ${PX.navy800} 100%)`,
+                  padding: "5.5rem 1.5rem 7.5rem",
+                  color: "#fff",
+                  textAlign: "center"
+                }}>
+                  <div style={{ maxWidth: 800, margin: "0 auto" }}>
+                    <span style={{ 
+                      background: "rgba(255,255,255,0.06)", 
+                      border: "1px solid rgba(255,255,255,0.15)", 
+                      padding: "5px 14px", 
+                      borderRadius: 30, 
+                      fontSize: 10.5, 
+                      fontWeight: 800, 
+                      letterSpacing: 1.5, 
+                      textTransform: "uppercase", 
+                      color: PX.amber500 
+                    }}>
+                      Instant fleet fare calculator
+                    </span>
+                    <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: "3.25rem", fontWeight: 950, marginTop: 16, letterSpacing: -0.8, lineHeight: 1.1 }}>
+                      Your Journey, Our Priority
+                    </h1>
+                    <p style={{ fontFamily: "'Figtree', sans-serif", fontSize: "1.1rem", color: "rgba(255,255,255,0.75)", fontWeight: 500, maxWidth: 650, margin: "1rem auto 0", lineHeight: 1.5 }}>
+                      With our modern fleet, professional drivers, and flexible booking options, Carolean Coaches makes every journey smooth, safe, and enjoyable.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Overlaid booking form card */}
+                <div style={{ maxWidth: 1040, margin: "-4.5rem auto 5rem", padding: "0 1.5rem", position: "relative", zIndex: 10 }}>
                   <div style={{ 
-                    background: `linear-gradient(135deg, ${PX.navy800} 0%, ${PX.navy700} 100%)`,
-                    borderRadius: 18,
-                    padding: "2.5rem 2.5rem 2rem",
-                    boxShadow: "0 8px 32px rgba(13,14,72,0.14)",
-                    marginBottom: "0"
+                    background: "#ffffff", 
+                    borderRadius: 16, 
+                    padding: "2.5rem", 
+                    border: "1px solid #e2e8f0", 
+                    boxShadow: "0 12px 40px rgba(13,14,72,0.06)" 
                   }}>
-                    <div style={{ textAlign: "center", marginBottom: "1.75rem" }}>
-                      <span style={{ background: "rgba(255,255,255,0.1)", padding: "5px 14px", borderRadius: 20, fontSize: 10.5, fontWeight: 700, letterSpacing: 1.4, textTransform: "uppercase", color: PX.amber500 }}>
-                        Instant Fleet Fare Calculator
-                      </span>
-                      <h1 style={{ color: "#fff", fontSize: "1.75rem", fontWeight: 900, marginTop: 10, letterSpacing: -0.3, lineHeight: 1.25 }}>
-                        Book Your Journey With Carolean Coaches
-                      </h1>
+                    <div style={{ textAlign: "center", marginBottom: "2rem", paddingBottom: "1.25rem", borderBottom: "1px solid #f1f5f9" }}>
+                      <div style={{ fontSize: 11, fontWeight: 900, color: PX.brandRed, letterSpacing: 4, textTransform: "uppercase" }}>
+                        Your Perfect Ride
+                      </div>
                     </div>
 
-                    {/* THE FLOATING BOOKING FORM WIDGET */}
-                    <div style={{ background: PX.offWhite, borderRadius: 12, padding: "2rem 2rem 1.75rem", boxShadow: "0 12px 30px rgba(0,0,0,0.12)" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                       
-                      <div style={{ textAlign: "center", marginBottom: "1.5rem", paddingBottom: "1.25rem", borderBottom: `1.5px solid ${PX.gray100}` }}>
-                        <div style={{ fontSize: 11, fontWeight: 900, color: PX.brandRed, letterSpacing: 4, textTransform: "uppercase" }}>
-                          Your Perfect Ride
-                        </div>
-                      </div>
-
-                      {/* FORM GRID */}
-                      <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                        
-                        {/* JOURNEY TYPE SELECTION */}
-                        <div style={{ display: "flex", gap: "1.5rem", justifyContent: "flex-start", paddingBottom: "0.5rem" }}>
+                      {/* Segmented Journey Type Controller */}
+                      <div>
+                        <label style={{ display:"block", fontSize:11, fontWeight:800, color:PX.gray600, textTransform:"uppercase", letterSpacing:.35, marginBottom: 8 }}>
+                          Journey Type
+                        </label>
+                        <div style={{ display: "flex", gap: "6px", background: "#f1f5f9", padding: "4px", borderRadius: 8, width: "fit-content" }}>
                           {[
                             {id: "return", label: "Return Trip"},
                             {id: "one-way", label: "One-Way"},
-                            {id: "multi-stop", label: "Multi-Stop Route"}
+                            {id: "multi-stop", label: "Multi-Stop"}
                           ].map(type => (
-                            <label key={type.id} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13.5, fontWeight: 700, color: journey.journeyType === type.id ? PX.brandRed : PX.navy800 }}>
-                              <div style={{ width: 18, height: 18, borderRadius: "50%", border: `2px solid ${journey.journeyType === type.id ? PX.brandRed : PX.gray400}`, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .2s" }}>
-                                {journey.journeyType === type.id && <div style={{ width: 10, height: 10, borderRadius: "50%", background: PX.brandRed }} />}
-                              </div>
-                              <input type="radio" name="journeyType" value={type.id} checked={journey.journeyType === type.id} onChange={e=>setJ(j=>({...j,journeyType:e.target.value}))} style={{ display: "none" }} />
+                            <button
+                              key={type.id}
+                              type="button"
+                              onClick={() => setJ(j => ({ ...j, journeyType: type.id }))}
+                              style={{
+                                background: journey.journeyType === type.id ? PX.brandRed : "transparent",
+                                color: journey.journeyType === type.id ? "#fff" : PX.navy800,
+                                border: "none",
+                                borderRadius: 6,
+                                padding: "8px 18px",
+                                fontSize: 13,
+                                fontWeight: 800,
+                                cursor: "pointer",
+                                transition: "all 0.2s"
+                              }}
+                            >
                               {type.label}
-                            </label>
+                            </button>
                           ))}
                         </div>
+                      </div>
 
-                        {/* ROW 2: Route Addresses */}
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                          <Field label="Pickup Address" required>
-                            <PlacesInput value={journey.origin} placeholder="e.g. Heathrow Airport" icon={<SvgMapPinGreen />} mapsLoaded={mapsLoaded} onChange={setOrigin}/>
-                          </Field>
-                          <Field label="Destination" required>
-                            <PlacesInput value={journey.destination} placeholder="e.g. Derby Arena" icon={<SvgMapPinRed />} mapsLoaded={mapsLoaded} onChange={setDest}/>
-                          </Field>
-                        </div>
+                      {/* Route Input fields */}
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1.25rem" }}>
+                        <Field label="Pickup Address" required>
+                          <PlacesInput value={journey.origin} placeholder="e.g. Heathrow Airport" icon={<SvgMapPinGreen />} mapsLoaded={mapsLoaded} onChange={setOrigin}/>
+                        </Field>
+                        <Field label="Destination" required>
+                          <PlacesInput value={journey.destination} placeholder="e.g. Derby Arena" icon={<SvgMapPinRed />} mapsLoaded={mapsLoaded} onChange={setDest}/>
+                        </Field>
+                      </div>
 
-                        {/* ROW 2: Travel Timing */}
-                        <div style={{ display: "grid", gridTemplateColumns: showReturnDate ? "1fr 1fr" : "1fr", gap: "1rem" }}>
-                          <Field label="Travel Date & Time" required>
-                            <input type="datetime-local" value={journey.departureDate} onChange={e=>setJ(j=>({...j,departureDate:e.target.value}))}/>
+                      {/* Timing details */}
+                      <div style={{ display: "grid", gridTemplateColumns: showReturnDate ? "repeat(auto-fit, minmax(240px, 1fr))" : "1fr", gap: "1.25rem" }}>
+                        <Field label="Travel Date & Time" required>
+                          <input type="datetime-local" value={journey.departureDate} onChange={e=>setJ(j=>({...j,departureDate:e.target.value}))}/>
+                        </Field>
+                        {showReturnDate && (
+                          <Field label="Return Date & Time" required>
+                            <input type="datetime-local" value={journey.returnDate} onChange={e=>setJ(j=>({...j,returnDate:e.target.value}))}/>
                           </Field>
-                          {showReturnDate && (
-                            <Field label="Return Date & Time" required>
-                              <input type="datetime-local" value={journey.returnDate} onChange={e=>setJ(j=>({...j,returnDate:e.target.value}))}/>
-                            </Field>
-                          )}
-                        </div>
-
-                        {/* DYNAMIC MULTI-STOP ROW */}
-                        {journey.journeyType === "multi-stop" && (
-                          <div style={{ padding:"1.25rem", background:PX.gray50, borderRadius:8, border:`1.5px dashed ${PX.gray200}` }}>
-                            <div style={{ fontSize:12, fontWeight:800, color:PX.navy800, marginBottom:"0.75rem", textTransform:"uppercase" }}>Intermediate stops</div>
-                            {(journey.stops || []).map((s,i)=>(
-                              <div key={i} style={{ display:"grid", gridTemplateColumns:"1fr auto auto", gap:8, marginBottom:8, alignItems:"center" }}>
-                                <PlacesInput value={s.place} placeholder={`Stop ${i+1}`} icon={<SvgMapPinBlue />} mapsLoaded={mapsLoaded}
-                                  onChange={(val,coords)=>{ updateStop(i,"place",val); if(coords) updateStop(i,"coords",coords); }}/>
-                                <select value={s.wait} style={{ width:120 }} onChange={e=>updateStop(i,"wait",e.target.value)}>
-                                  {[15,30,45,60,90,120,180].map(m=><option key={m} value={m}>{m} min wait</option>)}
-                                </select>
-                                <button type="button" onClick={()=>removeStop(i)} style={{ width:44,height:44,borderRadius:8,border:"none",
-                                  background:PX.red100,color:PX.red700,cursor:"pointer",fontWeight:700,fontSize:18, display:"flex", alignItems:"center", justifycontent:"center" }}><SvgClose size={18} /></button>
-                              </div>
-                            ))}
-                            <Btn variant="ghost" size="sm" onClick={addStop}>＋ Add stop</Btn>
-                          </div>
                         )}
+                      </div>
 
-                        {/* ROW 4: Load & Luggage */}
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem" }}>
+                      {/* DYNAMIC MULTI-STOP ROW */}
+                      {journey.journeyType === "multi-stop" && (
+                        <div style={{ padding:"1.25rem", background:"#f8fafc", borderRadius:8, border:`1.5px dashed #dde0e8` }}>
+                          <div style={{ fontSize:12, fontWeight:800, color:PX.navy800, marginBottom:"0.75rem", textTransform:"uppercase" }}>Intermediate stops</div>
+                          {(journey.stops || []).map((s,i)=>(
+                            <div key={i} style={{ display:"grid", gridTemplateColumns:"1fr auto auto", gap:8, marginBottom:8, alignItems:"center" }}>
+                              <PlacesInput value={s.place} placeholder={`Stop ${i+1}`} icon={<SvgMapPinBlue />} mapsLoaded={mapsLoaded}
+                                onChange={(val,coords)=>{ updateStop(i,"place",val); if(coords) updateStop(i,"coords",coords); }}/>
+                              <select value={s.wait} style={{ width:120 }} onChange={e=>updateStop(i,"wait",e.target.value)}>
+                                {[15,30,45,60,90,120,180].map(m=><option key={m} value={m}>{m} min wait</option>)}
+                              </select>
+                              <button type="button" onClick={()=>removeStop(i)} style={{ width:44,height:44,borderRadius:8,border:"none",
+                                background:PX.red100,color:PX.red700,cursor:"pointer",fontWeight:700,fontSize:18, display:"flex", alignItems:"center", justifyContent:"center" }}><SvgClose size={18} /></button>
+                            </div>
+                          ))}
+                          <Btn variant="ghost" size="sm" onClick={addStop}>＋ Add stop</Btn>
+                        </div>
+                      )}
+
+                      {/* ROW 4: Load & Luggage */}
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.25rem" }}>
                           <Field label="Number of Passengers" required>
-                            <div style={{ display:"flex", height: 44 }}>
+                            <div style={{ display:"flex", height: 42 }}>
                               <button type="button" onClick={()=>{
                                 const p = Math.max(1,journey.passengers-1);
                                 setJ(j=>({...j,passengers:p, suitcaseCount:p, handbagCount:p}));
                               }}
-                                style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderRight:"none",
-                                  borderRadius:"8px 0 0 8px",background:"#fff",cursor:"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>−</button>
+                                style={{ width:40,border:`1.5px solid #dde0e8`,borderRight:"none",
+                                  borderRadius:"6px 0 0 6px",background:"#fff",cursor:"pointer",fontSize:16,fontWeight:700,color:PX.navy800 }}>−</button>
                               <input type="number" min={1} max={70} value={journey.passengers}
                                 onChange={e=>{
                                   const p = parseInt(e.target.value)||16;
                                   setJ(j=>({...j,passengers:p, suitcaseCount:p, handbagCount:p}));
                                 }}
-                                style={{ width:70,textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",height:"100%" }}/>
+                                style={{ width:60,textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",height:"100%",fontWeight:700, border:`1.5px solid #dde0e8`, borderLeftWidth:0, borderRightWidth:0 }}/>
                               <button type="button" onClick={()=>{
                                 const p = Math.min(70,journey.passengers+1);
                                 setJ(j=>({...j,passengers:p, suitcaseCount:p, handbagCount:p}));
                               }}
-                                style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderLeft:"none",
-                                  borderRadius:"0 8px 8px 0",background:"#fff",cursor:"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>＋</button>
+                                style={{ width:40,border:`1.5px solid #dde0e8`,borderLeft:"none",
+                                  borderRadius:"0 6px 6px 0",background:"#fff",cursor:"pointer",fontSize:16,fontWeight:700,color:PX.navy800 }}>＋</button>
                             </div>
                           </Field>
                           <Field label="Luggage Requirements">
-                            <div style={{ display:"flex", height: 44 }}>
+                            <div style={{ display:"flex", height: 42 }}>
                               <select 
                                 value={journey.activeLuggageType || 'none'} 
                                 onChange={e=>setJ(j=>({...j,activeLuggageType:e.target.value}))}
-                                style={{ flex: 1, borderRadius:"8px 0 0 8px", borderRight:"none", border:`1.5px solid ${PX.gray200}`, borderRightWidth:0 }}
+                                style={{ flex: 1, borderRadius:"6px 0 0 6px", borderRight:"none", border:`1.5px solid #dde0e8`, borderRightWidth:0 }}
                               >
                                 <option value="none">None</option>
                                 <option value="suitcase">Suitcase (23kg)</option>
@@ -2643,9 +3051,9 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                                   if (journey.activeLuggageType === 'suitcase') setJ(j=>({...j,suitcaseCount:Math.max(0,(j.suitcaseCount||0)-1)}));
                                   else if (journey.activeLuggageType === 'handbag') setJ(j=>({...j,handbagCount:Math.max(0,(j.handbagCount||0)-1)}));
                                 }}
-                                style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderRight:"none", borderLeft:"none",
+                                style={{ width:40,border:`1.5px solid #dde0e8`,borderRight:"none", borderLeft:"none",
                                   background: (!journey.activeLuggageType || journey.activeLuggageType === 'none') ? "#f9fafb" : "#fff",
-                                  cursor:(!journey.activeLuggageType || journey.activeLuggageType === 'none')?"default":"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>−</button>
+                                  cursor:(!journey.activeLuggageType || journey.activeLuggageType === 'none')?"default":"pointer",fontSize:16,fontWeight:700,color:PX.navy800 }}>−</button>
                               
                               <input type="number" min={0} 
                                 disabled={!journey.activeLuggageType || journey.activeLuggageType === 'none'}
@@ -2655,7 +3063,7 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                                   if (journey.activeLuggageType === 'suitcase') setJ(j=>({...j,suitcaseCount:v}));
                                   else if (journey.activeLuggageType === 'handbag') setJ(j=>({...j,handbagCount:v}));
                                 }}
-                                style={{ width:46,textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",height:"100%", padding:0, border:`1.5px solid ${PX.gray200}`, borderLeftWidth:0, borderRightWidth:0,
+                                style={{ width:46,textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",height:"100%", padding:0, border:`1.5px solid #dde0e8`, borderLeftWidth:0, borderRightWidth:0,
                                   background: (!journey.activeLuggageType || journey.activeLuggageType === 'none') ? "#f9fafb" : "#fff" }}/>
                               
                               <button type="button" 
@@ -2664,10 +3072,10 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                                   if (journey.activeLuggageType === 'suitcase') setJ(j=>({...j,suitcaseCount:(j.suitcaseCount||0)+1}));
                                   else if (journey.activeLuggageType === 'handbag') setJ(j=>({...j,handbagCount:(j.handbagCount||0)+1}));
                                 }}
-                                style={{ width:42,border:`1.5px solid ${PX.gray200}`,borderLeft:"none",
-                                  borderRadius:"0 8px 8px 0",
+                                style={{ width:40,border:`1.5px solid #dde0e8`,borderLeft:"none",
+                                  borderRadius:"0 6px 6px 0",
                                   background: (!journey.activeLuggageType || journey.activeLuggageType === 'none') ? "#f9fafb" : "#fff",
-                                  cursor:(!journey.activeLuggageType || journey.activeLuggageType === 'none')?"default":"pointer",fontSize:18,fontWeight:700,color:PX.navy800 }}>＋</button>
+                                  cursor:(!journey.activeLuggageType || journey.activeLuggageType === 'none')?"default":"pointer",fontSize:16,fontWeight:700,color:PX.navy800 }}>＋</button>
                             </div>
                           </Field>
                         </div>
@@ -2680,7 +3088,7 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                         </div>
 
                         {/* ROW 5: Customer Contact Info */}
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem", marginTop: "0.5rem" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.25rem" }}>
                           <Field label="Full Name" required>
                             <input type="text" placeholder="e.g. John Doe" value={journey.name} onChange={e=>setJ(j=>({...j,name:e.target.value}))}/>
                           </Field>
@@ -2712,131 +3120,130 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                   </div>
                 </div>
               ) : (
-                  /* PAGE 2: QUOTATION PRICE SCREEN (2-column layout - Left: spacious Options, Right: Map & Checkout) */
-                  <div className="fade-up">
-                    
-                    {/* Sleek Horizontal Dark Journey Summary Header */}
-                    <div style={{ 
-                      background: `linear-gradient(135deg, ${PX.navy800} 0%, ${PX.navy700} 100%)`,
-                      borderRadius: 12,
-                      padding: "16px 24px",
-                      color: "#fff",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "1.5rem",
-                      boxShadow: "0 4px 15px rgba(13,14,72,0.1)",
-                      flexWrap: "wrap",
-                      gap: 12
-                    }}>
-                      <div>
-                        <div style={{ fontWeight: 800, fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}>
-                          <span>{journey.origin.split(',')[0]}</span>
-                          <span style={{ color: PX.brandRed }}>→</span>
-                          <span>{journey.destination.split(',')[0]}</span>
-                        </div>
-                        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", marginTop: 4, fontWeight: 500 }}>
-                          {journey.departureDate ? new Date(journey.departureDate).toLocaleString("en-GB") : ""} · {journey.passengers} Passengers · {journey.journeyType === "one-way" ? "One-way" : journey.journeyType === "return" ? "Return" : "Multi-stop"}
-                        </div>
+                /* PAGE 2: QUOTATION PRICE SCREEN */
+                <main style={{ maxWidth:1160, margin:"0 auto", padding:"2.5rem 1.5rem 5rem" }} className="fade-up">
+                  
+                  {/* Sleek Horizontal Dark Journey Summary Header */}
+                  <div style={{ 
+                    background: `linear-gradient(135deg, ${PX.navy800} 0%, ${PX.navy700} 100%)`,
+                    borderRadius: 12,
+                    padding: "20px 24px",
+                    color: "#fff",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "1.75rem",
+                    boxShadow: "0 4px 20px rgba(13,14,72,0.12)",
+                    flexWrap: "wrap",
+                    gap: 12
+                  }}>
+                    <div>
+                      <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: 18, display: "flex", alignItems: "center", gap: 8 }}>
+                        <span>{journey.origin.split(',')[0]}</span>
+                        <span style={{ color: PX.brandRed }}>→</span>
+                        <span>{journey.destination.split(',')[0]}</span>
                       </div>
-                      <Btn variant="ghost" size="sm" onClick={() => setShowQuotes(false)} style={{ color: "#fff", borderColor: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.06)" }}>
-                        ← Edit details
-                      </Btn>
+                      <div style={{ fontSize: 12.5, color: "rgba(255,255,255,0.75)", marginTop: 4, fontWeight: 500 }}>
+                        {journey.departureDate ? new Date(journey.departureDate).toLocaleString("en-GB") : ""} · {journey.passengers} Passengers · {journey.journeyType === "one-way" ? "One-way" : journey.journeyType === "return" ? "Return" : "Multi-stop"}
+                      </div>
+                    </div>
+                    <Btn variant="ghost" size="sm" onClick={() => setShowQuotes(false)} style={{ color: "#fff", borderColor: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.06)", borderRadius: 30 }}>
+                      ← Edit details
+                    </Btn>
+                  </div>
+
+                  {/* 2-Column Responsive Dashboard Layout */}
+                  <div className="results-layout">
+                    
+                    {/* LEFT COLUMN: Available Options */}
+                    <div className="left-panel-options">
+                      <Card style={{ padding: "2rem" }}>
+                        <SectionHead sub={`${journey.passengers} passengers · ${(journey.journeyType).replace("-"," ")}`}>
+                          Available Options
+                        </SectionHead>
+                        
+                        {loadingQuotes && quotes.length === 0 ? (
+                          <div style={{ padding: "2.5rem", textAlign: "center", color: PX.gray600 }}>
+                            <span className="spinning" style={{ marginRight: 8 }}>⟳</span> Fetching live options...
+                          </div>
+                        ) : (
+                          quotes.map(({vehicle, result}) => (
+                            <VehicleCard key={vehicle.id} vehicle={vehicle} result={result}
+                              selected={selected} onSelect={setSel}
+                              passengers={journey.passengers} suitcaseCount={journey.suitcaseCount}
+                              handbagCount={journey.handbagCount}/>
+                          ))
+                        )}
+                      </Card>
                     </div>
 
-                    {/* 2-Column Responsive Dashboard Layout */}
-                    <div className="results-layout">
+                    {/* RIGHT COLUMN: Map Card & Stacked Checkout Form */}
+                    <div className="right-panel-map" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                       
-                      {/* LEFT COLUMN: Available Options (Spacious full-width cards) */}
-                      <div className="left-panel-options">
-                        <Card style={{ padding: "1.5rem" }}>
-                          <SectionHead sub={`${journey.passengers} passengers · ${(journey.journeyType).replace("-"," ")}`}>
-                            Available Options
-                          </SectionHead>
-                          
-                          {loadingQuotes && quotes.length === 0 ? (
-                            <div style={{ padding: "2.5rem", textAlign: "center", color: PX.gray600 }}>
-                              <span className="spinning" style={{ marginRight: 8 }}>⟳</span> Fetching live options...
-                            </div>
-                          ) : (
-                            quotes.map(({vehicle, result}) => (
-                              <VehicleCard key={vehicle.id} vehicle={vehicle} result={result}
-                                selected={selected} onSelect={setSel}
-                                passengers={journey.passengers} suitcaseCount={journey.suitcaseCount}
-                                handbagCount={journey.handbagCount}/>
-                            ))
-                          )}
-                        </Card>
-                      </div>
-
-                      {/* RIGHT COLUMN: Map Card & Stacked Checkout Form */}
-                      <div className="right-panel-map" style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                      {/* Map Card */}
+                      <Card style={{ padding: "1.5rem" }}>
+                        <div style={{ fontSize:14, fontWeight:800, color:PX.navy800, marginBottom:"0.75rem", display:"flex", alignItems:"center", gap:8 }}>
+                          <SvgMap /> Route Planning & Dead Mileage
+                        </div>
                         
-                        {/* Map Card */}
-                        <Card style={{ padding: "1.25rem" }}>
-                          <div style={{ fontSize:14, fontWeight:800, color:PX.navy800, marginBottom:"0.75rem", display:"flex", alignItems:"center", gap:8 }}>
-                            <SvgMap /> Route Planning & Dead Mileage
+                        <RouteMap result={activeResult} journey={journey} gv={db.globalVars} />
+                      </Card>
+
+                      {/* Checkout Card */}
+                      {selected && (
+                        <Card style={{ border: `1.5px solid #10b981`, background: "#f0fdf4", padding: "1.5rem" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
+                            <div>
+                              <span style={{ fontSize: 11, fontWeight: 800, color: "#15803d", textTransform: "uppercase", letterSpacing: 0.5 }}>Selected Category</span>
+                              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 17, fontWeight: 900, color: PX.navy800, marginTop: 2 }}>{selectedQuote?.vehicle?.name}</div>
+                            </div>
+                            <div style={{ textAlign: "right" }}>
+                              <span style={{ fontSize: 11, fontWeight: 800, color: PX.gray500, textTransform: "uppercase" }}>Est. Fare</span>
+                              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 22, fontWeight: 900, color: PX.brandRed, marginTop: 2 }}>£{fmt(activeResult?.finalPrice || 0)}</div>
+                            </div>
                           </div>
                           
-                          <RouteMap result={activeResult} journey={journey} gv={db.globalVars} />
-                        </Card>
-
-                        {/* Checkout Card (Stacked directly below the Map) */}
-                        {selected && (
-                          <Card style={{ border: `2px solid ${PX.teal700}`, background: "#fafdfb", padding: "1.25rem" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                              <div>
-                                <span style={{ fontSize: 11, fontWeight: 700, color: PX.teal700, textTransform: "uppercase", letterSpacing: 0.5 }}>Selected Category</span>
-                                <div style={{ fontSize: 16, fontWeight: 800, color: PX.navy800, marginTop: 2 }}>{selectedQuote?.vehicle?.name}</div>
+                          {submitted ? (
+                            <div style={{ textAlign: "center", padding: "0.5rem 0" }}>
+                              <div style={{ display: "inline-flex", background: PX.teal100, borderRadius: "50%", padding: 8, marginBottom: 8, color: PX.teal700 }}>
+                                <SvgCheck size={24} />
                               </div>
-                              <div style={{ textAlign: "right" }}>
-                                <span style={{ fontSize: 11, fontWeight: 700, color: PX.gray400, textTransform: "uppercase" }}>Est. Fare</span>
-                                <div style={{ fontSize: 20, fontWeight: 900, color: PX.brandRed, marginTop: 2 }}>£{fmt(activeResult?.finalPrice || 0)}</div>
+                              <h3 style={{ fontSize: 16, fontWeight: 800, color: PX.teal700, marginBottom: 4 }}>Request Successfully Sent!</h3>
+                              <p style={{ fontSize: 12, color: PX.gray600 }}>We will contact you at <strong>{journey.email}</strong> within 2 hours.</p>
+                              <div style={{ background: PX.gray100, padding: "6px 12px", borderRadius: 6, display: "inline-block", fontFamily: "monospace", fontWeight: 700, fontSize: 12, color: PX.navy800, marginTop: 8 }}>
+                                REF: {bookingRef}
                               </div>
                             </div>
-                            
-                            {submitted ? (
-                              <div style={{ textAlign: "center", padding: "0.5rem 0" }}>
-                                <div style={{ display: "inline-flex", background: PX.teal100, borderRadius: "50%", padding: 8, marginBottom: 8, color: PX.teal700 }}>
-                                  <SvgCheck size={24} />
-                                </div>
-                                <h3 style={{ fontSize: 16, fontWeight: 800, color: PX.teal700, marginBottom: 4 }}>Request Successfully Sent!</h3>
-                                <p style={{ fontSize: 12, color: PX.gray600 }}>We will contact you at <strong>{journey.email}</strong> within 2 hours.</p>
-                                <div style={{ background: PX.gray100, padding: "6px 12px", borderRadius: 6, display: "inline-block", fontFamily: "monospace", fontWeight: 700, fontSize: 12, color: PX.navy800, marginTop: 8 }}>
-                                  REF: {bookingRef}
-                                </div>
-                              </div>
-                            ) : (
-                              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                                <Field label="Company / Organisation Name (Optional)">
-                                  <input type="text" placeholder="e.g. Acme Corporation" value={journey.company} onChange={e=>setJ(j=>({...j,company:e.target.value}))}/>
-                                </Field>
-                                <Btn variant="teal" size="md" full onClick={handleFinalBookingSubmit} disabled={submitting}>
-                                  {submitting ? <><span className="spinning" style={{ marginRight: 6 }}>⟳</span> Sending...</> : "Submit Quote Request"}
-                                </Btn>
-                                <p style={{ fontSize: 9.5, color: PX.gray400, textAlign: "center" }}>
-                                  This request is non-binding and subject to final vehicle/driver dispatch confirmation.
-                                </p>
-                              </div>
-                            )}
-                          </Card>
-                        )}
+                          ) : (
+                            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                              <Field label="Company / Organisation Name (Optional)">
+                                <input type="text" placeholder="e.g. Acme Corporation" value={journey.company} onChange={e=>setJ(j=>({...j,company:e.target.value}))}/>
+                              </Field>
+                              <Btn variant="teal" size="md" full onClick={handleFinalBookingSubmit} disabled={submitting}>
+                                {submitting ? <><span className="spinning" style={{ marginRight: 6 }}>⟳</span> Sending...</> : "Submit Quote Request"}
+                              </Btn>
+                              <p style={{ fontSize: 9.5, color: PX.gray400, textAlign: "center" }}>
+                                This request is non-binding and subject to final vehicle/driver dispatch confirmation.
+                              </p>
+                            </div>
+                          )}
+                        </Card>
+                      )}
 
-                        {/* Operational Base Depot Box */}
-                        <div style={{ padding:"10px 14px", background:PX.gray50, borderRadius:8, fontSize:11, color:PX.gray600, border:`1px solid ${PX.gray200}` }}>
-                          <strong>Operational Base Depot:</strong> Unit 1, Bentley Lane, Walsall WS2 8TL<br/>
-                          <span style={{ color:PX.gray400, fontSize:10.5, marginTop:2, display:"inline-block" }}>All coach hires require calculation of dead mileage (empty routing from and to the Walsall depot base). Included above.</span>
-                        </div>
-
+                      {/* Operational Base Depot Box */}
+                      <div style={{ padding:"12px 16px", background:"#fff", borderRadius:8, fontSize:11.5, color:PX.gray600, border:`1px solid #dde0e8`, lineHeight: 1.4 }}>
+                        <strong>Operational Base Depot:</strong> Unit 1, Bentley Lane, Walsall WS2 8TL<br/>
+                        <span style={{ color:PX.gray500, fontSize:10.5, marginTop:3, display:"inline-block" }}>All coach hires require calculation of dead mileage (empty routing from and to the Walsall depot base). Included above.</span>
                       </div>
 
                     </div>
-                  </div>
-                )}
 
-              </div>
-          )}
-        </main>
+                  </div>
+                </main>
+              )}
+
+            </div>
+        )}
         
         <footer style={{ background: PX.offWhite, borderTop: `1px solid ${PX.gray200}`, padding: "2rem 1.5rem", textAlign: "center", fontSize: 12, color: PX.gray600 }}>
           <div style={{ maxWidth: 1140, margin: "0 auto", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
