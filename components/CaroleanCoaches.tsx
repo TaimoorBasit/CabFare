@@ -3013,35 +3013,37 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                       {/* ROW 4: Load & Luggage */}
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.25rem" }}>
                           <Field label="Vehicle Preference (Optional)">
-                            <select
-                              value={journey.vehiclePreference || db.vehicles?.[0]?.id || ''}
-                              onChange={e=>setJ(j=>({...j,vehiclePreference:e.target.value}))}
-                              style={{ width: "100%", height: 42, padding: "8px 12px", borderRadius: 6, border: `1.5px solid #dde0e8`, fontSize: 14, color: PX.navy800, background: "#fff", cursor: "pointer" }}
-                            >
-                              {db.vehicles?.map(v => (
-                                <option key={v.id} value={v.id}>{v.name}</option>
-                              ))}
-                            </select>
+                            <div style={{ height: 42 }}>
+                              <select
+                                value={journey.vehiclePreference || db.vehicles?.[0]?.id || ''}
+                                onChange={e=>setJ(j=>({...j,vehiclePreference:e.target.value}))}
+                                style={{ width: "100%", height: "100%", boxSizing: "border-box", margin: 0, padding: "8px 12px", borderRadius: 6, border: `1.5px solid #dde0e8`, fontSize: 14, color: PX.navy800, background: "#fff", cursor: "pointer" }}
+                              >
+                                {db.vehicles?.map(v => (
+                                  <option key={v.id} value={v.id}>{v.name}</option>
+                                ))}
+                              </select>
+                            </div>
                           </Field>
                           <Field label="Number of Passengers" required>
-                            <div style={{ display:"flex", height: 42 }}>
+                            <div style={{ display:"flex", height: 42, alignItems: "stretch" }}>
                               <button type="button" onClick={()=>{
                                 const p = Math.max(1,journey.passengers-1);
                                 setJ(j=>({...j,passengers:p, suitcaseCount:p, handbagCount:p}));
                               }}
-                                style={{ width:40,border:`1.5px solid #dde0e8`,borderRight:"none",
+                                style={{ width:40, height: "100%", boxSizing: "border-box", margin: 0, border:`1.5px solid #dde0e8`,borderRight:"none",
                                   borderRadius:"6px 0 0 6px",background:"#fff",cursor:"pointer",fontSize:16,fontWeight:700,color:PX.navy800 }}>−</button>
                               <input type="number" min={1} max={70} value={journey.passengers}
                                 onChange={e=>{
                                   const p = parseInt(e.target.value)||16;
                                   setJ(j=>({...j,passengers:p, suitcaseCount:p, handbagCount:p}));
                                 }}
-                                style={{ width:60,textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",height:"100%",fontWeight:700, border:`1.5px solid #dde0e8`, borderLeftWidth:0, borderRightWidth:0 }}/>
+                                style={{ width:60, height: "100%", boxSizing: "border-box", margin: 0, textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",fontWeight:700, border:`1.5px solid #dde0e8`, borderLeftWidth:0, borderRightWidth:0 }}/>
                               <button type="button" onClick={()=>{
                                 const p = Math.min(70,journey.passengers+1);
                                 setJ(j=>({...j,passengers:p, suitcaseCount:p, handbagCount:p}));
                               }}
-                                style={{ width:40,border:`1.5px solid #dde0e8`,borderLeft:"none",
+                                style={{ width:40, height: "100%", boxSizing: "border-box", margin: 0, border:`1.5px solid #dde0e8`,borderLeft:"none",
                                   borderRadius:"0 6px 6px 0",background:"#fff",cursor:"pointer",fontSize:16,fontWeight:700,color:PX.navy800 }}>＋</button>
                             </div>
                           </Field>
