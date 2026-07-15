@@ -1,10 +1,8 @@
 import { getDatabase } from './db';
 
-// Using fetch to get directions from Google API
 export async function getDirections(origin: any, destination: any, waypoints: any[] = [], apiKey: string) {
   if (!apiKey) throw new Error("Google Maps API key is required");
 
-  // Format waypoints for Google API
   let waypointsStr = '';
   if (waypoints.length > 0) {
     waypointsStr = '&waypoints=' + waypoints.map(w => formatLoc(w)).join('|');
@@ -14,7 +12,7 @@ export async function getDirections(origin: any, destination: any, waypoints: an
 
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Google Maps API error: ${res.statusText}`);
-  
+
   const data = await res.json();
   if (data.status !== 'OK') {
     throw new Error(`Google Maps API failed: ${data.status} - ${data.error_message || ''}`);
@@ -58,12 +56,10 @@ export async function calculateMileage(journey: any) {
     const distanceUnit = db.data?.globalVars?.distanceUnit || 'km';
     const divisor = distanceUnit === 'miles' ? 1609.34 : 1000;
 
-    // 2. Calculate Dead Mileage (Yard to Origin, Destination to Yard)
     const deadOutDirections = await getDirections(yardLoc, liveOrigin, [], apiKey);
     const deadOutDistanceMeters = sumLegs(deadOutDirections.routes[0].legs, 'distance');
     const deadOutDurationSeconds = sumLegs(deadOutDirections.routes[0].legs, 'duration');
-    
-    // For return trips, we double the live distance/duration and the dead back is from origin instead of destination.
+
     const isReturn = journey.journeyType === 'return';
     if (isReturn) {
       liveDistanceMeters *= 2;
@@ -96,16 +92,14 @@ function sumLegs(legs: any[], key: 'distance'|'duration') {
   return legs.reduce((sum, leg) => sum + leg[key].value, 0);
 }
 
-// Haversine fallback if API fails
 function haversineKm(a: any, b: any) {
   if (!a || !b) return 60;
-  // Just dummy logic for fallback since real coordinates might be missing
+
   return 60;
 }
 
 function fallbackCalculateMileage(journey: any) {
-  // Simple fallback logic if Google Maps is disabled or fails
-  // Since we don't have the exact geocoder here, just return dummy or approximated values
+
   const isReturn = journey.journeyType === 'return';
   const liveKm = isReturn ? 200 : 100;
   const deadKm = 40;

@@ -12,7 +12,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 
 export async function createUser(email: string, password: string, name: string): Promise<User> {
   const db = await getDatabase();
-  
+
   const existing = db.data.users.find(u => u.email === email);
   if (existing) {
     throw new Error('User already exists');

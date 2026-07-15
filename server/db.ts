@@ -138,14 +138,14 @@ export async function initDatabase(): Promise<Low<DatabaseSchema>> {
   }
 
   db = new Low(adapter, seedData as any as DatabaseSchema);
-  
+
   await db.read();
-  
+
   if (!db.data || Object.keys(db.data).length === 0) {
     db.data = seedData as any as DatabaseSchema;
     await db.write();
   }
-  
+
   return db;
 }
 

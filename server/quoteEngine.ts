@@ -8,14 +8,12 @@ export async function generateQuotes(journey: any) {
   const data = db.data;
   if (!data || !data.vehicles) throw new Error("Database missing vehicles");
 
-  // 1. Calculate mileage and geometry once for the journey
   const mileageResult = await calculateMileage(journey);
 
   const quotes = [];
 
-  // 2. Iterate through vehicles
   for (const vehicle of data.vehicles as any[]) {
-    // 3. Check availability
+
     const isAvailable = await checkAvailability({
       vehicleId: vehicle.id,
       passengers: journey.passengers,
@@ -25,11 +23,6 @@ export async function generateQuotes(journey: any) {
       handbagCount: journey.handbagCount
     });
 
-    // We no longer skip vehicles if they are unavailable. The frontend will still display them
-    // and correctly show any capacity warnings ("Exceeds capacity" badge), but the price
-    // will be returned so the customer can see it regardless of fleet availability limits.
-
-    // 4. Calculate price
     const pricingResult = await calculatePrice({
       liveKm: mileageResult.liveKm,
       deadKm: mileageResult.deadKm,
@@ -44,7 +37,7 @@ export async function generateQuotes(journey: any) {
       destinationName: String(journey.destination),
       originCoords: journey.wpCoords?.[0] || null,
       destinationCoords: journey.wpCoords?.[journey.wpCoords?.length - 1] || null,
-      waypoints: mileageResult.geometry ? [] : [], // Geometry contains points we can use for waypoints if needed, but we'll stick to WP coords for now.
+      waypoints: mileageResult.geometry ? [] : [], 
       waitingMins: journey.waitingMins,
       departureDate: journey.departureDate,
       returnDate: journey.returnDate
@@ -52,7 +45,6 @@ export async function generateQuotes(journey: any) {
 
     const requiredVehicles = Math.ceil((journey.passengers || 1) / (vehicle.capacity || 1));
 
-    // 5. Structure the quote response
     quotes.push({
       vehicle,
       result: {
@@ -62,11 +54,11 @@ export async function generateQuotes(journey: any) {
         subtotal: (pricingResult.baseFare + pricingResult.extraLiveMileageCharge + pricingResult.extraDeadMileageCharge + pricingResult.waitingCharge) * requiredVehicles,
         surchargeLines: pricingResult.surchargeLines.map(s => ({...s, cost: s.cost * requiredVehicles})),
         surchargeTotal: pricingResult.surchargeTotal * requiredVehicles,
-        chain: mileageResult.legs, // Using the Google legs instead of the custom chain for now, or adapt later
+        chain: mileageResult.legs, 
         geometry: mileageResult.geometry,
-        pts: [journey.wpCoords?.[0] || {lat:0, lng:0}, journey.wpCoords?.[1] || {lat:0, lng:0}], // Approximation for map pins
+        pts: [journey.wpCoords?.[0] || {lat:0, lng:0}, journey.wpCoords?.[1] || {lat:0, lng:0}], 
         isManualQuote: pricingResult.isManualQuote,
-        belowMin: false, // New engine doesn't enforce old min hire unless configured
+        belowMin: false, 
         opDays: (journey.returnDate && journey.departureDate && new Date(journey.returnDate) > new Date(journey.departureDate)) ? Math.max(1, Math.ceil((new Date(journey.returnDate).getTime() - new Date(journey.departureDate).getTime()) / 86400000) + 1) : 1,
         totalShiftHrs: Math.round(((mileageResult.totalDurationMinutes + Number(journey.waitingMins || 0)) / 60) * 10) / 10
       }

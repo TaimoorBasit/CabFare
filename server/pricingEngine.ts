@@ -20,7 +20,6 @@ interface PricingInput {
   returnDate?: string;
 }
 
-// Haversine distance in km
 function haversineKm(a: {lat: number, lng: number}, b: {lat: number, lng: number}) {
   if (!a || !b || !a.lat || !b.lat) return 9999;
   const R = 6371; 
@@ -33,9 +32,7 @@ function haversineKm(a: {lat: number, lng: number}, b: {lat: number, lng: number
 function matchLocation(coord: {lat: number, lng: number} | null | undefined, name: string | null | undefined, ruleGeo: {lat: number, lng: number} | null | undefined, ruleName: string | null | undefined, radiusKm: number) {
   const normRuleName = ruleName || 'Any';
   if (normRuleName.toLowerCase() === 'any') return true;
-  
-  // If rule has GPS and we have query coordinates, check radius.
-  // Fall back to a default of 10km if radiusKm is not > 0 (for pricing matrix rules).
+
   const checkRadius = radiusKm > 0 ? radiusKm : 10;
   if (ruleGeo && ruleGeo.lat && coord && coord.lat) {
     if (haversineKm(coord, ruleGeo) <= checkRadius) {
@@ -43,7 +40,6 @@ function matchLocation(coord: {lat: number, lng: number} | null | undefined, nam
     }
   }
 
-  // Fallback to string matching: check both ways (rule includes search, or search includes rule)
   const normName = name || '';
   const n1 = normName.toLowerCase().trim();
   const n2 = normRuleName.toLowerCase().trim();
@@ -132,12 +128,12 @@ export async function calculatePrice(input: PricingInput) {
       waitingCharge = (waitingMins / 60) * matrix.waitingChargePerHour;
       preSurchargeBase = baseFare + extraLiveMileageCharge + extraDeadMileageCharge + waitingCharge;
     } else {
-      // 3. Fallback: Fleet Economics Engine (Dynamic Calculation)
+
       isManualQuote = true;
-      
+
       const totalKm = liveKm + deadKm;
       const gv = data.globalVars || {};
-      const drivHrs = input.totalDurationMinutes / 60; // Use actual duration from Google Maps API
+      const drivHrs = input.totalDurationMinutes / 60; 
       const waitHrs = (Number(waitingMins) || 0) / 60;
       const shiftHrs = drivHrs + waitHrs;
       const dualCrew = shiftHrs > 9;
@@ -146,58 +142,50 @@ export async function calculatePrice(input: PricingInput) {
       if (returnDate && departureDate && new Date(returnDate) > new Date(departureDate)) {
         opDays = Math.max(1, Math.ceil((new Date(returnDate).getTime() - new Date(departureDate).getTime()) / 86400000) + 1);
       }
-      
-      // Standing rate
+
       const totalAnnualFixed = (vehicle.annualCosts || []).reduce((s: number, c: any) => s + Number(c.cost), 0);
       const fleetCount = vehicle.fleetCount || 1;
       const annualFixed = totalAnnualFixed / fleetCount;
       const rStanding = annualFixed / (vehicle.utilisationDays || 225);
 
-      // Variable Cost
       const fuelPrice = vehicle.fuelPricePerLitre ?? gv.fuelPricePerLitre ?? 1.52;
       const fuelPerKm = fuelPrice / (vehicle.fuelKpl || 5);
       const tyrePerKm = vehicle.tyreCostPerKm ?? 0.05;
       const maintPerKm = vehicle.maintenanceCostPerKm || 0.15;
       const cRunning = fuelPerKm + tyrePerKm + maintPerKm;
 
-      // Driver Wages
       const driverWage = vehicle.driverHourlyWage ?? gv.driverHourlyWage ?? 17.50;
       const holPayPct = vehicle.holidayPayPct ?? gv.holidayPayPct ?? 12.07;
       const baseWage = driverWage * shiftHrs * opDays;
       const holPay = baseWage * (holPayPct / 100);
       const driverCost = (baseWage + holPay) * (dualCrew ? 2 : 1);
 
-      // Raw Subtotal
       const rawSubtotal = (rStanding * opDays) + (cRunning * totalKm) + driverCost;
-      
+
       baseFare = rawSubtotal;
       preSurchargeBase = baseFare;
     }
   }
 
-  // 4. Route Surcharges
   const surcharges = data.surcharges || {};
   let surchargeTotal = 0;
   let surchargeLines: {label: string, cost: number}[] = [];
 
-  // London ULEZ (Radius 35km from central)
   const londonCenter = {lat: 51.5074, lng: -0.1278};
   const goesLondon = (originCoords && haversineKm(originCoords, londonCenter) < 35) || 
                      (destinationCoords && haversineKm(destinationCoords, londonCenter) < 35) ||
                      originName?.toLowerCase().includes("london") || destinationName?.toLowerCase().includes("london");
 
-  // Birmingham CAZ (Radius 10km)
   const birmCenter = {lat: 52.4862, lng: -1.8904};
   const goesBirm = (originCoords && haversineKm(originCoords, birmCenter) < 10) || 
                    (destinationCoords && haversineKm(destinationCoords, birmCenter) < 10) ||
                    originName?.toLowerCase().includes("birmingham") || destinationName?.toLowerCase().includes("birmingham");
 
-  // Dartford Crossing (Radius 15km)
   const dartfordCenter = {lat: 51.4614, lng: 0.2261};
   const goesDartford = (originCoords && haversineKm(originCoords, dartfordCenter) < 15) || 
                        (destinationCoords && haversineKm(destinationCoords, dartfordCenter) < 15) ||
                        originName?.toLowerCase().includes("dartford") || destinationName?.toLowerCase().includes("dartford");
-  
+
   if (goesLondon) {
     surchargeTotal += surcharges.ulez || 12.5;
     surchargeLines.push({ label: "London ULEZ / CAZ", cost: surcharges.ulez || 12.5 });
@@ -210,7 +198,7 @@ export async function calculatePrice(input: PricingInput) {
     surchargeTotal += surcharges.dartford || 2.5;
     surchargeLines.push({ label: "Dartford Crossing", cost: surcharges.dartford || 2.5 });
   }
-  
+
   let opDays = 1;
   if (returnDate && departureDate && new Date(returnDate) > new Date(departureDate)) {
     opDays = Math.max(1, Math.ceil((new Date(returnDate).getTime() - new Date(departureDate).getTime()) / 86400000) + 1);
@@ -221,12 +209,11 @@ export async function calculatePrice(input: PricingInput) {
     surchargeLines.push({ label: `Driver subsistence ×${opDays-1}`, cost: sub });
   }
 
-  // 5. Apply Profit Margin & Minimum Hire (only for Fleet Economics fallback)
   let finalFare = preSurchargeBase + surchargeTotal;
   const gv = data.globalVars || {};
 
   if (isManualQuote) {
-    // If vehicle has its own profit margin, use it. Otherwise fallback to global or 28%.
+
     const vehicleProfitPct = vehicle?.profitMarginPct ?? gv.profitMarginPct ?? 28;
     const profitMargin = vehicleProfitPct / 100;
     finalFare = finalFare * (1 + profitMargin);
@@ -238,17 +225,16 @@ export async function calculatePrice(input: PricingInput) {
       opDays = Math.max(1, Math.ceil((new Date(returnDate).getTime() - new Date(departureDate).getTime()) / 86400000) + 1);
     }
     const minHire = (vEco ? vEco.minHirePerDay : 0) * opDays;
-    
+
     if (finalFare < minHire) {
       finalFare = minHire;
     }
   }
 
-  // Add extra profit for luggage beyond vehicle capacity
   const suitcaseCount = Number(input.suitcaseCount) || 0;
   const handbagCount = Number(input.handbagCount) || 0;
   const cap = vehicle.capacity || 16;
-  
+
   const extraSuitcases = Math.max(0, suitcaseCount - cap);
   const extraHandbags = Math.max(0, handbagCount - cap);
   const totalExtraBags = extraSuitcases + extraHandbags;
@@ -259,10 +245,9 @@ export async function calculatePrice(input: PricingInput) {
     finalFare = finalFare * extraLuggageMultiplier;
   }
 
-  // 6. Seasonal Adjustment
   let seasonalMultiplier = 1;
   const depDateObj = new Date(departureDate);
-  
+
   const applicableSeasons = data.seasonalPricing.filter(s => 
     s.enabled && 
     new Date(s.startDate) <= depDateObj && 
