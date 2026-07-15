@@ -3046,11 +3046,11 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                             </div>
                           </Field>
                           <Field label="Luggage Requirements">
-                            <div style={{ display:"flex", height: 42 }}>
+                            <div style={{ display:"flex", height: 42, alignItems: "stretch" }}>
                               <select 
                                 value={journey.activeLuggageType || 'none'} 
                                 onChange={e=>setJ(j=>({...j,activeLuggageType:e.target.value}))}
-                                style={{ flex: 1, borderRadius:"6px 0 0 6px", borderRight:"none", border:`1.5px solid #dde0e8`, borderRightWidth:0 }}
+                                style={{ flex: 1, boxSizing: "border-box", margin: 0, borderRadius:"6px 0 0 6px", borderRight:"none", border:`1.5px solid #dde0e8`, borderRightWidth:0 }}
                               >
                                 <option value="none">None</option>
                                 <option value="suitcase">Suitcase (23kg)</option>
@@ -3063,7 +3063,7 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                                   if (journey.activeLuggageType === 'suitcase') setJ(j=>({...j,suitcaseCount:Math.max(0,(j.suitcaseCount||0)-1)}));
                                   else if (journey.activeLuggageType === 'handbag') setJ(j=>({...j,handbagCount:Math.max(0,(j.handbagCount||0)-1)}));
                                 }}
-                                style={{ width:40,border:`1.5px solid #dde0e8`,borderRight:"none", borderLeft:"none",
+                                style={{ width:40, boxSizing: "border-box", margin: 0, border:`1.5px solid #dde0e8`,borderRight:"none", borderLeft:"none",
                                   background: (!journey.activeLuggageType || journey.activeLuggageType === 'none') ? "#f9fafb" : "#fff",
                                   cursor:(!journey.activeLuggageType || journey.activeLuggageType === 'none')?"default":"pointer",fontSize:16,fontWeight:700,color:PX.navy800 }}>−</button>
                               
@@ -3075,7 +3075,7 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                                   if (journey.activeLuggageType === 'suitcase') setJ(j=>({...j,suitcaseCount:v}));
                                   else if (journey.activeLuggageType === 'handbag') setJ(j=>({...j,handbagCount:v}));
                                 }}
-                                style={{ width:46,textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",height:"100%", padding:0, border:`1.5px solid #dde0e8`, borderLeftWidth:0, borderRightWidth:0,
+                                style={{ width:46, boxSizing: "border-box", margin: 0, textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",height:"100%", padding:0, border:`1.5px solid #dde0e8`, borderLeftWidth:0, borderRightWidth:0,
                                   background: (!journey.activeLuggageType || journey.activeLuggageType === 'none') ? "#f9fafb" : "#fff" }}/>
                               
                               <button type="button" 
@@ -3084,7 +3084,7 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                                   if (journey.activeLuggageType === 'suitcase') setJ(j=>({...j,suitcaseCount:(j.suitcaseCount||0)+1}));
                                   else if (journey.activeLuggageType === 'handbag') setJ(j=>({...j,handbagCount:(j.handbagCount||0)+1}));
                                 }}
-                                style={{ width:40,border:`1.5px solid #dde0e8`,borderLeft:"none",
+                                style={{ width:40, boxSizing: "border-box", margin: 0, border:`1.5px solid #dde0e8`,borderLeft:"none",
                                   borderRadius:"0 6px 6px 0",
                                   background: (!journey.activeLuggageType || journey.activeLuggageType === 'none') ? "#f9fafb" : "#fff",
                                   cursor:(!journey.activeLuggageType || journey.activeLuggageType === 'none')?"default":"pointer",fontSize:16,fontWeight:700,color:PX.navy800 }}>＋</button>
