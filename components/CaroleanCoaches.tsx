@@ -2702,6 +2702,7 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
     journeyType:"one-way", origin:"", destination:"",
     departureDate:"", returnDate:"",
     passengers:16, suitcaseCount:16, handbagCount:16, waitingMins:0,
+    vehiclePreference: "Any",
     waypoints:[], wpCoords:[], stops:[],
     name: "", phone: "", email: "", company: "", specialRequests: ""
   });
@@ -3077,6 +3078,18 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                                   background: (!journey.activeLuggageType || journey.activeLuggageType === 'none') ? "#f9fafb" : "#fff",
                                   cursor:(!journey.activeLuggageType || journey.activeLuggageType === 'none')?"default":"pointer",fontSize:16,fontWeight:700,color:PX.navy800 }}>＋</button>
                             </div>
+                          </Field>
+                          <Field label="Vehicle Preference (Optional)">
+                            <select
+                              value={journey.vehiclePreference || 'Any'}
+                              onChange={e=>setJ(j=>({...j,vehiclePreference:e.target.value}))}
+                              style={{ width: "100%", height: 42, padding: "8px 12px", borderRadius: 6, border: `1.5px solid #dde0e8`, fontSize: 14, color: PX.navy800, background: "#fff", cursor: "pointer" }}
+                            >
+                              <option value="Any">No Preference</option>
+                              {db.vehicles?.map(v => (
+                                <option key={v.id} value={v.id}>{v.name}</option>
+                              ))}
+                            </select>
                           </Field>
                         </div>
 
