@@ -1174,7 +1174,7 @@ function Navbar() {
         
         {/* Logo and Brand Title */}
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <SvgCoach size={28} color={PX.brandRed} />
+          <img src="/carolean image.png" alt="Carolean Coaches Logo" style={{ height: 32, width: "auto" }} />
           <div>
             <div style={{ color:"#fff", fontFamily:"'Outfit', sans-serif", fontWeight:900, fontSize:19, letterSpacing:-0.3, lineHeight:1.1 }}>Carolean Coaches</div>
             <div style={{ color: PX.amber500, fontSize:9, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", marginTop: 1 }}>Premium Travel</div>
