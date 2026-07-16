@@ -2707,7 +2707,7 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
               <div>
                 {/* Full-width brand hero banner */}
                 <div style={{ 
-                  backgroundImage: "url('/header-bg.png')",
+                  backgroundImage: "linear-gradient(rgba(19, 21, 92, 0.65), rgba(19, 21, 92, 0.65)), url('/header-bg.png')",
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                   backgroundRepeat: "no-repeat",
@@ -2717,22 +2717,23 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                 }}>
                   <div style={{ maxWidth: 800, margin: "0 auto" }}>
                     <span style={{ 
-                      background: "rgba(255,255,255,0.06)", 
-                      border: "1px solid rgba(255,255,255,0.15)", 
+                      background: "rgba(19, 21, 92, 0.8)", 
+                      border: "1px solid rgba(255,255,255,0.2)", 
                       padding: "5px 14px", 
                       borderRadius: 30, 
                       fontSize: 10.5, 
                       fontWeight: 800, 
                       letterSpacing: 1.5, 
                       textTransform: "uppercase", 
-                      color: PX.amber500 
+                      color: PX.amber500,
+                      boxShadow: "0 2px 10px rgba(0,0,0,0.2)"
                     }}>
                       Instant fleet fare calculator
                     </span>
-                    <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: "3.25rem", fontWeight: 950, marginTop: 16, letterSpacing: -0.8, lineHeight: 1.1 }}>
+                    <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: "3.25rem", fontWeight: 950, marginTop: 16, letterSpacing: -0.8, lineHeight: 1.1, textShadow: "0 4px 20px rgba(0,0,0,0.4)" }}>
                       Your Journey, Our Priority
                     </h1>
-                    <p style={{ fontFamily: "'Figtree', sans-serif", fontSize: "1.1rem", color: "rgba(255,255,255,0.75)", fontWeight: 500, maxWidth: 650, margin: "1rem auto 0", lineHeight: 1.5 }}>
+                    <p style={{ fontFamily: "'Figtree', sans-serif", fontSize: "1.1rem", color: "rgba(255,255,255,0.9)", fontWeight: 500, maxWidth: 650, margin: "1rem auto 0", lineHeight: 1.5, textShadow: "0 2px 10px rgba(0,0,0,0.4)" }}>
                       With our modern fleet, professional drivers, and flexible booking options, Carolean Coaches makes every journey smooth, safe, and enjoyable.
                     </p>
                   </div>
