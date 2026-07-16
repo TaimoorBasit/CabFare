@@ -1168,7 +1168,7 @@ function RouteMap({ result, journey, gv }) {
 // ── Navbar ────────────────────────────────────────────────────────────────────
 function Navbar() {
   return (
-    <header style={{ background: `url('/header-bg.png') center/cover no-repeat, ${PX.navy800}`, borderTop: `4px solid ${PX.brandRed}`, position:"sticky", top:0, zIndex:100, boxShadow:"0 4px 20px rgba(0,0,0,.15)" }}>
+    <header style={{ background: PX.navy800, borderTop: `4px solid ${PX.brandRed}`, position:"sticky", top:0, zIndex:100, boxShadow:"0 4px 20px rgba(0,0,0,.15)" }}>
       <div style={{ maxWidth:1160, margin:"0 auto", padding:"0 1.5rem",
         display:"flex", alignItems:"center", justifyContent:"space-between", height:72 }}>
         
