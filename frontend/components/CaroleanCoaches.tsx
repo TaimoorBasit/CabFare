@@ -2707,7 +2707,10 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
               <div>
                 {/* Full-width brand hero banner */}
                 <div style={{ 
-                  background: `radial-gradient(circle at 80% 20%, #13155c 0%, ${PX.navy800} 100%)`,
+                  backgroundImage: "url('/header-bg.png')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
                   padding: "5.5rem 1.5rem 7.5rem",
                   color: "#fff",
                   textAlign: "center"
