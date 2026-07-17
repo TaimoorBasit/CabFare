@@ -19944,7 +19944,7 @@
       "name": "Standard Bus",
       "emoji": "bus",
       "desc": "Mid-size groups & day trips",
-      "capacity": 35,
+      "capacity": 33,
       "fleetCount": 2,
       "utilisationDays": 225,
       "annualCosts": [
@@ -19974,7 +19974,7 @@
       "name": "Premium Coach",
       "emoji": "coach",
       "desc": "Full-size luxury for large groups",
-      "capacity": 53,
+      "capacity": 51,
       "fleetCount": 1,
       "utilisationDays": 225,
       "annualCosts": [
@@ -20005,7 +20005,9 @@
     "driverHourlyWage": 17.5,
     "holidayPayPct": 12.07,
     "profitMarginPct": 28,
-    "yardAddress": ""
+    "yardAddress": "Unit 2 Bentley Ln, Walsall WS2 8TL, UK",
+    "yardLat": 52.5916536,
+    "yardLng": -2.0071041
   },
   "surcharges": {
     "m6Toll": 6.5,

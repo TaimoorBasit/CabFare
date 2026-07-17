@@ -23,6 +23,12 @@ export async function generateQuotes(journey: any) {
       handbagCount: journey.handbagCount
     });
 
+    const usableCapacity = vehicle.capacity || 1;
+    const requiredVehicles = Math.max(1, Math.ceil((journey.passengers || 1) / usableCapacity));
+    const paxPerVehicle = Math.ceil((journey.passengers || 0) / requiredVehicles);
+    const suitcasesPerVehicle = Math.ceil((journey.suitcaseCount || 0) / requiredVehicles);
+    const handbagsPerVehicle = Math.ceil((journey.handbagCount || 0) / requiredVehicles);
+
     const pricingResult = await calculatePrice({
       liveKm: mileageResult.liveKm,
       deadKm: mileageResult.deadKm,
@@ -30,9 +36,9 @@ export async function generateQuotes(journey: any) {
       totalDurationMinutes: mileageResult.totalDurationMinutes,
       vehicleId: vehicle.id,
       journeyType: journey.journeyType,
-      passengers: journey.passengers,
-      suitcaseCount: journey.suitcaseCount,
-      handbagCount: journey.handbagCount,
+      passengers: paxPerVehicle,
+      suitcaseCount: suitcasesPerVehicle,
+      handbagCount: handbagsPerVehicle,
       originName: String(journey.origin),
       destinationName: String(journey.destination),
       originCoords: journey.wpCoords?.[0] || null,
@@ -43,7 +49,7 @@ export async function generateQuotes(journey: any) {
       returnDate: journey.returnDate
     });
 
-    const requiredVehicles = Math.ceil((journey.passengers || 1) / (vehicle.capacity || 1));
+    // requiredVehicles already calculated above
 
     quotes.push({
       vehicle,

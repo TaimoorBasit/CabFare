@@ -27,6 +27,8 @@ function formatLoc(loc: any) {
   return '';
 }
 
+const mileageCache = new Map<string, any>();
+
 export async function calculateMileage(journey: any) {
   const db = await getDatabase();
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || (db.data as any)?.googleApiKey || '';
@@ -48,8 +50,15 @@ export async function calculateMileage(journey: any) {
   const liveDestination = livePoints[livePoints.length - 1];
   const liveWaypoints = livePoints.slice(1, -1);
 
-  try {
-    // 1. Calculate Live Mileage
+  const isReturn = journey.journeyType === 'return';
+  const cacheKey = JSON.stringify({ liveOrigin, liveDestination, liveWaypoints, yardLoc, isReturn });
+  if (mileageCache.has(cacheKey)) {
+    return await mileageCache.get(cacheKey);
+  }
+
+  const mileagePromise = (async () => {
+    try {
+      // 1. Calculate Live Mileage
     const liveDirections = await getDirections(liveOrigin, liveDestination, liveWaypoints, apiKey);
     let liveDistanceMeters = sumLegs(liveDirections.routes[0].legs, 'distance');
     let liveDurationSeconds = sumLegs(liveDirections.routes[0].legs, 'duration');
@@ -73,7 +82,7 @@ export async function calculateMileage(journey: any) {
     const liveKm = liveDistanceMeters / divisor;
     const deadKm = (deadOutDistanceMeters + deadBackDistanceMeters) / divisor;
 
-    return {
+    const result = {
       liveKm,
       deadKm,
       totalKm: liveKm + deadKm,
@@ -82,10 +91,16 @@ export async function calculateMileage(journey: any) {
       geometry: liveDirections.routes[0].overview_polyline.points,
       legs: liveDirections.routes[0].legs
     };
-  } catch (error) {
+    return result;
+  } catch (error: any) {
     console.error("Mileage engine error:", error);
+    require('fs').appendFileSync('mileage_error.log', new Date().toISOString() + ' - ' + error.message + '\n');
     return fallbackCalculateMileage(journey);
   }
+  })();
+
+  mileageCache.set(cacheKey, mileagePromise);
+  return await mileagePromise;
 }
 
 function sumLegs(legs: any[], key: 'distance'|'duration') {

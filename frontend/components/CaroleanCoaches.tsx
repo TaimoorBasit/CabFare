@@ -1026,7 +1026,7 @@ function ProgressBar({ pct, color }) {
 }
 
 // ── Route map ─────────────────────────────────────────────────────────────────
-function GoogleMapPreview({ result, gv }) {
+function GoogleMapPreview({ result, journey, gv }) {
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
   const [directionsRenderer, setDirectionsRenderer] = useState(null);
@@ -1045,17 +1045,35 @@ function GoogleMapPreview({ result, gv }) {
   }, [mapRef]);
 
   useEffect(() => {
-    if (map && directionsRenderer && window.google?.maps && result?.pts && result.pts.length >= 2) {
+    if (map && directionsRenderer && window.google?.maps && (result?.pts?.length >= 2 || journey?.origin)) {
       const directionsService = new window.google.maps.DirectionsService();
       
-      const pts = result.pts;
-      const origin = new window.google.maps.LatLng(pts[0].lat, pts[0].lng);
-      const destination = new window.google.maps.LatLng(pts[pts.length - 1].lat, pts[pts.length - 1].lng);
+      const pts = result?.pts || [];
+      let origin;
+      if (pts[0] && pts[0].lat !== 0 && pts[0].lng !== 0) {
+        origin = new window.google.maps.LatLng(pts[0].lat, pts[0].lng);
+      } else {
+        origin = journey?.origin;
+      }
+
+      let destination;
+      if (pts.length >= 2 && pts[pts.length - 1].lat !== 0 && pts[pts.length - 1].lng !== 0) {
+        destination = new window.google.maps.LatLng(pts[pts.length - 1].lat, pts[pts.length - 1].lng);
+      } else {
+        destination = journey?.destination;
+      }
       
-      const waypoints = pts.slice(1, -1).map(pt => ({
-        location: new window.google.maps.LatLng(pt.lat, pt.lng),
-        stopover: true
-      }));
+      let waypoints = [];
+      if (pts.length > 2) {
+        waypoints = pts.slice(1, -1).map(pt => ({
+          location: pt.lat !== 0 ? new window.google.maps.LatLng(pt.lat, pt.lng) : pt.name,
+          stopover: true
+        }));
+      } else if (journey?.stops?.length > 0) {
+        waypoints = journey.stops.map(s => ({
+          location: s.place, stopover: true
+        })).filter(w => w.location);
+      }
 
       directionsService.route(
         {
@@ -1092,7 +1110,7 @@ function GoogleMapPreview({ result, gv }) {
 }
 
 function RouteMap({ result, journey, gv }) {
-  if (window.google?.maps && result?.pts?.length >= 2) return <GoogleMapPreview result={result} gv={gv} />;
+  if (window.google?.maps && (result?.pts?.length >= 2 || journey?.origin)) return <GoogleMapPreview result={result} journey={journey} gv={gv} />;
 
   if (!result?.pts?.length || result.pts.length < 2)
     return <div style={{ display:"flex", flexDirection:"column", alignItems:"center",
@@ -1187,8 +1205,9 @@ function Navbar() {
 
 // ── VehicleCard (Step 2 equivalent) ──────────────────────────────────────────
 function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcaseCount, handbagCount }) {
-  const requiredVehicles = Math.ceil((passengers || 1) / (vehicle.capacity || 1));
-  const totalCapacity = (vehicle.capacity || 1) * requiredVehicles;
+  const usableCapacity = vehicle.capacity || 1;
+  const requiredVehicles = Math.ceil((passengers || 1) / usableCapacity);
+  const totalCapacity = usableCapacity * requiredVehicles;
   const paxOk = requiredVehicles === 1;
   const lugOk = true;
   const ok=true, isSel=selected===vehicle.id;
@@ -1225,7 +1244,7 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcase
             <div style={{ fontWeight:800,fontSize:16,color:PX.navy800 }}>{vehicle.name}</div>
             <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{vehicle.desc}</div>
             <div style={{ fontSize:12,color:PX.gray900,marginTop:4,fontWeight:600 }}>
-              Up to {vehicle.capacity} seats
+              Up to {usableCapacity} seats
             </div>
             <div style={{ fontSize:12,color:PX.gray600,marginTop:2,fontWeight:500 }}>🧳 {lugLabel}</div>
           </div>
@@ -1246,6 +1265,15 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcase
           <span style={{ fontSize:11,fontWeight:700,color:capColor }}>{passengers}/{totalCapacity} seats ({pct}%)</span>
         </div>
         <ProgressBar pct={pct} color={capColor}/>
+        {requiredVehicles > 1 && (
+          <div style={{ fontSize: 11, color: PX.gray600, marginTop: 6, fontWeight: 500, background: "#f1f5f9", padding: "6px 10px", borderRadius: 6 }}>
+             <strong style={{color: PX.navy800}}>Vehicle Breakdown:</strong> {Array.from({length: requiredVehicles}).map((_, i) => {
+               const pax = i === requiredVehicles - 1 ? passengers - (usableCapacity * i) : usableCapacity;
+               const vName = (vehicle.name || '').toLowerCase().includes('coach') ? 'Coach' : 'Vehicle';
+               return `${vName} ${i+1}: ${pax} passengers`;
+             }).join(" • ")}
+          </div>
+        )}
       </div>
       <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginTop:12 }}>
         {isSel && <Badge color="green"><SvgCheck size={10} style={{ marginRight: 3 }} /> Selected</Badge>}
@@ -1266,6 +1294,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
   const [selectedWageVehicleId, setSelectedWageVehicleId] = useState(vehicles[0]?.id || "");
   const [gv, setGv]         = useState({...db.globalVars});
   const [depotLoc, setDepotLoc] = useState({ address: gv.yardAddress || "", lat: gv.yardLat, lng: gv.yardLng });
+  const [previewBooking, setPreviewBooking] = useState<any>(null);
   const [overheads, setOH]  = useState(db.annualOverheads.map(o=>({...o})));
   const [sr, setSr]         = useState({...db.surcharges});
   const [blocks, setBl]     = useState([...db.blockedDates]);
@@ -1524,8 +1553,8 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
   };
 
   const saveApi = async (type, item, isDelete=false) => {
-    const ep = type === 'matrix' ? '/api/admin/pricing-matrix' :
-               type === 'templates' ? '/api/admin/route-templates' : '/api/admin/seasonal';
+    const ep = API_BASE_URL + (type === 'matrix' ? '/api/admin/pricing-matrix' :
+               type === 'templates' ? '/api/admin/route-templates' : '/api/admin/seasonal');
     if (isDelete) {
       await fetch(`${ep}?id=${item.id}`, { method: 'DELETE' });
     } else {
@@ -1789,7 +1818,7 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
                     </thead>
                     <tbody>
                       {filteredBookingsData.map((b: any) => (
-                        <tr key={b.id}>
+                        <tr key={b.id} onClick={() => setPreviewBooking(b)} style={{ cursor: "pointer", transition: "background 0.2s" }} onMouseEnter={e => e.currentTarget.style.background = "#f8fafc"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
                           <td style={{ fontWeight: 700, color: PX.navy800 }}>{b.id}</td>
                           <td style={{ color: PX.gray600 }}>
                             {new Date(b.createdAt).toLocaleDateString("en-GB")}
@@ -2424,6 +2453,45 @@ function AdminDashboard({ db, setDb, mapsLoaded }) {
             </div>
           )}
 
+          {previewBooking && (
+            <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.4)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }} onClick={() => setPreviewBooking(null)}>
+              <div style={{ background: "#fff", borderRadius: 16, width: "100%", maxWidth: 600, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.25rem 1.5rem", borderBottom: `1.5px solid ${PX.gray200}`, position: "sticky", top: 0, background: "#fff", zIndex: 10 }}>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: PX.navy800 }}>Booking Preview: {previewBooking.id}</div>
+                  <button onClick={() => setPreviewBooking(null)} style={{ background: "none", border: "none", fontSize: 24, lineHeight: 1, color: PX.gray400, cursor: "pointer" }}>&times;</button>
+                </div>
+                <div style={{ padding: "1.5rem" }}>
+                  <div style={{ marginBottom: "1.5rem" }}>
+                    <RouteMap result={previewBooking.quote?.result} journey={previewBooking.journey} gv={db.globalVars} />
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", background: PX.gray50, padding: "1.25rem", borderRadius: 12, border: `1.5px solid ${PX.gray200}` }}>
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: PX.gray500, textTransform: "uppercase" }}>Customer</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: PX.navy800, marginTop: 4 }}>{previewBooking.customer?.name}</div>
+                      <div style={{ fontSize: 12, color: PX.gray600 }}>{previewBooking.customer?.email}</div>
+                      <div style={{ fontSize: 12, color: PX.gray600 }}>{previewBooking.customer?.phone}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: PX.gray500, textTransform: "uppercase" }}>Route</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: PX.navy800, marginTop: 4 }}>{String(previewBooking.journey?.origin).split(',')[0]}</div>
+                      <div style={{ fontSize: 12, color: PX.gray500, margin: "2px 0" }}>↓</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: PX.navy800 }}>{String(previewBooking.journey?.destination).split(',')[0]}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: PX.gray500, textTransform: "uppercase" }}>Requirements</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: PX.navy800, marginTop: 4 }}>{previewBooking.journey?.passengers} Passengers</div>
+                      <div style={{ fontSize: 13, color: PX.gray600 }}>Vehicle: {previewBooking.quote?.vehicle?.name}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: PX.gray500, textTransform: "uppercase" }}>Total Fare</div>
+                      <div style={{ fontSize: 20, fontWeight: 800, color: PX.brandRed, marginTop: 2 }}>£{fmt(previewBooking.quote?.result?.finalPrice || previewBooking.quote?.result?.finalFare || 0)}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           </div>
         </div>
       </div>
@@ -2543,6 +2611,7 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted]   = useState(false);
   const [bookingRef, setBookingRef] = useState("");
+  const fetchIdRef = useRef(0);
   const [validationError, setValidationError] = useState("");
 
   const { loaded: mapsLoaded } = useGoogleMaps(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "");
@@ -2566,6 +2635,7 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
       : [currentJourney.wpCoords?.[0], currentJourney.wpCoords?.[1]];
 
     if (!wp[0] || !wp[wp.length-1]) return;
+    const currentFetchId = ++fetchIdRef.current;
     setLoadingQuotes(true);
     try {
       const res = await fetch(API_BASE_URL + '/api/quotes/calculate', {
@@ -2574,6 +2644,7 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
         body: JSON.stringify({...currentJourney, waypoints: wp, wpCoords: wc})
       });
       const data = await res.json();
+      if (currentFetchId !== fetchIdRef.current) return;
       if (data.quotes && data.quotes.length > 0) {
         setQ(data.quotes);
         if (!selected) {
@@ -2585,11 +2656,14 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
         setValidationError('No quotes could be generated for this route.');
       }
     } catch(err) {
+      if (currentFetchId !== fetchIdRef.current) return;
       console.error(err);
       setQ([]);
       setValidationError('Failed to connect to the pricing server. Please ensure the backend is running.');
     } finally {
-      setLoadingQuotes(false);
+      if (currentFetchId === fetchIdRef.current) {
+        setLoadingQuotes(false);
+      }
     }
   }, [journey, db, selected]);
 
@@ -2848,19 +2922,22 @@ export default function App({ initialMode = 'admin' }: { initialMode?: 'admin' |
                           <Field label="Number of Passengers" required>
                             <div style={{ display:"flex", height: 42, alignItems: "stretch" }}>
                               <button type="button" onClick={()=>{
-                                const p = Math.max(1,journey.passengers-1);
+                                const current = Number(journey.passengers) || 1;
+                                const p = Math.max(1, current - 1);
                                 setJ(j=>({...j,passengers:p, suitcaseCount:p, handbagCount:p}));
                               }}
                                 style={{ width:40, height: "100%", boxSizing: "border-box", margin: 0, border:`1.5px solid #dde0e8`,borderRight:"none",
                                   borderRadius:"6px 0 0 6px",background:"#fff",cursor:"pointer",fontSize:16,fontWeight:700,color:PX.navy800 }}>−</button>
-                              <input type="number" min={1} max={70} value={journey.passengers}
+                              <input type="number" min={1} value={journey.passengers}
                                 onChange={e=>{
-                                  const p = parseInt(e.target.value)||16;
-                                  setJ(j=>({...j,passengers:p, suitcaseCount:p, handbagCount:p}));
+                                  const val = e.target.value;
+                                  const p = val === "" ? "" : (parseInt(val) || 1);
+                                  setJ(j=>({...j,passengers:p as any, suitcaseCount:Number(p)||0, handbagCount:Number(p)||0}));
                                 }}
                                 style={{ width:60, height: "100%", boxSizing: "border-box", margin: 0, textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",fontWeight:700, border:`1.5px solid #dde0e8`, borderLeftWidth:0, borderRightWidth:0 }}/>
                               <button type="button" onClick={()=>{
-                                const p = Math.min(70,journey.passengers+1);
+                                const current = Number(journey.passengers) || 0;
+                                const p = current + 1;
                                 setJ(j=>({...j,passengers:p, suitcaseCount:p, handbagCount:p}));
                               }}
                                 style={{ width:40, height: "100%", boxSizing: "border-box", margin: 0, border:`1.5px solid #dde0e8`,borderLeft:"none",
