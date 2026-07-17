@@ -256,12 +256,12 @@ export async function calculatePrice(input: PricingInput) {
   let seasonalMultiplier = 1;
   const depDateObj = new Date(departureDate);
 
-  const applicableSeasons = data.seasonalPricing.filter(s => 
+  const applicableSeasons = (data.seasonalPricing || []).filter((s: any) => 
     s.enabled && 
     new Date(s.startDate) <= depDateObj && 
     new Date(s.endDate) >= depDateObj &&
     (!Array.isArray(s.applicableVehicles) || s.applicableVehicles.includes('Any') || s.applicableVehicles.includes(vehicleId))
-  ).sort((a, b) => (b.priority || 0) - (a.priority || 0));
+  ).sort((a: any, b: any) => (b.priority || 0) - (a.priority || 0));
 
   if (applicableSeasons.length > 0) {
     const season = applicableSeasons[0];
