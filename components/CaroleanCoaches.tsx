@@ -1397,11 +1397,11 @@ export default function App() {
                           <Field label="Vehicle Preference (Optional)">
                             <div style={{ height: 42 }}>
                               <select
-                                value={journey.vehiclePreference || ''}
+                                value={journey.vehiclePreference || db.vehicles?.[0]?.id || ''}
                                 onChange={e => { const vid = e.target.value; let newPass = 16; if (vid === 'bus') newPass = 33; if (vid === 'coach') newPass = 49; setJ(j => ({...j, vehiclePreference: vid, passengers: newPass, suitcaseCount: newPass, handbagCount: newPass})); }}
                                 style={{ width: "100%", height: "100%", boxSizing: "border-box", margin: 0, padding: "8px 12px", borderRadius: 6, border: `1.5px solid #dde0e8`, fontSize: 14, color: PX.navy800, background: "#fff", cursor: "pointer" }}
                               >
-                                <option value="">No Preference</option>
+                                
                                 {db.vehicles?.map(v => (
                                   <option key={v.id} value={v.id}>{v.name} ({v.capacity} Seats)</option>
                                 ))}
