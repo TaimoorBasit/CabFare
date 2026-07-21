@@ -1046,7 +1046,11 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcase
         </div>
         <div style={{ textAlign:"right",flexShrink:0 }}>
           {result ? <>
-            <div style={{ fontSize:18,fontWeight:800,color:PX.navy800,lineHeight:1 }}>Available</div>
+            <div style={{ fontSize:22,fontWeight:800,color:PX.navy800,lineHeight:1 }}>
+              {result.upperBoundPrice && result.upperBoundPrice > result.finalPrice ? `£${fmt(result.finalPrice)} – £${fmt(result.upperBoundPrice)}` : `£${fmt(result.finalPrice)}`}
+            </div>
+            <div style={{ fontSize:11,color:PX.gray400,fontWeight:600,marginTop:2,textTransform:"uppercase" }}>total fare</div>
+            {result.belowMin && <div style={{ fontSize:10,color:PX.amber500,marginTop:2,fontWeight:600 }}>▲ Min. hire applied</div>}
           </> : <span style={{ fontSize:13,color:PX.gray400 }}>—</span>}
         </div>
       </div>
@@ -1160,9 +1164,25 @@ export default function App() {
   }, [journey, db, selected]);
 
   // Reactive updates for parameters once calculation layout is shown
-  
+  useEffect(() => {
+    if (showQuotes && journey.origin && journey.destination) {
+      const delayDebounce = setTimeout(() => {
+        buildQuotes();
+      }, 400);
+      return () => clearTimeout(delayDebounce);
+    }
+  }, [
+    journey.passengers,
+    journey.suitcaseCount,
+    journey.handbagCount,
+    journey.waitingMins,
+    journey.journeyType,
+    journey.departureDate,
+    journey.returnDate,
+    showQuotes
+  ]);
 
-  const handleCalculateClick = async () => {
+  const handleCalculateClick = () => {
     setValidationError("");
     if (!journey.origin || !journey.destination || !journey.departureDate || !journey.name || !journey.email || !journey.phone) {
       setValidationError("Please fill in all required fields (Name, Email, Phone, Date, Pickup, and Destination).");
@@ -1179,65 +1199,12 @@ export default function App() {
     }
 
     if (!hasOriginCoords || !hasDestCoords || !allStopsHaveCoords) {
-      setValidationError("📍 Our service is exclusively available within the UK. Please select a valid UK location from the dropdown suggestions or use the map pin icon.");
+      setValidationError("❌ Our service is exclusively available within the UK. Please select a valid UK location from the dropdown suggestions or use the map pin icon.");
       return;
     }
 
-    setSubmitting(true);
-    try {
-      const wp = journey.journeyType === "multi-stop"
-        ? [journey.origin, ...journey.stops.map(s => s.place).filter(Boolean), journey.destination]
-        : [journey.origin, journey.destination];
-
-      const wc = journey.journeyType === "multi-stop"
-        ? [journey.wpCoords?.[0], ...journey.stops.map(s => s.coords || null), journey.wpCoords?.[journey.wpCoords.length - 1]]
-        : [journey.wpCoords?.[0], journey.wpCoords?.[1]];
-
-      const calcRes = await fetch(API_BASE_URL + '/api/quotes/calculate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({...journey, waypoints: wp, wpCoords: wc})
-      });
-      const calcData = await calcRes.json();
-      
-      if (calcData.quotes && calcData.quotes.length > 0) {
-        setQ(calcData.quotes);
-        const preferred = calcData.quotes.find(q => q.vehicle.id === journey.vehiclePreference);
-        const bestQuote = preferred || calcData.quotes.find(q => q.vehicle.capacity >= journey.passengers) || calcData.quotes[0];
-        setSel(bestQuote.vehicle.id);
-        
-        const payload = {
-          customer: {
-            name: journey.name,
-            phone: journey.phone,
-            email: journey.email,
-            company: journey.company
-          },
-          journey: journey,
-          quote: bestQuote
-        };
-        
-        const bookRes = await fetch(API_BASE_URL + '/api/bookings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const bookData = await bookRes.json();
-        
-        if (bookData.success) {
-          setBookingRef(bookData.booking.id);
-          setSubmitted(true);
-        }
-        setShowQuotes(true);
-      } else {
-        setValidationError('No quotes could be generated for this route.');
-      }
-    } catch(err) {
-      console.error(err);
-      setValidationError('Network error occurred while submitting quote request.');
-    } finally {
-      setSubmitting(false);
-    }
+    setShowQuotes(true);
+    buildQuotes();
   };
 
   const handleFinalBookingSubmit = async () => {
@@ -1546,8 +1513,8 @@ export default function App() {
 
                         {/* CALCULATION TRIGGERS */}
                         <div style={{ display:"flex", justifyContent:"flex-end", marginTop:10 }}>
-                          <Btn variant="primary" size="lg" onClick={handleCalculateClick} disabled={submitting}>
-                            {submitting ? <><span className="spinning" style={{ marginRight: 6 }}>⟳</span> Sending...</> : "Submit Quote Request"}
+                          <Btn variant="primary" size="lg" onClick={handleCalculateClick} disabled={loadingQuotes}>
+                            {loadingQuotes ? <><span className="spinning" style={{ marginRight: 6 }}>⟳</span> Re-calculating...</> : "Get instant quote →"}
                           </Btn>
                         </div>
 
@@ -1627,40 +1594,7 @@ export default function App() {
                         <RouteMap result={activeResult} journey={journey} gv={db.globalVars} />
                       </Card>
 
-                      {/* Checkout Card */}
-                      {selected && (
-                        <Card style={{ border: `1.5px solid #10b981`, background: "#f0fdf4", padding: "1.5rem" }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
-                            <div>
-                              <span style={{ fontSize: 11, fontWeight: 800, color: "#15803d", textTransform: "uppercase", letterSpacing: 0.5 }}>Selected Category</span>
-                              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 17, fontWeight: 900, color: PX.navy800, marginTop: 2 }}>{selectedQuote?.vehicle?.name} {selectedQuote?.vehicle?.capacity} seats</div>
-                            </div>
-                          </div>
-                          
-                          {submitted ? (
-                            <div style={{ textAlign: "center", padding: "0.5rem 0" }}>
-                              <div style={{ display: "inline-flex", background: PX.teal100, borderRadius: "50%", padding: 8, marginBottom: 8, color: PX.teal700 }}>
-                                <SvgCheck size={24} />
-                              </div>
-                              <h3 style={{ fontSize: 16, fontWeight: 800, color: PX.teal700, marginBottom: 4 }}>Request Successfully Sent!</h3>
-                              <p style={{ fontSize: 12, color: PX.gray600 }}>We will contact you at <strong>{journey.email}</strong> within 2 hours.</p>
-                              <div style={{ background: PX.gray100, padding: "6px 12px", borderRadius: 6, display: "inline-block", fontFamily: "monospace", fontWeight: 700, fontSize: 12, color: PX.navy800, marginTop: 8 }}>
-                                REF: {bookingRef}
-                              </div>
-                            </div>
-                          ) : (
-                            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                              <Field label="Company / Organisation Name (Optional)">
-                                <input type="text" placeholder="e.g. Acme Corporation" value={journey.company} onChange={e=>setJ(j=>({...j,company:e.target.value}))}/>
-                              </Field>
-                              <Btn variant="teal" size="md" full onClick={handleFinalBookingSubmit} disabled={submitting}>
-                                {submitting ? <><span className="spinning" style={{ marginRight: 6 }}>⟳</span> Sending...</> : "Submit Quote Request"}
-                              </Btn>
 
-                            </div>
-                          )}
-                        </Card>
-                      )}
 
                       {/* Contact Message Box */}
                       <div style={{ padding:"12px 16px", background:"#eff6ff", borderRadius:8, fontSize:12, color:PX.navy800, border:`1px solid #bfdbfe`, lineHeight: 1.4, textAlign: "center" }}>
