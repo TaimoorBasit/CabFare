@@ -9,8 +9,8 @@ interface AvailabilityInput {
   handbagCount?: number;
 }
 
-export async function checkAvailability(input: AvailabilityInput) {
-  const db = await getDatabase();
+export async function checkAvailability(input: AvailabilityInput, env: any) {
+  const db = await getDatabase(env);
   const data = db.data;
   if (!data) return false;
 

@@ -1,9 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.postHandler = exports.getHandler = void 0;
-const db_1 = require("../database/db");
-const getHandler = async (req, res) => {
-    const db = await (0, db_1.getDatabase)();
+import { getDatabase } from '../database/db';
+export const getHandler = async (req, res) => {
+    const db = await getDatabase(req.env);
     return res.json({
         vehicles: db.data?.vehicles,
         globalVars: db.data?.globalVars,
@@ -12,9 +9,8 @@ const getHandler = async (req, res) => {
         blockedDates: db.data?.blockedDates
     });
 };
-exports.getHandler = getHandler;
-const postHandler = async (req, res) => {
-    const db = await (0, db_1.getDatabase)();
+export const postHandler = async (req, res) => {
+    const db = await getDatabase(req.env);
     const config = req.body;
     if (db.data) {
         if (config.vehicles)
@@ -31,4 +27,3 @@ const postHandler = async (req, res) => {
     }
     return res.json({ success: true });
 };
-exports.postHandler = postHandler;

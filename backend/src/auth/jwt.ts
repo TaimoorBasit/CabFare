@@ -1,19 +1,22 @@
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-change-in-production';
+import { sign, verify } from 'hono/jwt';
 
 export interface JWTPayload {
   id: string;
   email: string;
+  exp?: number;
 }
 
-export function createToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+export async function createToken(payload: JWTPayload, env: any): Promise<string> {
+  const secret = env?.JWT_SECRET || 'your-super-secret-key-change-in-production';
+  const exp = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days
+  return sign({ ...payload, exp }, secret, "HS256");
 }
 
-export function verifyToken(token: string): JWTPayload | null {
+export async function verifyToken(token: string, env: any): Promise<JWTPayload | null> {
+  const secret = env?.JWT_SECRET || 'your-super-secret-key-change-in-production';
   try {
-    return jwt.verify(token, JWT_SECRET) as JWTPayload;
+    const decoded = await verify(token, secret, "HS256");
+    return decoded as unknown as JWTPayload;
   } catch {
     return null;
   }

@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getHandler = void 0;
-const getHandler = async (req, res) => {
+export const getHandler = async (req, res) => {
     const url = process.env.KV_REST_API_URL;
     const token = process.env.KV_REST_API_TOKEN;
     const status = {
@@ -40,4 +37,3 @@ const getHandler = async (req, res) => {
     }
     return res.json(status);
 };
-exports.getHandler = getHandler;

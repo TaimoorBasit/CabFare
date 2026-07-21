@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+type Request = any; type Response = any; type NextFunction = any;
 export const getHandler = async (req: Request, res: Response) => {
   const url = process.env.KV_REST_API_URL;
   const token = process.env.KV_REST_API_TOKEN;

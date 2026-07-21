@@ -1,36 +1,38 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateQuotes = generateQuotes;
-const mileageEngine_1 = require("./mileageEngine");
-const pricingEngine_1 = require("./pricingEngine");
-const availabilityEngine_1 = require("./availabilityEngine");
-const db_1 = require("../database/db");
-async function generateQuotes(journey) {
-    const db = await (0, db_1.getDatabase)();
+import { calculateMileage } from './mileageEngine';
+import { calculatePrice } from './pricingEngine';
+import { checkAvailability } from './availabilityEngine';
+import { getDatabase } from '../database/db';
+export async function generateQuotes(journey, env) {
+    const db = await getDatabase(env);
     const data = db.data;
     if (!data || !data.vehicles)
         throw new Error("Database missing vehicles");
-    const mileageResult = await (0, mileageEngine_1.calculateMileage)(journey);
+    const mileageResult = await calculateMileage(journey, env);
     const quotes = [];
     for (const vehicle of data.vehicles) {
-        const isAvailable = await (0, availabilityEngine_1.checkAvailability)({
+        const isAvailable = await checkAvailability({
             vehicleId: vehicle.id,
             passengers: journey.passengers,
             departureDate: journey.departureDate,
             returnDate: journey.returnDate,
             suitcaseCount: journey.suitcaseCount,
             handbagCount: journey.handbagCount
-        });
-        const pricingResult = await (0, pricingEngine_1.calculatePrice)({
+        }, env);
+        const usableCapacity = vehicle.capacity || 1;
+        const requiredVehicles = Math.max(1, Math.ceil((journey.passengers || 1) / usableCapacity));
+        const paxPerVehicle = Math.ceil((journey.passengers || 0) / requiredVehicles);
+        const suitcasesPerVehicle = Math.ceil((journey.suitcaseCount || 0) / requiredVehicles);
+        const handbagsPerVehicle = Math.ceil((journey.handbagCount || 0) / requiredVehicles);
+        const pricingResult = await calculatePrice({
             liveKm: mileageResult.liveKm,
             deadKm: mileageResult.deadKm,
             liveDurationMinutes: mileageResult.liveDurationMinutes,
             totalDurationMinutes: mileageResult.totalDurationMinutes,
             vehicleId: vehicle.id,
             journeyType: journey.journeyType,
-            passengers: journey.passengers,
-            suitcaseCount: journey.suitcaseCount,
-            handbagCount: journey.handbagCount,
+            passengers: paxPerVehicle,
+            suitcaseCount: suitcasesPerVehicle,
+            handbagCount: handbagsPerVehicle,
             originName: String(journey.origin),
             destinationName: String(journey.destination),
             originCoords: journey.wpCoords?.[0] || null,
@@ -39,8 +41,8 @@ async function generateQuotes(journey) {
             waitingMins: journey.waitingMins,
             departureDate: journey.departureDate,
             returnDate: journey.returnDate
-        });
-        const requiredVehicles = Math.ceil((journey.passengers || 1) / (vehicle.capacity || 1));
+        }, env);
+        // requiredVehicles already calculated above
         quotes.push({
             vehicle,
             result: {

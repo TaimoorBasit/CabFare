@@ -84,8 +84,8 @@ export function fleetEconomics(dbData: any) {
   return { vehicleBreakdown, companyOverheads, overheadPerUnit, totalFleetUnits };
 }
 
-export async function calculatePrice(input: PricingInput) {
-  const db = await getDatabase();
+export async function calculatePrice(input: PricingInput, env: any) {
+  const db = await getDatabase(env);
   const data = db.data;
   if (!data || !data.vehicles) throw new Error("Database not initialized");
 

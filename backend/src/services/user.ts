@@ -10,41 +10,43 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash);
 }
 
-export async function createUser(email: string, password: string, name: string): Promise<User> {
-  const db = await getDatabase();
-
-  const existing = db.data.users.find(u => u.email === email);
-  if (existing) {
-    throw new Error('User already exists');
-  }
+export async function createUser(email: string, password: string, name: string, env: any): Promise<User | null> {
+  const db = await getDatabase(env);
+  if (!db.data) return null;
+  
+  const existingUser = db.data.users.find((u: User) => u.email === email);
+  if (existingUser) return null; // Email already in use
 
   const passwordHash = await hashPassword(password);
-  const user: User = {
-    id: randomUUID(),
+
+  const newUser: User = {
+    id: Date.now().toString(), // basic id generation
     email,
     passwordHash,
     name,
-    createdAt: new Date().toISOString(),
+    createdAt: new Date().toISOString()
   };
 
-  db.data.users.push(user);
+  db.data.users.push(newUser);
   await db.write();
 
-  return user;
+  return newUser;
 }
 
-export async function findUserByEmail(email: string): Promise<User | undefined> {
-  const db = await getDatabase();
-  return db.data.users.find(u => u.email === email);
+export async function findUserByEmail(email: string, env: any): Promise<User | null> {
+  const db = await getDatabase(env);
+  if (!db.data) return null;
+  return db.data.users.find((u: User) => u.email === email) || null;
 }
 
-export async function findUserById(id: string): Promise<User | undefined> {
-  const db = await getDatabase();
-  return db.data.users.find(u => u.id === id);
+export async function findUserById(id: string, env: any): Promise<User | null> {
+  const db = await getDatabase(env);
+  if (!db.data) return null;
+  return db.data.users.find((u: User) => u.id === id) || null;
 }
 
-export async function authenticateUser(email: string, password: string): Promise<User | null> {
-  const user = await findUserByEmail(email);
+export async function authenticateUser(email: string, password: string, env: any): Promise<User | null> {
+  const user = await findUserByEmail(email, env);
   if (!user) {
     return null;
   }

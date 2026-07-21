@@ -29,9 +29,9 @@ function formatLoc(loc: any) {
 
 const mileageCache = new Map<string, any>();
 
-export async function calculateMileage(journey: any) {
-  const db = await getDatabase();
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || (db.data as any)?.googleApiKey || '';
+export async function calculateMileage(journey: any, env: any) {
+  const db = await getDatabase(env);
+  const apiKey = env?.GOOGLE_MAPS_API_KEY || env?.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || (db.data as any)?.googleApiKey || '';
   if (!apiKey) {
     // Fallback if no API key
     return fallbackCalculateMileage(journey);
@@ -94,7 +94,6 @@ export async function calculateMileage(journey: any) {
     return result;
   } catch (error: any) {
     console.error("Mileage engine error:", error);
-    require('fs').appendFileSync('mileage_error.log', new Date().toISOString() + ' - ' + error.message + '\n');
     return fallbackCalculateMileage(journey);
   }
   })();

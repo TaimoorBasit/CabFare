@@ -1,10 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.putHandler = exports.postHandler = void 0;
-const db_1 = require("../database/db");
-const postHandler = async (req, res) => {
+import { getDatabase } from '../database/db';
+export const getHandler = async (req, res) => {
     try {
-        const db = await (0, db_1.getDatabase)();
+        const db = await getDatabase(req.env);
         if (!db.data)
             throw new Error("Database not initialized");
         return res.json({ bookings: db.data.bookings || [] });
@@ -13,10 +10,9 @@ const postHandler = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 };
-exports.postHandler = postHandler;
-const putHandler = async (req, res) => {
+export const postHandler = async (req, res) => {
     try {
-        const db = await (0, db_1.getDatabase)();
+        const db = await getDatabase(req.env);
         if (!db.data)
             throw new Error("Database not initialized");
         const payload = req.body;
@@ -37,4 +33,3 @@ const putHandler = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 };
-exports.putHandler = putHandler;

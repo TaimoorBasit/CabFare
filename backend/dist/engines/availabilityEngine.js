@@ -1,9 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkAvailability = checkAvailability;
-const db_1 = require("../database/db");
-async function checkAvailability(input) {
-    const db = await (0, db_1.getDatabase)();
+import { getDatabase } from '../database/db';
+export async function checkAvailability(input, env) {
+    const db = await getDatabase(env);
     const data = db.data;
     if (!data)
         return false;

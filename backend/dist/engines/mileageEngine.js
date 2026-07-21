@@ -1,9 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDirections = getDirections;
-exports.calculateMileage = calculateMileage;
-const db_1 = require("../database/db");
-async function getDirections(origin, destination, waypoints = [], apiKey) {
+import { getDatabase } from '../database/db';
+export async function getDirections(origin, destination, waypoints = [], apiKey) {
     if (!apiKey)
         throw new Error("Google Maps API key is required");
     let waypointsStr = '';
@@ -27,9 +23,10 @@ function formatLoc(loc) {
         return `${loc.lat},${loc.lng}`;
     return '';
 }
-async function calculateMileage(journey) {
-    const db = await (0, db_1.getDatabase)();
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || db.data?.googleApiKey || '';
+const mileageCache = new Map();
+export async function calculateMileage(journey, env) {
+    const db = await getDatabase(env);
+    const apiKey = env?.GOOGLE_MAPS_API_KEY || env?.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || db.data?.googleApiKey || '';
     if (!apiKey) {
         // Fallback if no API key
         return fallbackCalculateMileage(journey);
@@ -45,40 +42,50 @@ async function calculateMileage(journey) {
     const liveOrigin = livePoints[0];
     const liveDestination = livePoints[livePoints.length - 1];
     const liveWaypoints = livePoints.slice(1, -1);
-    try {
-        // 1. Calculate Live Mileage
-        const liveDirections = await getDirections(liveOrigin, liveDestination, liveWaypoints, apiKey);
-        let liveDistanceMeters = sumLegs(liveDirections.routes[0].legs, 'distance');
-        let liveDurationSeconds = sumLegs(liveDirections.routes[0].legs, 'duration');
-        const distanceUnit = db.data?.globalVars?.distanceUnit || 'km';
-        const divisor = distanceUnit === 'miles' ? 1609.34 : 1000;
-        const deadOutDirections = await getDirections(yardLoc, liveOrigin, [], apiKey);
-        const deadOutDistanceMeters = sumLegs(deadOutDirections.routes[0].legs, 'distance');
-        const deadOutDurationSeconds = sumLegs(deadOutDirections.routes[0].legs, 'duration');
-        const isReturn = journey.journeyType === 'return';
-        if (isReturn) {
-            liveDistanceMeters *= 2;
-            liveDurationSeconds *= 2;
+    const isReturn = journey.journeyType === 'return';
+    const cacheKey = JSON.stringify({ liveOrigin, liveDestination, liveWaypoints, yardLoc, isReturn });
+    if (mileageCache.has(cacheKey)) {
+        return await mileageCache.get(cacheKey);
+    }
+    const mileagePromise = (async () => {
+        try {
+            // 1. Calculate Live Mileage
+            const liveDirections = await getDirections(liveOrigin, liveDestination, liveWaypoints, apiKey);
+            let liveDistanceMeters = sumLegs(liveDirections.routes[0].legs, 'distance');
+            let liveDurationSeconds = sumLegs(liveDirections.routes[0].legs, 'duration');
+            const distanceUnit = db.data?.globalVars?.distanceUnit || 'km';
+            const divisor = distanceUnit === 'miles' ? 1609.34 : 1000;
+            const deadOutDirections = await getDirections(yardLoc, liveOrigin, [], apiKey);
+            const deadOutDistanceMeters = sumLegs(deadOutDirections.routes[0].legs, 'distance');
+            const deadOutDurationSeconds = sumLegs(deadOutDirections.routes[0].legs, 'duration');
+            const isReturn = journey.journeyType === 'return';
+            if (isReturn) {
+                liveDistanceMeters *= 2;
+                liveDurationSeconds *= 2;
+            }
+            const deadBackDirections = await getDirections(isReturn ? liveOrigin : liveDestination, yardLoc, [], apiKey);
+            const deadBackDistanceMeters = sumLegs(deadBackDirections.routes[0].legs, 'distance');
+            const deadBackDurationSeconds = sumLegs(deadBackDirections.routes[0].legs, 'duration');
+            const liveKm = liveDistanceMeters / divisor;
+            const deadKm = (deadOutDistanceMeters + deadBackDistanceMeters) / divisor;
+            const result = {
+                liveKm,
+                deadKm,
+                totalKm: liveKm + deadKm,
+                liveDurationMinutes: liveDurationSeconds / 60,
+                totalDurationMinutes: (liveDurationSeconds + deadOutDurationSeconds + deadBackDurationSeconds) / 60,
+                geometry: liveDirections.routes[0].overview_polyline.points,
+                legs: liveDirections.routes[0].legs
+            };
+            return result;
         }
-        const deadBackDirections = await getDirections(isReturn ? liveOrigin : liveDestination, yardLoc, [], apiKey);
-        const deadBackDistanceMeters = sumLegs(deadBackDirections.routes[0].legs, 'distance');
-        const deadBackDurationSeconds = sumLegs(deadBackDirections.routes[0].legs, 'duration');
-        const liveKm = liveDistanceMeters / divisor;
-        const deadKm = (deadOutDistanceMeters + deadBackDistanceMeters) / divisor;
-        return {
-            liveKm,
-            deadKm,
-            totalKm: liveKm + deadKm,
-            liveDurationMinutes: liveDurationSeconds / 60,
-            totalDurationMinutes: (liveDurationSeconds + deadOutDurationSeconds + deadBackDurationSeconds) / 60,
-            geometry: liveDirections.routes[0].overview_polyline.points,
-            legs: liveDirections.routes[0].legs
-        };
-    }
-    catch (error) {
-        console.error("Mileage engine error:", error);
-        return fallbackCalculateMileage(journey);
-    }
+        catch (error) {
+            console.error("Mileage engine error:", error);
+            return fallbackCalculateMileage(journey);
+        }
+    })();
+    mileageCache.set(cacheKey, mileagePromise);
+    return await mileagePromise;
 }
 function sumLegs(legs, key) {
     return legs.reduce((sum, leg) => sum + leg[key].value, 0);

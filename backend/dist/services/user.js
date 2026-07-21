@@ -1,51 +1,44 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.hashPassword = hashPassword;
-exports.verifyPassword = verifyPassword;
-exports.createUser = createUser;
-exports.findUserByEmail = findUserByEmail;
-exports.findUserById = findUserById;
-exports.authenticateUser = authenticateUser;
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const crypto_1 = require("crypto");
-const db_1 = require("../database/db");
-async function hashPassword(password) {
-    return bcryptjs_1.default.hash(password, 10);
+import bcrypt from 'bcryptjs';
+import { getDatabase } from '../database/db';
+export async function hashPassword(password) {
+    return bcrypt.hash(password, 10);
 }
-async function verifyPassword(password, hash) {
-    return bcryptjs_1.default.compare(password, hash);
+export async function verifyPassword(password, hash) {
+    return bcrypt.compare(password, hash);
 }
-async function createUser(email, password, name) {
-    const db = await (0, db_1.getDatabase)();
-    const existing = db.data.users.find(u => u.email === email);
-    if (existing) {
-        throw new Error('User already exists');
-    }
+export async function createUser(email, password, name, env) {
+    const db = await getDatabase(env);
+    if (!db.data)
+        return null;
+    const existingUser = db.data.users.find((u) => u.email === email);
+    if (existingUser)
+        return null; // Email already in use
     const passwordHash = await hashPassword(password);
-    const user = {
-        id: (0, crypto_1.randomUUID)(),
+    const newUser = {
+        id: Date.now().toString(), // basic id generation
         email,
         passwordHash,
         name,
-        createdAt: new Date().toISOString(),
+        createdAt: new Date().toISOString()
     };
-    db.data.users.push(user);
+    db.data.users.push(newUser);
     await db.write();
-    return user;
+    return newUser;
 }
-async function findUserByEmail(email) {
-    const db = await (0, db_1.getDatabase)();
-    return db.data.users.find(u => u.email === email);
+export async function findUserByEmail(email, env) {
+    const db = await getDatabase(env);
+    if (!db.data)
+        return null;
+    return db.data.users.find((u) => u.email === email) || null;
 }
-async function findUserById(id) {
-    const db = await (0, db_1.getDatabase)();
-    return db.data.users.find(u => u.id === id);
+export async function findUserById(id, env) {
+    const db = await getDatabase(env);
+    if (!db.data)
+        return null;
+    return db.data.users.find((u) => u.id === id) || null;
 }
-async function authenticateUser(email, password) {
-    const user = await findUserByEmail(email);
+export async function authenticateUser(email, password, env) {
+    const user = await findUserByEmail(email, env);
     if (!user) {
         return null;
     }

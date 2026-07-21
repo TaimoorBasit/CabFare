@@ -1,8 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.fleetEconomics = fleetEconomics;
-exports.calculatePrice = calculatePrice;
-const db_1 = require("../database/db");
+import { getDatabase } from '../database/db';
 function haversineKm(a, b) {
     if (!a || !b || !a.lat || !b.lat)
         return 9999;
@@ -34,7 +30,7 @@ function matchLocation(coord, name, ruleGeo, ruleName, radiusKm) {
         return true;
     return false;
 }
-function fleetEconomics(dbData) {
+export function fleetEconomics(dbData) {
     const companyOverheads = dbData.annualOverheads?.reduce((s, o) => s + Number(o.cost), 0) || 0;
     const totalFleetUnits = dbData.vehicles?.reduce((s, v) => s + (Number(v.fleetCount) || 1), 0) || 1;
     const overheadPerUnit = totalFleetUnits > 0 ? companyOverheads / totalFleetUnits : 0;
@@ -61,8 +57,8 @@ function fleetEconomics(dbData) {
     }) || [];
     return { vehicleBreakdown, companyOverheads, overheadPerUnit, totalFleetUnits };
 }
-async function calculatePrice(input) {
-    const db = await (0, db_1.getDatabase)();
+export async function calculatePrice(input, env) {
+    const db = await getDatabase(env);
     const data = db.data;
     if (!data || !data.vehicles)
         throw new Error("Database not initialized");
@@ -199,7 +195,7 @@ async function calculatePrice(input) {
     }
     let seasonalMultiplier = 1;
     const depDateObj = new Date(departureDate);
-    const applicableSeasons = data.seasonalPricing.filter(s => s.enabled &&
+    const applicableSeasons = (data.seasonalPricing || []).filter((s) => s.enabled &&
         new Date(s.startDate) <= depDateObj &&
         new Date(s.endDate) >= depDateObj &&
         (!Array.isArray(s.applicableVehicles) || s.applicableVehicles.includes('Any') || s.applicableVehicles.includes(vehicleId))).sort((a, b) => (b.priority || 0) - (a.priority || 0));

@@ -1,93 +1,90 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
+import { Hono } from 'hono';
+import { env } from 'hono/adapter';
+import * as adminAvailability from '../controllers/admin_availabilityController';
+import * as adminConfig from '../controllers/admin_configController';
+import * as adminPricingMatrix from '../controllers/admin_pricing-matrixController';
+import * as adminRouteTemplates from '../controllers/admin_route-templatesController';
+import * as adminSeasonal from '../controllers/admin_seasonalController';
+import * as bookings from '../controllers/bookingsController';
+import * as hello from '../controllers/helloController';
+import * as quotesCalculate from '../controllers/quotes_calculateController';
+import { fleetEconomics } from '../engines/pricingEngine';
+const api = new Hono();
+// Shim
+const createShim = (handler) => {
+    return async (c) => {
+        let body = {};
+        if (c.req.method !== 'GET' && c.req.method !== 'HEAD') {
+            body = await c.req.json().catch(() => ({}));
+        }
+        const req = {
+            body,
+            query: c.req.query(),
+            headers: c.req.header(),
+            env: env(c) // Attach Cloudflare environment variables seamlessly
         };
-        return ownKeys(o);
+        let responseSent = false;
+        let responsePayload = null;
+        const res = {
+            status: (code) => { c.status(code); return res; },
+            json: (data) => { responseSent = true; responsePayload = c.json(data); return responsePayload; },
+            send: (data) => { responseSent = true; responsePayload = c.text(data); return responsePayload; }
+        };
+        try {
+            await handler(req, res);
+            if (responseSent)
+                return responsePayload;
+            return c.text('');
+        }
+        catch (e) {
+            console.error("Handler error:", e);
+            return c.json({ error: e.message || 'Internal error', stack: e.stack }, 500);
+        }
     };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const adminAvailability = __importStar(require("../controllers/admin_availabilityController"));
-const adminConfig = __importStar(require("../controllers/admin_configController"));
-const adminPricingMatrix = __importStar(require("../controllers/admin_pricing-matrixController"));
-const adminRouteTemplates = __importStar(require("../controllers/admin_route-templatesController"));
-const adminSeasonal = __importStar(require("../controllers/admin_seasonalController"));
-const bookings = __importStar(require("../controllers/bookingsController"));
-const hello = __importStar(require("../controllers/helloController"));
-const quotesCalculate = __importStar(require("../controllers/quotes_calculateController"));
-const pricingEngine_1 = require("../engines/pricingEngine");
-const router = (0, express_1.Router)();
-// Helper to bind handlers safely
+};
 const bindHandler = (controller, method) => {
-    return controller[method] || ((req, res) => res.status(501).json({ error: 'Not implemented' }));
+    return createShim(controller[method] || (async (req, res) => res.status(501).json({ error: 'Not implemented' })));
 };
 // Admin Config
-router.get('/admin/config', bindHandler(adminConfig, 'getHandler'));
-router.post('/admin/config', bindHandler(adminConfig, 'postHandler'));
+api.get('/admin/config', bindHandler(adminConfig, 'getHandler'));
+api.post('/admin/config', bindHandler(adminConfig, 'postHandler'));
 // Fleet Economics calculation endpoint
-router.post('/admin/economics', async (req, res) => {
+api.post('/admin/economics', createShim(async (req, res) => {
     const dbData = req.body;
     try {
-        const eco = (0, pricingEngine_1.fleetEconomics)(dbData);
+        const eco = fleetEconomics(dbData);
         res.json(eco);
     }
     catch (e) {
         res.status(500).json({ error: 'Calculation failed' });
     }
-});
+}));
 // Admin Pricing Matrix
-router.get('/admin/pricing-matrix', bindHandler(adminPricingMatrix, 'getHandler'));
-router.post('/admin/pricing-matrix', bindHandler(adminPricingMatrix, 'postHandler'));
-router.put('/admin/pricing-matrix', bindHandler(adminPricingMatrix, 'putHandler'));
-router.delete('/admin/pricing-matrix', bindHandler(adminPricingMatrix, 'deleteHandler'));
+api.get('/admin/pricing-matrix', bindHandler(adminPricingMatrix, 'getHandler'));
+api.post('/admin/pricing-matrix', bindHandler(adminPricingMatrix, 'postHandler'));
+api.put('/admin/pricing-matrix', bindHandler(adminPricingMatrix, 'putHandler'));
+api.delete('/admin/pricing-matrix', bindHandler(adminPricingMatrix, 'deleteHandler'));
 // Admin Route Templates
-router.get('/admin/route-templates', bindHandler(adminRouteTemplates, 'getHandler'));
-router.post('/admin/route-templates', bindHandler(adminRouteTemplates, 'postHandler'));
-router.put('/admin/route-templates', bindHandler(adminRouteTemplates, 'putHandler'));
-router.delete('/admin/route-templates', bindHandler(adminRouteTemplates, 'deleteHandler'));
+api.get('/admin/route-templates', bindHandler(adminRouteTemplates, 'getHandler'));
+api.post('/admin/route-templates', bindHandler(adminRouteTemplates, 'postHandler'));
+api.put('/admin/route-templates', bindHandler(adminRouteTemplates, 'putHandler'));
+api.delete('/admin/route-templates', bindHandler(adminRouteTemplates, 'deleteHandler'));
 // Admin Seasonal
-router.get('/admin/seasonal', bindHandler(adminSeasonal, 'getHandler'));
-router.post('/admin/seasonal', bindHandler(adminSeasonal, 'postHandler'));
-router.put('/admin/seasonal', bindHandler(adminSeasonal, 'putHandler'));
-router.delete('/admin/seasonal', bindHandler(adminSeasonal, 'deleteHandler'));
+api.get('/admin/seasonal', bindHandler(adminSeasonal, 'getHandler'));
+api.post('/admin/seasonal', bindHandler(adminSeasonal, 'postHandler'));
+api.put('/admin/seasonal', bindHandler(adminSeasonal, 'putHandler'));
+api.delete('/admin/seasonal', bindHandler(adminSeasonal, 'deleteHandler'));
 // Admin Availability
-router.get('/admin/availability', bindHandler(adminAvailability, 'getHandler'));
-router.post('/admin/availability', bindHandler(adminAvailability, 'postHandler'));
-router.delete('/admin/availability', bindHandler(adminAvailability, 'deleteHandler'));
+api.get('/admin/availability', bindHandler(adminAvailability, 'getHandler'));
+api.post('/admin/availability', bindHandler(adminAvailability, 'postHandler'));
+api.delete('/admin/availability', bindHandler(adminAvailability, 'deleteHandler'));
 // Bookings
-router.get('/bookings', bindHandler(bookings, 'getHandler'));
-router.post('/bookings', bindHandler(bookings, 'postHandler'));
-router.delete('/bookings', bindHandler(bookings, 'deleteHandler'));
-router.put('/bookings', bindHandler(bookings, 'putHandler'));
+api.get('/bookings', bindHandler(bookings, 'getHandler'));
+api.post('/bookings', bindHandler(bookings, 'postHandler'));
+api.delete('/bookings', bindHandler(bookings, 'deleteHandler'));
+api.put('/bookings', bindHandler(bookings, 'putHandler'));
 // Quotes
-router.post('/quotes/calculate', bindHandler(quotesCalculate, 'postHandler'));
+api.post('/quotes/calculate', bindHandler(quotesCalculate, 'postHandler'));
 // Hello
-router.get('/hello', bindHandler(hello, 'getHandler'));
-exports.default = router;
+api.get('/hello', bindHandler(hello, 'getHandler'));
+export default api;

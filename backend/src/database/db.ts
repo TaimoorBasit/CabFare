@@ -1,7 +1,4 @@
-import { Low } from 'lowdb';
-import { JSONFile } from 'lowdb/node';
-import path from 'path';
-import fs from 'fs';
+// No fs, path, or Node.js built-ins.
 import seedData from './seed.json';
 
 export interface User {
@@ -74,11 +71,12 @@ export interface DatabaseSchema {
 }
 
 class KVAdapter {
-  async read() {
+  async read(env: any): Promise<DatabaseSchema | null> {
     try {
-      const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-      const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-      if (!url || !token) return null;
+      if (!env) throw new Error("Environment configuration is missing");
+      const url = env.KV_REST_API_URL || env.UPSTASH_REDIS_REST_URL;
+      const token = env.KV_REST_API_TOKEN || env.UPSTASH_REDIS_REST_TOKEN;
+      if (!url || !token) throw new Error("Upstash Redis credentials missing in environment");
 
       const res = await fetch(url, {
         method: 'POST',
@@ -88,23 +86,34 @@ class KVAdapter {
         },
         body: JSON.stringify(["GET", "cabfare_db"])
       });
+      
+      if (!res.ok) {
+         const errText = await res.text();
+         throw new Error(`Upstash API Error: ${res.status} ${res.statusText} - ${errText}`);
+      }
+
       const json: any = await res.json();
+      if (json && json.error) {
+         throw new Error(`Upstash DB Error: ${json.error}`);
+      }
       if (json && json.result) {
         return JSON.parse(json.result);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error("KV read error:", e);
+      throw new Error(`KV read failed: ${e.message}`);
     }
     return null;
   }
 
-  async write(data: any) {
+  async write(data: DatabaseSchema, env: any): Promise<void> {
     try {
-      const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-      const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-      if (!url || !token) return;
+      if (!env) throw new Error("Environment configuration is missing");
+      const url = env.KV_REST_API_URL || env.UPSTASH_REDIS_REST_URL;
+      const token = env.KV_REST_API_TOKEN || env.UPSTASH_REDIS_REST_TOKEN;
+      if (!url || !token) throw new Error("Upstash Redis credentials missing in environment");
 
-      await fetch(url, {
+      const res = await fetch(url, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -112,33 +121,48 @@ class KVAdapter {
         },
         body: JSON.stringify(["SET", "cabfare_db", JSON.stringify(data)])
       });
-    } catch (e) {
+      
+      if (!res.ok) {
+         const errText = await res.text();
+         throw new Error(`Upstash Write API Error: ${res.status} ${res.statusText} - ${errText}`);
+      }
+      const json: any = await res.json();
+      if (json && json.error) {
+         throw new Error(`Upstash Write DB Error: ${json.error}`);
+      }
+    } catch (e: any) {
       console.error("KV write error:", e);
+      throw new Error(`KV write failed: ${e.message}`);
     }
   }
 }
 
-let db: Low<DatabaseSchema> | null = null;
+class DB {
+  data: DatabaseSchema | null = null;
+  adapter = new KVAdapter();
+  env: any;
 
-export async function initDatabase(): Promise<Low<DatabaseSchema>> {
-  if (db) return db;
-
-  const isVercel = !!(process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL) && !!(process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN);
-  let adapter;
-
-  if (isVercel) {
-    adapter = new KVAdapter();
-  } else {
-    const dataDir = path.join(process.cwd(), '.data');
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-    const file = path.join(dataDir, 'db.json');
-    adapter = new JSONFile<DatabaseSchema>(file);
+  constructor(env: any) {
+    this.env = env;
   }
 
-  db = new Low(adapter, seedData as any as DatabaseSchema);
+  async read() {
+    this.data = await this.adapter.read(this.env);
+  }
 
+  async write() {
+    if (this.data) {
+      await this.adapter.write(this.data, this.env);
+    }
+  }
+}
+
+let db: DB | null = null;
+
+export async function initDatabase(env: any): Promise<DB> {
+  if (db) return db;
+
+  db = new DB(env);
   await db.read();
 
   if (!db.data || Object.keys(db.data).length === 0) {
@@ -149,13 +173,13 @@ export async function initDatabase(): Promise<Low<DatabaseSchema>> {
   return db;
 }
 
-export async function getDatabase(): Promise<Low<DatabaseSchema>> {
+export async function getDatabase(env: any): Promise<DB> {
   if (!db) {
-    await initDatabase();
-  }
-  if (db && (process.env.KV_REST_API_URL || process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_URL || process.env.UPSTASH_REDIS_REST_TOKEN)) {
+    await initDatabase(env);
+  } else {
+    // Keep it refreshed just in case but update env reference
+    db.env = env;
     await db.read();
   }
   return db!;
 }
-

@@ -1,9 +1,9 @@
-import { Request, Response } from 'express';
+type Request = any; type Response = any; type NextFunction = any;
 import { getDatabase } from '../database/db';
 
 export const getHandler = async (req: Request, res: Response) => {
   try {
-    const db = await getDatabase();
+    const db = await getDatabase(req.env);
     if (!db.data) throw new Error("Database not initialized");
 
     return res.json({ bookings: db.data.bookings || [] });
@@ -14,7 +14,7 @@ export const getHandler = async (req: Request, res: Response) => {
 
 export const postHandler = async (req: Request, res: Response) => {
   try {
-    const db = await getDatabase();
+    const db = await getDatabase(req.env);
     if (!db.data) throw new Error("Database not initialized");
 
     const payload = req.body;

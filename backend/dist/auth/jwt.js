@@ -1,25 +1,20 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createToken = createToken;
-exports.verifyToken = verifyToken;
-exports.extractTokenFromHeader = extractTokenFromHeader;
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-change-in-production';
-function createToken(payload) {
-    return jsonwebtoken_1.default.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+import { sign, verify } from 'hono/jwt';
+export async function createToken(payload, env) {
+    const secret = env?.JWT_SECRET || 'your-super-secret-key-change-in-production';
+    const exp = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days
+    return sign({ ...payload, exp }, secret, "HS256");
 }
-function verifyToken(token) {
+export async function verifyToken(token, env) {
+    const secret = env?.JWT_SECRET || 'your-super-secret-key-change-in-production';
     try {
-        return jsonwebtoken_1.default.verify(token, JWT_SECRET);
+        const decoded = await verify(token, secret, "HS256");
+        return decoded;
     }
     catch {
         return null;
     }
 }
-function extractTokenFromHeader(authHeader) {
+export function extractTokenFromHeader(authHeader) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return null;
     }

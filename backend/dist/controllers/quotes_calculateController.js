@@ -1,11 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.postHandler = void 0;
-const quoteEngine_1 = require("../engines/quoteEngine");
-const postHandler = async (req, res) => {
+import { generateQuotes } from '../engines/quoteEngine';
+export const postHandler = async (req, res) => {
     try {
         const journey = req.body;
-        const quotes = await (0, quoteEngine_1.generateQuotes)(journey);
+        const quotes = await generateQuotes(journey, req.env);
         return res.json({ quotes });
     }
     catch (error) {
@@ -13,4 +10,3 @@ const postHandler = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 };
-exports.postHandler = postHandler;

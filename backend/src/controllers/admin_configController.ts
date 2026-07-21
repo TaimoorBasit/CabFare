@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
+type Request = any; type Response = any; type NextFunction = any;
 import { getDatabase } from '../database/db';
 
 export const getHandler = async (req: Request, res: Response) => {
-  const db = await getDatabase();
+  const db = await getDatabase(req.env);
   return res.json({
     vehicles: db.data?.vehicles,
     globalVars: db.data?.globalVars,
@@ -13,7 +13,7 @@ export const getHandler = async (req: Request, res: Response) => {
 }
 
 export const postHandler = async (req: Request, res: Response) => {
-  const db = await getDatabase();
+  const db = await getDatabase(req.env);
   const config = req.body;
   if (db.data) {
     if (config.vehicles) db.data.vehicles = config.vehicles;

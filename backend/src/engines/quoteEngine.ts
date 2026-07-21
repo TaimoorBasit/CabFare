@@ -3,12 +3,12 @@ import { calculatePrice } from './pricingEngine';
 import { checkAvailability } from './availabilityEngine';
 import { getDatabase } from '../database/db';
 
-export async function generateQuotes(journey: any) {
-  const db = await getDatabase();
+export async function generateQuotes(journey: any, env: any) {
+  const db = await getDatabase(env);
   const data = db.data;
   if (!data || !data.vehicles) throw new Error("Database missing vehicles");
 
-  const mileageResult = await calculateMileage(journey);
+  const mileageResult = await calculateMileage(journey, env);
 
   const quotes = [];
 
@@ -21,7 +21,7 @@ export async function generateQuotes(journey: any) {
       returnDate: journey.returnDate,
       suitcaseCount: journey.suitcaseCount,
       handbagCount: journey.handbagCount
-    });
+    }, env);
 
     const usableCapacity = vehicle.capacity || 1;
     const requiredVehicles = Math.max(1, Math.ceil((journey.passengers || 1) / usableCapacity));
@@ -47,7 +47,7 @@ export async function generateQuotes(journey: any) {
       waitingMins: journey.waitingMins,
       departureDate: journey.departureDate,
       returnDate: journey.returnDate
-    });
+    }, env);
 
     // requiredVehicles already calculated above
 

@@ -1,22 +1,14 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.initDatabase = initDatabase;
-exports.getDatabase = getDatabase;
-const lowdb_1 = require("lowdb");
-const node_1 = require("lowdb/node");
-const path_1 = __importDefault(require("path"));
-const fs_1 = __importDefault(require("fs"));
-const seed_json_1 = __importDefault(require("./seed.json"));
+// No fs, path, or Node.js built-ins.
+import seedData from './seed.json';
 class KVAdapter {
-    async read() {
+    async read(env) {
         try {
-            const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-            const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+            if (!env)
+                throw new Error("Environment configuration is missing");
+            const url = env.KV_REST_API_URL || env.UPSTASH_REDIS_REST_URL;
+            const token = env.KV_REST_API_TOKEN || env.UPSTASH_REDIS_REST_TOKEN;
             if (!url || !token)
-                return null;
+                throw new Error("Upstash Redis credentials missing in environment");
             const res = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -25,23 +17,33 @@ class KVAdapter {
                 },
                 body: JSON.stringify(["GET", "cabfare_db"])
             });
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(`Upstash API Error: ${res.status} ${res.statusText} - ${errText}`);
+            }
             const json = await res.json();
+            if (json && json.error) {
+                throw new Error(`Upstash DB Error: ${json.error}`);
+            }
             if (json && json.result) {
                 return JSON.parse(json.result);
             }
         }
         catch (e) {
             console.error("KV read error:", e);
+            throw new Error(`KV read failed: ${e.message}`);
         }
         return null;
     }
-    async write(data) {
+    async write(data, env) {
         try {
-            const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-            const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+            if (!env)
+                throw new Error("Environment configuration is missing");
+            const url = env.KV_REST_API_URL || env.UPSTASH_REDIS_REST_URL;
+            const token = env.KV_REST_API_TOKEN || env.UPSTASH_REDIS_REST_TOKEN;
             if (!url || !token)
-                return;
-            await fetch(url, {
+                throw new Error("Upstash Redis credentials missing in environment");
+            const res = await fetch(url, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -49,42 +51,56 @@ class KVAdapter {
                 },
                 body: JSON.stringify(["SET", "cabfare_db", JSON.stringify(data)])
             });
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(`Upstash Write API Error: ${res.status} ${res.statusText} - ${errText}`);
+            }
+            const json = await res.json();
+            if (json && json.error) {
+                throw new Error(`Upstash Write DB Error: ${json.error}`);
+            }
         }
         catch (e) {
             console.error("KV write error:", e);
+            throw new Error(`KV write failed: ${e.message}`);
+        }
+    }
+}
+class DB {
+    data = null;
+    adapter = new KVAdapter();
+    env;
+    constructor(env) {
+        this.env = env;
+    }
+    async read() {
+        this.data = await this.adapter.read(this.env);
+    }
+    async write() {
+        if (this.data) {
+            await this.adapter.write(this.data, this.env);
         }
     }
 }
 let db = null;
-async function initDatabase() {
+export async function initDatabase(env) {
     if (db)
         return db;
-    const isVercel = !!(process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL) && !!(process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN);
-    let adapter;
-    if (isVercel) {
-        adapter = new KVAdapter();
-    }
-    else {
-        const dataDir = path_1.default.join(process.cwd(), '.data');
-        if (!fs_1.default.existsSync(dataDir)) {
-            fs_1.default.mkdirSync(dataDir, { recursive: true });
-        }
-        const file = path_1.default.join(dataDir, 'db.json');
-        adapter = new node_1.JSONFile(file);
-    }
-    db = new lowdb_1.Low(adapter, seed_json_1.default);
+    db = new DB(env);
     await db.read();
     if (!db.data || Object.keys(db.data).length === 0) {
-        db.data = seed_json_1.default;
+        db.data = seedData;
         await db.write();
     }
     return db;
 }
-async function getDatabase() {
+export async function getDatabase(env) {
     if (!db) {
-        await initDatabase();
+        await initDatabase(env);
     }
-    if (db && (process.env.KV_REST_API_URL || process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_URL || process.env.UPSTASH_REDIS_REST_TOKEN)) {
+    else {
+        // Keep it refreshed just in case but update env reference
+        db.env = env;
         await db.read();
     }
     return db;

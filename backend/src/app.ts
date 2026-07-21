@@ -1,33 +1,27 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import path from 'path';
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 
-// Load environment variables
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+const app = new Hono();
 
-const app = express();
-
-app.use(cors());
-app.use(express.json());
+app.use('*', cors());
 
 // Basic health check route
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get('/health', (c) => {
+  return c.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // Root route
-app.get('/', (req, res) => {
-  res.send('CabFare API Backend is running successfully.');
+app.get('/', (c) => {
+  return c.text('CabFare API Backend is running successfully on Hono/Cloudflare.');
 });
 
 // We will mount routes here
 import apiRoutes from './routes/api';
-app.use('/api', apiRoutes);
+app.route('/api', apiRoutes);
 
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.onError((err, c) => {
   console.error(err.stack);
-  res.status(500).json({ error: 'Internal Server Error' });
+  return c.json({ error: 'Internal Server Error' }, 500);
 });
 
 export default app;
