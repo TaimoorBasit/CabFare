@@ -1313,6 +1313,29 @@ export default function App() {
   const showReturnDate = journey.journeyType === "return";
   const showLuggageCount = journey.largeLuggage !== "none";
 
+  if (submitted) {
+    return (
+      <>
+        <GlobalStyle/>
+        <div style={{ minHeight:"100vh", background:"#f4f6f9", display: "flex", flexDirection: "column" }}>
+          <Navbar />
+          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+            <div style={{ background: "#fff", padding: "4rem", borderRadius: 16, boxShadow: "0 12px 40px rgba(13,14,72,0.06)", textAlign: "center", maxWidth: 600 }}>
+              <div style={{ display: "inline-flex", background: "#ccfbf1", borderRadius: "50%", padding: 16, marginBottom: 24, color: "#0f766e" }}>
+                <SvgCheck size={64} />
+              </div>
+              <h3 style={{ fontSize: 28, fontWeight: 800, color: "#0f766e", marginBottom: 12 }}>Quote Request Successfully Sent!</h3>
+              <p style={{ fontSize: 16, color: "#475569", lineHeight: 1.6 }}>Our dedicated team will review your journey details and contact you at <strong style={{ color: PX.navy800 }}>{journey.email}</strong> shortly with the best possible quotation.</p>
+              <div style={{ background: "#f1f5f9", padding: "10px 20px", borderRadius: 8, display: "inline-block", fontFamily: "monospace", fontWeight: 700, fontSize: 16, color: "#1e293b", marginTop: 24 }}>
+                Booking REF: {bookingRef}
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <GlobalStyle/>
