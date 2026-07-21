@@ -1403,7 +1403,7 @@ export default function App() {
                             <div style={{ height: 42 }}>
                               <select
                                 value={journey.vehiclePreference || db.vehicles?.[0]?.id || ''}
-                                onChange={e => { const vid = e.target.value; let newPass = 16; if (vid === 'bus') newPass = 33; if (vid === 'coach') newPass = 49; setJ(j => ({...j, vehiclePreference: vid, passengers: newPass, suitcaseCount: newPass, handbagCount: newPass})); }}
+                                onChange={e => { const vid = e.target.value; const selectedVehicle = db.vehicles?.find(v => v.id === vid); const newPass = selectedVehicle ? selectedVehicle.capacity : 16; setJ(j => ({...j, vehiclePreference: vid, passengers: newPass, suitcaseCount: newPass, handbagCount: newPass})); }}
                                 style={{ width: "100%", height: "100%", boxSizing: "border-box", margin: 0, padding: "8px 12px", borderRadius: 6, border: `1.5px solid #dde0e8`, fontSize: 14, color: PX.navy800, background: "#fff", cursor: "pointer" }}
                               >
                                 
@@ -1601,10 +1601,6 @@ export default function App() {
                             <div>
                               <span style={{ fontSize: 11, fontWeight: 800, color: "#15803d", textTransform: "uppercase", letterSpacing: 0.5 }}>Selected Category</span>
                               <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 17, fontWeight: 900, color: PX.navy800, marginTop: 2 }}>{selectedQuote?.vehicle?.name} {selectedQuote?.vehicle?.capacity} seats</div>
-                            </div>
-                            <div style={{ textAlign: "right" }}>
-                              <span style={{ fontSize: 11, fontWeight: 800, color: PX.gray500, textTransform: "uppercase" }}>Est. Fare</span>
-                              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 22, fontWeight: 900, color: PX.brandRed, marginTop: 2 }}>{activeResult?.upperBoundPrice && activeResult.upperBoundPrice > activeResult.finalPrice ? `£${fmt(activeResult.finalPrice)} – £${fmt(activeResult.upperBoundPrice)}` : `£${fmt(activeResult?.finalPrice || 0)}`}</div>
                             </div>
                           </div>
                           
