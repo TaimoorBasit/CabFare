@@ -1402,7 +1402,7 @@ export default function App() {
                                 style={{ width: "100%", height: "100%", boxSizing: "border-box", margin: 0, padding: "8px 12px", borderRadius: 6, border: `1.5px solid #dde0e8`, fontSize: 14, color: PX.navy800, background: "#fff", cursor: "pointer" }}
                               >
                                 {db.vehicles?.map(v => (
-                                  <option key={v.id} value={v.id}>{v.name}</option>
+                                  <option key={v.id} value={v.id}>{v.name} ({v.capacity} Seats)</option>
                                 ))}
                               </select>
                             </div>
