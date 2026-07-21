@@ -1143,7 +1143,8 @@ export default function App() {
       if (data.quotes && data.quotes.length > 0) {
         setQ(data.quotes);
         if (!selected) {
-          const firstAvail = data.quotes.find(q => q.vehicle.capacity >= currentJourney.passengers);
+          const preferred = data.quotes.find(q => q.vehicle.id === currentJourney.vehiclePreference);
+          const firstAvail = preferred || data.quotes.find(q => q.vehicle.capacity >= currentJourney.passengers) || data.quotes[0];
           if (firstAvail) setSel(firstAvail.vehicle.id);
         }
       } else {
@@ -1253,9 +1254,9 @@ export default function App() {
   const addStop    = () => setJ(j => ({ ...j, stops: [...(j.stops||[]), { place: "", coords: null, wait: 30 }] }));
   const updateStop = (i, k, v) => setJ(j => ({ ...j, stops: j.stops.map((st, idx) => idx === i ? { ...st, [k]: v } : st) }));
   const removeStop = i => setJ(j => ({ ...j, stops: j.stops.filter((_, idx) => idx !== i) }));
-
-  const selectedQuote = quotes.find(q => q.vehicle.id === selected);
-  const activeResult = selectedQuote?.result || quotes[0]?.result;
+  const filteredQuotes = quotes.filter(({vehicle}) => !journey.vehiclePreference || vehicle.id === journey.vehiclePreference);
+  const selectedQuote = filteredQuotes.find(q => q.vehicle.id === selected) || filteredQuotes[0];
+  const activeResult = selectedQuote?.result;
 
   const showReturnDate = journey.journeyType === "return";
   const showLuggageCount = journey.largeLuggage !== "none";
@@ -1571,7 +1572,7 @@ export default function App() {
                             <span className="spinning" style={{ marginRight: 8 }}>⟳</span> Fetching live options...
                           </div>
                         ) : (
-                          quotes.filter(({vehicle}) => !journey.vehiclePreference || vehicle.id === journey.vehiclePreference).map(({vehicle, result}) => (
+                          filteredQuotes.map(({vehicle, result}) => (
                             <VehicleCard key={vehicle.id} vehicle={vehicle} result={result}
                               selected={selected} onSelect={setSel}
                               passengers={journey.passengers} suitcaseCount={journey.suitcaseCount}
@@ -1626,8 +1627,9 @@ export default function App() {
                               <Btn variant="teal" size="md" full onClick={handleFinalBookingSubmit} disabled={submitting}>
                                 {submitting ? <><span className="spinning" style={{ marginRight: 6 }}>⟳</span> Sending...</> : "Submit Quote Request"}
                               </Btn>
-                              <p style={{ fontSize: 9.5, color: PX.gray400, textAlign: "center" }}>
-                                This request is non-binding and subject to final vehicle/driver dispatch confirmation.
+                              <p style={{ fontSize: 10.5, color: PX.gray500, textAlign: "center", lineHeight: 1.4 }}>
+                                For customized requirements or further assistance, our team will reach out to you shortly to provide the best quotation.<br/><br/>
+                                <span style={{ fontSize: 9.5, color: PX.gray400 }}>This request is non-binding and subject to final vehicle/driver dispatch confirmation.</span>
                               </p>
                             </div>
                           )}
