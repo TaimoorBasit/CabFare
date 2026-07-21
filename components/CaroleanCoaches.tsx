@@ -1085,7 +1085,11 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcase
 // ── Fleet Economics Panel ──────────────────────────────────────────────────────
 // ── Root App ──────────────────────────────────────────────────────────────────
 export default function App() {
-  const [db, setDb]         = useState({ vehicles: [], globalVars: {}, annualOverheads: [], surcharges: {}, blockedDates: [] });
+  const [db, setDb]         = useState({ vehicles: [
+    { id: 'minibus', name: 'Executive Minibus', capacity: 16 },
+    { id: 'bus', name: 'Standard Bus', capacity: 33 },
+    { id: 'coach', name: 'Premium Coach', capacity: 49 }
+  ], globalVars: {}, annualOverheads: [], surcharges: {}, blockedDates: [] });
   const [journey, setJ]     = useState({
     journeyType:"one-way", origin:"", destination:"",
     departureDate:"", returnDate:"",
