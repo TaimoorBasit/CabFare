@@ -1046,11 +1046,7 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcase
         </div>
         <div style={{ textAlign:"right",flexShrink:0 }}>
           {result ? <>
-            <div style={{ fontSize:22,fontWeight:800,color:PX.navy800,lineHeight:1 }}>
-              {result.upperBoundPrice && result.upperBoundPrice > result.finalPrice ? `£${fmt(result.finalPrice)} – £${fmt(result.upperBoundPrice)}` : `£${fmt(result.finalPrice)}`}
-            </div>
-            <div style={{ fontSize:11,color:PX.gray400,fontWeight:600,marginTop:2,textTransform:"uppercase" }}>total fare</div>
-            {result.belowMin && <div style={{ fontSize:10,color:PX.amber500,marginTop:2,fontWeight:600 }}>▲ Min. hire applied</div>}
+            <div style={{ fontSize:18,fontWeight:800,color:PX.navy800,lineHeight:1 }}>Available</div>
           </> : <span style={{ fontSize:13,color:PX.gray400 }}>—</span>}
         </div>
       </div>
@@ -1164,25 +1160,9 @@ export default function App() {
   }, [journey, db, selected]);
 
   // Reactive updates for parameters once calculation layout is shown
-  useEffect(() => {
-    if (showQuotes && journey.origin && journey.destination) {
-      const delayDebounce = setTimeout(() => {
-        buildQuotes();
-      }, 400);
-      return () => clearTimeout(delayDebounce);
-    }
-  }, [
-    journey.passengers,
-    journey.suitcaseCount,
-    journey.handbagCount,
-    journey.waitingMins,
-    journey.journeyType,
-    journey.departureDate,
-    journey.returnDate,
-    showQuotes
-  ]);
+  
 
-  const handleQuoteSubmit = async () => {
+  const handleCalculateClick = async () => {
     setValidationError("");
     if (!journey.origin || !journey.destination || !journey.departureDate || !journey.name || !journey.email || !journey.phone) {
       setValidationError("Please fill in all required fields (Name, Email, Phone, Date, Pickup, and Destination).");
@@ -1221,8 +1201,10 @@ export default function App() {
       const calcData = await calcRes.json();
       
       if (calcData.quotes && calcData.quotes.length > 0) {
+        setQ(calcData.quotes);
         const preferred = calcData.quotes.find(q => q.vehicle.id === journey.vehiclePreference);
         const bestQuote = preferred || calcData.quotes.find(q => q.vehicle.capacity >= journey.passengers) || calcData.quotes[0];
+        setSel(bestQuote.vehicle.id);
         
         const payload = {
           customer: {
@@ -1245,9 +1227,8 @@ export default function App() {
         if (bookData.success) {
           setBookingRef(bookData.booking.id);
           setSubmitted(true);
-        } else {
-          setValidationError("Booking request failed: " + (bookData.error || "Unknown error"));
         }
+        setShowQuotes(true);
       } else {
         setValidationError('No quotes could be generated for this route.');
       }
@@ -1313,29 +1294,6 @@ export default function App() {
   const showReturnDate = journey.journeyType === "return";
   const showLuggageCount = journey.largeLuggage !== "none";
 
-  if (submitted) {
-    return (
-      <>
-        <GlobalStyle/>
-        <div style={{ minHeight:"100vh", background:"#f4f6f9", display: "flex", flexDirection: "column" }}>
-          <Navbar />
-          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
-            <div style={{ background: "#fff", padding: "4rem", borderRadius: 16, boxShadow: "0 12px 40px rgba(13,14,72,0.06)", textAlign: "center", maxWidth: 600 }}>
-              <div style={{ display: "inline-flex", background: "#ccfbf1", borderRadius: "50%", padding: 16, marginBottom: 24, color: "#0f766e" }}>
-                <SvgCheck size={64} />
-              </div>
-              <h3 style={{ fontSize: 28, fontWeight: 800, color: "#0f766e", marginBottom: 12 }}>Quote Request Successfully Sent!</h3>
-              <p style={{ fontSize: 16, color: "#475569", lineHeight: 1.6 }}>Our dedicated team will review your journey details and contact you at <strong style={{ color: PX.navy800 }}>{journey.email}</strong> shortly with the best possible quotation.</p>
-              <div style={{ background: "#f1f5f9", padding: "10px 20px", borderRadius: 8, display: "inline-block", fontFamily: "monospace", fontWeight: 700, fontSize: 16, color: "#1e293b", marginTop: 24 }}>
-                Booking REF: {bookingRef}
-              </div>
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }
-
   return (
     <>
       <GlobalStyle/>
@@ -1344,7 +1302,7 @@ export default function App() {
         
         <div className="fade-up">
             
-            
+            {!showQuotes ? (
               /* PAGE 1: SEARCH & INPUT FORM WITH HERO */
               <div>
                 {/* Full-width brand hero banner */}
@@ -1588,7 +1546,7 @@ export default function App() {
 
                         {/* CALCULATION TRIGGERS */}
                         <div style={{ display:"flex", justifyContent:"flex-end", marginTop:10 }}>
-                          <Btn variant="primary" size="lg" onClick={handleQuoteSubmit} disabled={submitting}>
+                          <Btn variant="primary" size="lg" onClick={handleCalculateClick} disabled={submitting}>
                             {submitting ? <><span className="spinning" style={{ marginRight: 6 }}>⟳</span> Sending...</> : "Submit Quote Request"}
                           </Btn>
                         </div>
@@ -1599,7 +1557,121 @@ export default function App() {
 
                   </div>
                 </div>
-              
+              ) : (
+                /* PAGE 2: QUOTATION PRICE SCREEN */
+                <main style={{ maxWidth:1160, margin:"0 auto", padding:"2.5rem 1.5rem 5rem" }} className="fade-up">
+                  
+                  {/* Sleek Horizontal Dark Journey Summary Header */}
+                  <div style={{ 
+                    background: `linear-gradient(135deg, ${PX.navy800} 0%, ${PX.navy700} 100%)`,
+                    borderRadius: 12,
+                    padding: "20px 24px",
+                    color: "#fff",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "1.75rem",
+                    boxShadow: "0 4px 20px rgba(13,14,72,0.12)",
+                    flexWrap: "wrap",
+                    gap: 12
+                  }}>
+                    <div>
+                      <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: 18, display: "flex", alignItems: "center", gap: 8 }}>
+                        <span>{journey.origin.split(',')[0]}</span>
+                        <span style={{ color: PX.brandRed }}>→</span>
+                        <span>{journey.destination.split(',')[0]}</span>
+                      </div>
+                      <div style={{ fontSize: 12.5, color: "rgba(255,255,255,0.75)", marginTop: 4, fontWeight: 500 }}>
+                        {journey.departureDate ? new Date(journey.departureDate).toLocaleString("en-GB") : ""} · {journey.passengers} Passengers · {journey.journeyType === "one-way" ? "One-way" : journey.journeyType === "return" ? "Return" : "Multi-stop"}
+                      </div>
+                    </div>
+                    <Btn variant="ghost" size="sm" onClick={() => setShowQuotes(false)} style={{ color: "#fff", borderColor: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.06)", borderRadius: 30 }}>
+                      ← Edit details
+                    </Btn>
+                  </div>
+
+                  {/* 2-Column Responsive Dashboard Layout */}
+                  <div className="results-layout">
+                    
+                    {/* LEFT COLUMN: Available Options */}
+                    <div className="left-panel-options">
+                      <Card style={{ padding: "2rem" }}>
+                        <SectionHead sub={`${journey.passengers} passengers · ${(journey.journeyType).replace("-"," ")}`}>
+                          Available Options
+                        </SectionHead>
+                        
+                        {loadingQuotes && quotes.length === 0 ? (
+                          <div style={{ padding: "2.5rem", textAlign: "center", color: PX.gray600 }}>
+                            <span className="spinning" style={{ marginRight: 8 }}>⟳</span> Fetching live options...
+                          </div>
+                        ) : (
+                          filteredQuotes.map(({vehicle, result}) => (
+                            <VehicleCard key={vehicle.id} vehicle={vehicle} result={result}
+                              selected={selected} onSelect={setSel}
+                              passengers={journey.passengers} suitcaseCount={journey.suitcaseCount}
+                              handbagCount={journey.handbagCount}/>
+                          ))
+                        )}
+                      </Card>
+                    </div>
+
+                    {/* RIGHT COLUMN: Map Card & Stacked Checkout Form */}
+                    <div className="right-panel-map" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                      
+                      {/* Map Card */}
+                      <Card style={{ padding: "1.5rem" }}>
+                        <div style={{ fontSize:14, fontWeight:800, color:PX.navy800, marginBottom:"0.75rem", display:"flex", alignItems:"center", gap:8 }}>
+                          <SvgMap /> Route Planning & Dead Mileage
+                        </div>
+                        
+                        <RouteMap result={activeResult} journey={journey} gv={db.globalVars} />
+                      </Card>
+
+                      {/* Checkout Card */}
+                      {selected && (
+                        <Card style={{ border: `1.5px solid #10b981`, background: "#f0fdf4", padding: "1.5rem" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
+                            <div>
+                              <span style={{ fontSize: 11, fontWeight: 800, color: "#15803d", textTransform: "uppercase", letterSpacing: 0.5 }}>Selected Category</span>
+                              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 17, fontWeight: 900, color: PX.navy800, marginTop: 2 }}>{selectedQuote?.vehicle?.name} {selectedQuote?.vehicle?.capacity} seats</div>
+                            </div>
+                          </div>
+                          
+                          {submitted ? (
+                            <div style={{ textAlign: "center", padding: "0.5rem 0" }}>
+                              <div style={{ display: "inline-flex", background: PX.teal100, borderRadius: "50%", padding: 8, marginBottom: 8, color: PX.teal700 }}>
+                                <SvgCheck size={24} />
+                              </div>
+                              <h3 style={{ fontSize: 16, fontWeight: 800, color: PX.teal700, marginBottom: 4 }}>Request Successfully Sent!</h3>
+                              <p style={{ fontSize: 12, color: PX.gray600 }}>We will contact you at <strong>{journey.email}</strong> within 2 hours.</p>
+                              <div style={{ background: PX.gray100, padding: "6px 12px", borderRadius: 6, display: "inline-block", fontFamily: "monospace", fontWeight: 700, fontSize: 12, color: PX.navy800, marginTop: 8 }}>
+                                REF: {bookingRef}
+                              </div>
+                            </div>
+                          ) : (
+                            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                              <Field label="Company / Organisation Name (Optional)">
+                                <input type="text" placeholder="e.g. Acme Corporation" value={journey.company} onChange={e=>setJ(j=>({...j,company:e.target.value}))}/>
+                              </Field>
+                              <Btn variant="teal" size="md" full onClick={handleFinalBookingSubmit} disabled={submitting}>
+                                {submitting ? <><span className="spinning" style={{ marginRight: 6 }}>⟳</span> Sending...</> : "Submit Quote Request"}
+                              </Btn>
+
+                            </div>
+                          )}
+                        </Card>
+                      )}
+
+                      {/* Contact Message Box */}
+                      <div style={{ padding:"12px 16px", background:"#eff6ff", borderRadius:8, fontSize:12, color:PX.navy800, border:`1px solid #bfdbfe`, lineHeight: 1.4, textAlign: "center" }}>
+                        <strong>Thank you for your inquiry.</strong> Our dedicated team will reach out to you shortly to discuss your requirements and provide the best possible quotation for your journey.
+                      </div>
+
+                    </div>
+
+                  </div>
+                </main>
+              )}
             </div>
         
         <footer style={{ background: PX.offWhite, borderTop: `1px solid ${PX.gray200}`, padding: "2rem 1.5rem", textAlign: "center", fontSize: 12, color: PX.gray600 }}>
