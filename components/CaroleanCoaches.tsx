@@ -1632,10 +1632,9 @@ export default function App() {
                         </Card>
                       )}
 
-                      {/* Operational Base Depot Box */}
-                      <div style={{ padding:"12px 16px", background:"#fff", borderRadius:8, fontSize:11.5, color:PX.gray600, border:`1px solid #dde0e8`, lineHeight: 1.4 }}>
-                        <strong>Operational Base Depot:</strong> Unit 1, Bentley Lane, Walsall WS2 8TL<br/>
-                        <span style={{ color:PX.gray500, fontSize:10.5, marginTop:3, display:"inline-block" }}>All coach hires require calculation of dead mileage (empty routing from and to the Walsall depot base). Included above.</span>
+                      {/* Contact Message Box */}
+                      <div style={{ padding:"12px 16px", background:"#eff6ff", borderRadius:8, fontSize:12, color:PX.navy800, border:`1px solid #bfdbfe`, lineHeight: 1.4, textAlign: "center" }}>
+                        <strong>Thank you for your inquiry.</strong> Our dedicated team will reach out to you shortly to discuss your requirements and provide the best possible quotation for your journey.
                       </div>
 
                     </div>
