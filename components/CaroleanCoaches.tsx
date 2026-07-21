@@ -1036,7 +1036,7 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcase
             {renderVehicleIcon()}
           </div>
           <div>
-            <div style={{ fontWeight:800,fontSize:16,color:PX.navy800 }}>{vehicle.name}</div>
+            <div style={{ fontWeight:800,fontSize:16,color:PX.navy800 }}>{vehicle.name} {vehicle.capacity} seats</div>
             <div style={{ fontSize:12,color:PX.gray600,marginTop:2 }}>{vehicle.desc}</div>
             <div style={{ fontSize:12,color:PX.gray900,marginTop:4,fontWeight:600 }}>
               Up to {usableCapacity} seats
@@ -1047,7 +1047,7 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcase
         <div style={{ textAlign:"right",flexShrink:0 }}>
           {result ? <>
             <div style={{ fontSize:22,fontWeight:800,color:PX.navy800,lineHeight:1 }}>
-              £{fmt(result.finalPrice)}
+              {result.upperBoundPrice && result.upperBoundPrice > result.finalPrice ? `£${fmt(result.finalPrice)} – £${fmt(result.upperBoundPrice)}` : `£${fmt(result.finalPrice)}`}
             </div>
             <div style={{ fontSize:11,color:PX.gray400,fontWeight:600,marginTop:2,textTransform:"uppercase" }}>total fare</div>
             {result.belowMin && <div style={{ fontSize:10,color:PX.amber500,marginTop:2,fontWeight:600 }}>▲ Min. hire applied</div>}
@@ -1599,11 +1599,11 @@ export default function App() {
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
                             <div>
                               <span style={{ fontSize: 11, fontWeight: 800, color: "#15803d", textTransform: "uppercase", letterSpacing: 0.5 }}>Selected Category</span>
-                              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 17, fontWeight: 900, color: PX.navy800, marginTop: 2 }}>{selectedQuote?.vehicle?.name}</div>
+                              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 17, fontWeight: 900, color: PX.navy800, marginTop: 2 }}>{selectedQuote?.vehicle?.name} {selectedQuote?.vehicle?.capacity} seats</div>
                             </div>
                             <div style={{ textAlign: "right" }}>
                               <span style={{ fontSize: 11, fontWeight: 800, color: PX.gray500, textTransform: "uppercase" }}>Est. Fare</span>
-                              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 22, fontWeight: 900, color: PX.brandRed, marginTop: 2 }}>£{fmt(activeResult?.finalPrice || 0)}</div>
+                              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 22, fontWeight: 900, color: PX.brandRed, marginTop: 2 }}>{activeResult?.upperBoundPrice && activeResult.upperBoundPrice > activeResult.finalPrice ? `£${fmt(activeResult.finalPrice)} – £${fmt(activeResult.upperBoundPrice)}` : `£${fmt(activeResult?.finalPrice || 0)}`}</div>
                             </div>
                           </div>
                           
