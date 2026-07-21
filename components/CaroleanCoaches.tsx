@@ -1403,7 +1403,7 @@ export default function App() {
                             <div style={{ height: 42 }}>
                               <select
                                 value={journey.vehiclePreference || db.vehicles?.[0]?.id || ''}
-                                onChange={e => { const vid = e.target.value; const selectedVehicle = db.vehicles?.find(v => v.id === vid); const newPass = selectedVehicle ? selectedVehicle.capacity : 16; setJ(j => ({...j, vehiclePreference: vid, passengers: newPass, suitcaseCount: newPass, handbagCount: newPass})); }}
+                                onChange={e => { const vid = e.target.value; const selectedVehicle = db.vehicles?.find(v => v.id === vid); const newPass = selectedVehicle ? selectedVehicle.capacity : 16; setJ(j => ({...j, vehiclePreference: vid, passengers: newPass, suitcaseCount: newPass, handbagCount: newPass, activeLuggageType: 'suitcase'})); }}
                                 style={{ width: "100%", height: "100%", boxSizing: "border-box", margin: 0, padding: "8px 12px", borderRadius: 6, border: `1.5px solid #dde0e8`, fontSize: 14, color: PX.navy800, background: "#fff", cursor: "pointer" }}
                               >
                                 
