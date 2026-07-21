@@ -9,3 +9,8 @@ yarn-debug.log*
 yarn-error.log*
 .data
 *.log
+
+.env
+.env.local
+Secrets/
+Tokens/
