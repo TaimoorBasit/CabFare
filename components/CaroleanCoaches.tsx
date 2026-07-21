@@ -1623,10 +1623,7 @@ export default function App() {
                               <Btn variant="teal" size="md" full onClick={handleFinalBookingSubmit} disabled={submitting}>
                                 {submitting ? <><span className="spinning" style={{ marginRight: 6 }}>⟳</span> Sending...</> : "Submit Quote Request"}
                               </Btn>
-                              <p style={{ fontSize: 10.5, color: PX.gray500, textAlign: "center", lineHeight: 1.4 }}>
-                                For customized requirements or further assistance, our team will reach out to you shortly to provide the best quotation.<br/><br/>
-                                <span style={{ fontSize: 9.5, color: PX.gray400 }}>This request is non-binding and subject to final vehicle/driver dispatch confirmation.</span>
-                              </p>
+
                             </div>
                           )}
                         </Card>
