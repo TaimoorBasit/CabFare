@@ -1557,53 +1557,83 @@ export default function App() {
                     </Btn>
                   </div>
 
-                  {/* 2-Column Responsive Dashboard Layout */}
-                  <div className="results-layout">
-                    
-                    {/* LEFT COLUMN: Available Options */}
-                    <div className="left-panel-options">
-                      <Card style={{ padding: "2rem" }}>
-                        <SectionHead sub={`${journey.passengers} passengers · ${(journey.journeyType).replace("-"," ")}`}>
-                          Available Options
-                        </SectionHead>
-                        
-                        {loadingQuotes && quotes.length === 0 ? (
-                          <div style={{ padding: "2.5rem", textAlign: "center", color: PX.gray600 }}>
-                            <span className="spinning" style={{ marginRight: 8 }}>⟳</span> Fetching live options...
-                          </div>
-                        ) : (
-                          filteredQuotes.map(({vehicle, result}) => (
-                            <VehicleCard key={vehicle.id} vehicle={vehicle} result={result}
-                              selected={selected} onSelect={setSel}
-                              passengers={journey.passengers} suitcaseCount={journey.suitcaseCount}
-                              handbagCount={journey.handbagCount}/>
-                          ))
-                        )}
-                      </Card>
-                    </div>
-
-                    {/* RIGHT COLUMN: Map Card & Stacked Checkout Form */}
-                    <div className="right-panel-map" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                      
-                      {/* Map Card */}
-                      <Card style={{ padding: "1.5rem" }}>
-                        <div style={{ fontSize:14, fontWeight:800, color:PX.navy800, marginBottom:"0.75rem", display:"flex", alignItems:"center", gap:8 }}>
-                          <SvgMap /> Route Planning & Dead Mileage
+                  {submitted ? (
+                    <Card style={{ maxWidth: 640, margin: "3rem auto", padding: "3rem 2.5rem", textAlign: "center", border: `2px solid ${PX.teal500}`, background: "#f0fdf4" }}>
+                      <div className="fade-up">
+                        <div style={{ display: "inline-flex", background: PX.teal100, borderRadius: "50%", padding: 16, marginBottom: 20, color: PX.teal700 }}>
+                          <SvgCheck size={48} />
                         </div>
+                        <h2 style={{ fontSize: 26, fontWeight: 900, color: PX.teal700, marginBottom: 12 }}>Request Successfully Sent!</h2>
+                        <p style={{ fontSize: 15, color: PX.gray700, lineHeight: 1.6, marginBottom: 24 }}>
+                          We will contact you at <strong>{journey.email}</strong> within 2 hours.
+                        </p>
                         
-                        <RouteMap result={activeResult} journey={journey} gv={db.globalVars} />
-                      </Card>
+                        <div style={{ background: "#fff", border: `1px solid #bfdbfe`, padding: "16px", borderRadius: 8, marginBottom: 24, fontSize: 14, color: PX.navy800, lineHeight: 1.5 }}>
+                          <strong>Thank you for your inquiry.</strong><br/>
+                          Our dedicated team will reach out to you shortly to discuss your requirements and provide the best possible quotation for your journey.
+                        </div>
 
+                        <div style={{ background: PX.gray100, padding: "10px 20px", borderRadius: 8, display: "inline-block", fontFamily: "monospace", fontWeight: 800, fontSize: 16, color: PX.navy800, letterSpacing: 1 }}>
+                          REF: {bookingRef}
+                        </div>
+                      </div>
+                    </Card>
+                  ) : (
+                    <div className="results-layout">
+                      
+                      {/* LEFT COLUMN: Available Options */}
+                      <div className="left-panel-options">
+                        <Card style={{ padding: "2rem" }}>
+                          <SectionHead sub={`${journey.passengers} passengers · ${(journey.journeyType).replace("-"," ")}`}>
+                            Available Options
+                          </SectionHead>
+                          
+                          {loadingQuotes && quotes.length === 0 ? (
+                            <div style={{ padding: "2.5rem", textAlign: "center", color: PX.gray600 }}>
+                              <span className="spinning" style={{ marginRight: 8 }}>⟳</span> Fetching live options...
+                            </div>
+                          ) : (
+                            <>
+                              {filteredQuotes.map(({vehicle, result}) => (
+                                <VehicleCard key={vehicle.id} vehicle={vehicle} result={result}
+                                  selected={selected} onSelect={setSel}
+                                  passengers={journey.passengers} suitcaseCount={journey.suitcaseCount}
+                                  handbagCount={journey.handbagCount}/>
+                              ))}
+                              
+                              {selected && (
+                                <div style={{ marginTop: "2rem", borderTop: "1px solid #e2e8f0", paddingTop: "1.5rem" }} className="fade-up">
+                                  <Btn variant="teal" size="lg" full onClick={handleFinalBookingSubmit} disabled={submitting}>
+                                    {submitting ? <><span className="spinning" style={{ marginRight: 8 }}>⟳</span> Sending Request...</> : "Submit Quote Request"}
+                                  </Btn>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </Card>
+                      </div>
 
+                      {/* RIGHT COLUMN: Map Card & Stacked Checkout Form */}
+                      <div className="right-panel-map" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                        
+                        {/* Map Card */}
+                        <Card style={{ padding: "1.5rem" }}>
+                          <div style={{ fontSize:14, fontWeight:800, color:PX.navy800, marginBottom:"0.75rem", display:"flex", alignItems:"center", gap:8 }}>
+                            <SvgMap /> Route Planning & Dead Mileage
+                          </div>
+                          
+                          <RouteMap result={activeResult} journey={journey} gv={db.globalVars} />
+                        </Card>
 
-                      {/* Contact Message Box */}
-                      <div style={{ padding:"12px 16px", background:"#eff6ff", borderRadius:8, fontSize:12, color:PX.navy800, border:`1px solid #bfdbfe`, lineHeight: 1.4, textAlign: "center" }}>
-                        <strong>Thank you for your inquiry.</strong> Our dedicated team will reach out to you shortly to discuss your requirements and provide the best possible quotation for your journey.
+                        {/* Contact Message Box */}
+                        <div style={{ padding:"12px 16px", background:"#eff6ff", borderRadius:8, fontSize:12, color:PX.navy800, border:`1px solid #bfdbfe`, lineHeight: 1.4, textAlign: "center" }}>
+                          <strong>Thank you for your inquiry.</strong> Our dedicated team will reach out to you shortly to discuss your requirements and provide the best possible quotation for your journey.
+                        </div>
+
                       </div>
 
                     </div>
-
-                  </div>
+                  )}
                 </main>
               )}
             </div>
