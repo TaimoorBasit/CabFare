@@ -1271,262 +1271,324 @@ export default function App() {
         <div className="fade-up">
             
             {!showQuotes ? (
-              /* PAGE 1: SEARCH & INPUT FORM WITH HERO */
-              <div>
-                {/* Full-width brand hero banner */}
-                <div style={{ 
-                  backgroundImage: "linear-gradient(rgba(19, 21, 92, 0.65), rgba(19, 21, 92, 0.65)), url('/header-bg.png')",
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  backgroundRepeat: "no-repeat",
-                  padding: "5.5rem 1.5rem 7.5rem",
-                  color: "#fff",
-                  textAlign: "center"
-                }}>
-                  <div style={{ maxWidth: 800, margin: "0 auto" }}>
-                    <span style={{ 
-                      background: "rgba(19, 21, 92, 0.8)", 
-                      border: "1px solid rgba(255,255,255,0.2)", 
-                      padding: "5px 14px", 
-                      borderRadius: 30, 
-                      fontSize: 10.5, 
-                      fontWeight: 800, 
-                      letterSpacing: 1.5, 
-                      textTransform: "uppercase", 
-                      color: PX.amber500,
-                      boxShadow: "0 2px 10px rgba(0,0,0,0.2)"
-                    }}>
-                      Instant fleet fare calculator
-                    </span>
-                    <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: "3.25rem", fontWeight: 950, marginTop: 16, letterSpacing: -0.8, lineHeight: 1.1, textShadow: "0 4px 20px rgba(0,0,0,0.4)" }}>
-                      Your Journey, Our Priority
-                    </h1>
-                    <p style={{ fontFamily: "'Figtree', sans-serif", fontSize: "1.1rem", color: "rgba(255,255,255,0.9)", fontWeight: 500, maxWidth: 650, margin: "1rem auto 0", lineHeight: 1.5, textShadow: "0 2px 10px rgba(0,0,0,0.4)" }}>
-                      With our modern fleet, professional drivers, and flexible booking options, Carolean Coaches makes every journey smooth, safe, and enjoyable.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Overlaid booking form card */}
-                <div style={{ maxWidth: 1040, margin: "-4.5rem auto 5rem", padding: "0 1.5rem", position: "relative", zIndex: 10 }}>
-                  <div style={{ 
-                    background: "#ffffff", 
-                    borderRadius: 16, 
-                    padding: "2.5rem", 
-                    border: "1px solid #e2e8f0", 
-                    boxShadow: "0 12px 40px rgba(13,14,72,0.06)" 
-                  }}>
-                    <div style={{ textAlign: "center", marginBottom: "2rem", paddingBottom: "1.25rem", borderBottom: "1px solid #f1f5f9" }}>
-                      <div style={{ fontSize: 11, fontWeight: 900, color: PX.brandRed, letterSpacing: 4, textTransform: "uppercase" }}>
-                        Your Perfect Ride
-                      </div>
+              <div className="bg-background text-on-surface font-body-md selection:bg-secondary selection:text-white overflow-x-hidden" style={{marginTop: -40}}>
+                <header className="fixed top-0 left-0 right-0 z-50 bg-surface h-20 border-b border-outline-variant transition-all duration-300 shadow-xl bg-white/95 backdrop-blur-md" id="main-nav">
+                  <div className="flex justify-between items-center w-full px-gutter max-w-container-max mx-auto h-full px-6">
+                    <div className="flex items-center gap-4">
+                      <img alt="Carolean Coaches Logo" className="h-10 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLumoQP5jmF1XgJNC5lNqtwGhsObTeB2YXZkQzSTm7Amj6eXg01uUEKMrO_KkHhNSorr8c9oB_YrR156TkK9Ack2vFR2RvFAZ-UTleuTEHXLn7eCAnQdiPLN9rUUZC0KsfYt-Zf0VLvkQzw7Xg61mqzhHnSrGOSII7xC_vAJozhOvJkgNpomQVykVjs4NxPBKkLHKVgHSIqRbv-Mt5dcowl1V6T8TIC73_nk86d9LCHtWX2KJY8zODlCLA"/>
+                      <span className="text-headline-md font-headline-lg font-bold text-deep-navy">Carolean Coaches</span>
                     </div>
-
-                    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                      
-                      {/* Segmented Journey Type Controller */}
-                      <div>
-                        <label style={{ display:"block", fontSize:11, fontWeight:800, color:PX.gray600, textTransform:"uppercase", letterSpacing:.35, marginBottom: 8 }}>
-                          Journey Type
-                        </label>
-                        <div style={{ display: "flex", gap: "6px", background: "#f1f5f9", padding: "4px", borderRadius: 8, width: "fit-content" }}>
-                          {[
-                            {id: "return", label: "Return Trip"},
-                            {id: "one-way", label: "One-Way"},
-                            {id: "multi-stop", label: "Multi-Stop"}
-                          ].map(type => (
-                            <button
-                              key={type.id}
-                              type="button"
-                              onClick={() => setJ(j => ({ ...j, journeyType: type.id }))}
-                              style={{
-                                background: journey.journeyType === type.id ? PX.brandRed : "transparent",
-                                color: journey.journeyType === type.id ? "#fff" : PX.navy800,
-                                border: "none",
-                                borderRadius: 6,
-                                padding: "8px 18px",
-                                fontSize: 13,
-                                fontWeight: 800,
-                                cursor: "pointer",
-                                transition: "all 0.2s"
-                              }}
-                            >
-                              {type.label}
-                            </button>
-                          ))}
+                    <nav className="hidden md:flex items-center gap-8">
+                      <a className="font-label-lg text-label-lg text-secondary border-b-2 border-secondary pb-1 transition-colors duration-200" href="#">Our Fleet</a>
+                      <a className="font-label-lg text-label-lg text-on-surface-variant hover:text-secondary transition-colors duration-200" href="#">Services</a>
+                      <a className="font-label-lg text-label-lg text-on-surface-variant hover:text-secondary transition-colors duration-200" href="#">About Us</a>
+                      <a className="font-label-lg text-label-lg text-on-surface-variant hover:text-secondary transition-colors duration-200" href="#">Contact</a>
+                    </nav>
+                    <div className="flex items-center gap-4">
+                      <a className="hidden lg:block font-label-lg text-label-lg text-on-surface-variant hover:text-secondary transition-colors" href="#">Login</a>
+                      <button onClick={() => window.scrollTo({top: 0, behavior: "smooth"})} className="bg-impact-red text-white font-label-lg px-8 py-3 rounded-full hover:bg-secondary transition-all transform active:scale-95 shadow-lg shadow-impact-red/20">
+                        Get a Quote
+                      </button>
+                    </div>
+                  </div>
+                </header>
+                
+                <main className="pt-20">
+                  <section className="relative min-h-[95vh] flex items-center justify-center py-section-gap-md overflow-hidden">
+                    <div className="absolute inset-0 z-0">
+                      <div className="absolute inset-0 hero-gradient-overlay z-10"></div>
+                      <img alt="Luxury Carolean Coach on road" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AP1WRLv55cwxeMUYfCKyBaSOD03fhTX9LR1pTm4Qxp4qCVrH2ssPRuuiLG7uDsDOJ5Kl6ptIbxoUE-3psVUb3ueJuYMpUgfaBMAbQYR_eWy2CIO-bYvLPZd1rPq11u-q-hmtg-fimN5OZrY1Hh64ePcqv2htmxi5jnm8FVaFm4EldIwKOORHqOgW0UjNHJJ2OlU1S8ehmf5SX5YHCrPodBud8ajq1vpSkZq1dogDTG7_ueOuYhVW-Jq-ObzLGA"/>
+                    </div>
+                    <div className="relative z-20 w-full max-w-container-max px-gutter mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center px-6">
+                      <div className="lg:col-span-6 text-stark-white mb-10 lg:mb-0">
+                        <div className="inline-flex items-center gap-2 py-2 px-4 bg-white/10 backdrop-blur-md text-white text-label-sm font-label-sm mb-8 rounded-full border border-white/20 uppercase tracking-widest">
+                          <span className="w-2 h-2 rounded-full bg-impact-red animate-pulse"></span>
+                          Premium Travel Solutions
                         </div>
-                      </div>
-
-                      {/* Route Input fields */}
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1.25rem" }}>
-                        <Field label="Pickup Address" required>
-                          <PlacesInput value={journey.origin} placeholder="e.g. Heathrow Airport" icon={<SvgMapPinGreen />} mapsLoaded={mapsLoaded} onChange={setOrigin}/>
-                        </Field>
-                        <Field label="Destination" required>
-                          <PlacesInput value={journey.destination} placeholder="e.g. Derby Arena" icon={<SvgMapPinRed />} mapsLoaded={mapsLoaded} onChange={setDest}/>
-                        </Field>
-                      </div>
-
-                      {/* Timing details */}
-                      <div style={{ display: "grid", gridTemplateColumns: showReturnDate ? "repeat(auto-fit, minmax(240px, 1fr))" : "1fr", gap: "1.25rem" }}>
-                        <Field label="Travel Date & Time" required>
-                          <input type="datetime-local" value={journey.departureDate} onChange={e=>setJ(j=>({...j,departureDate:e.target.value}))}/>
-                        </Field>
-                        {showReturnDate && (
-                          <Field label="Return Date & Time" required>
-                            <input type="datetime-local" value={journey.returnDate} onChange={e=>setJ(j=>({...j,returnDate:e.target.value}))}/>
-                          </Field>
-                        )}
-                      </div>
-
-                      {/* DYNAMIC MULTI-STOP ROW */}
-                      {journey.journeyType === "multi-stop" && (
-                        <div style={{ padding:"1.25rem", background:"#f8fafc", borderRadius:8, border:`1.5px dashed #dde0e8` }}>
-                          <div style={{ fontSize:12, fontWeight:800, color:PX.navy800, marginBottom:"0.75rem", textTransform:"uppercase" }}>Intermediate stops</div>
-                          {(journey.stops || []).map((s,i)=>(
-                            <div key={i} style={{ display:"grid", gridTemplateColumns:"1fr auto auto", gap:8, marginBottom:8, alignItems:"center" }}>
-                              <PlacesInput value={s.place} placeholder={`Stop ${i+1}`} icon={<SvgMapPinBlue />} mapsLoaded={mapsLoaded}
-                                onChange={(val,coords)=>{ updateStop(i,"place",val); if(coords) updateStop(i,"coords",coords); }}/>
-                              <select value={s.wait} style={{ width:120 }} onChange={e=>updateStop(i,"wait",e.target.value)}>
-                                {[15,30,45,60,90,120,180].map(m=><option key={m} value={m}>{m} min wait</option>)}
-                              </select>
-                              <button type="button" onClick={()=>removeStop(i)} style={{ width:44,height:44,borderRadius:8,border:"none",
-                                background:PX.red100,color:PX.red700,cursor:"pointer",fontWeight:700,fontSize:18, display:"flex", alignItems:"center", justifyContent:"center" }}><SvgClose size={18} /></button>
-                            </div>
-                          ))}
-                          <Btn variant="ghost" size="sm" onClick={addStop}>＋ Add stop</Btn>
-                        </div>
-                      )}
-
-                      {/* ROW 4: Load & Luggage */}
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.25rem" }}>
-                          <Field label="Vehicle Preference (Optional)">
-                            <div style={{ height: 42 }}>
-                              <select
-                                value={journey.vehiclePreference || db.vehicles?.[0]?.id || ''}
-                                onChange={e => { const vid = e.target.value; const selectedVehicle = db.vehicles?.find(v => v.id === vid); const newPass = selectedVehicle ? selectedVehicle.capacity : 16; setJ(j => ({...j, vehiclePreference: vid, passengers: newPass, suitcaseCount: newPass, handbagCount: newPass, activeLuggageType: 'suitcase'})); }}
-                                style={{ width: "100%", height: "100%", boxSizing: "border-box", margin: 0, padding: "8px 12px", borderRadius: 6, border: `1.5px solid #dde0e8`, fontSize: 14, color: PX.navy800, background: "#fff", cursor: "pointer" }}
-                              >
-                                
-                                {db.vehicles?.map(v => (
-                                  <option key={v.id} value={v.id}>{v.name} ({v.capacity} Seats)</option>
-                                ))}
-                              </select>
-                            </div>
-                          </Field>
-                          <Field label="Number of Passengers" required>
-                            <div style={{ display:"flex", height: 42, alignItems: "stretch" }}>
-                              <button type="button" onClick={()=>{
-                                const current = Number(journey.passengers) || 1;
-                                const p = Math.max(1, current - 1);
-                                setJ(j=>({...j,passengers:p, suitcaseCount:p, handbagCount:p}));
-                              }}
-                                style={{ width:40, height: "100%", boxSizing: "border-box", margin: 0, border:`1.5px solid #dde0e8`,borderRight:"none",
-                                  borderRadius:"6px 0 0 6px",background:"#fff",cursor:"pointer",fontSize:16,fontWeight:700,color:PX.navy800 }}>−</button>
-                              <input type="number" min={1} value={journey.passengers}
-                                onChange={e=>{
-                                  const val = e.target.value;
-                                  const p = val === "" ? "" : (parseInt(val) || 1);
-                                  setJ(j=>({...j,passengers:p as any, suitcaseCount:Number(p)||0, handbagCount:Number(p)||0}));
-                                }}
-                                style={{ width:60, height: "100%", boxSizing: "border-box", margin: 0, textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none",fontWeight:700, border:`1.5px solid #dde0e8`, borderLeftWidth:0, borderRightWidth:0 }}/>
-                              <button type="button" onClick={()=>{
-                                const current = Number(journey.passengers) || 0;
-                                const p = current + 1;
-                                setJ(j=>({...j,passengers:p, suitcaseCount:p, handbagCount:p}));
-                              }}
-                                style={{ width:40, height: "100%", boxSizing: "border-box", margin: 0, border:`1.5px solid #dde0e8`,borderLeft:"none",
-                                  borderRadius:"0 6px 6px 0",background:"#fff",cursor:"pointer",fontSize:16,fontWeight:700,color:PX.navy800 }}>＋</button>
-                            </div>
-                          </Field>
-                          <Field label="Luggage Requirements">
-                            <div style={{ display:"flex", height: 42, alignItems: "stretch" }}>
-                              <select 
-                                value={journey.activeLuggageType || 'none'} 
-                                onChange={e=>setJ(j=>({...j,activeLuggageType:e.target.value}))}
-                                style={{ flex: 1, height: "100%", boxSizing: "border-box", margin: 0, borderRadius:"6px 0 0 6px", borderRight:"none", border:`1.5px solid #dde0e8`, borderRightWidth:0 }}
-                              >
-                                <option value="none">None</option>
-                                <option value="suitcase">Suitcase (23kg)</option>
-                                <option value="handbag">Hand carry</option>
-                              </select>
-                              
-                              <button type="button" 
-                                disabled={!journey.activeLuggageType || journey.activeLuggageType === 'none'}
-                                onClick={()=>{
-                                  if (journey.activeLuggageType === 'suitcase') setJ(j=>({...j,suitcaseCount:Math.max(0,(j.suitcaseCount||0)-1)}));
-                                  else if (journey.activeLuggageType === 'handbag') setJ(j=>({...j,handbagCount:Math.max(0,(j.handbagCount||0)-1)}));
-                                }}
-                                style={{ width:40, height: "100%", boxSizing: "border-box", margin: 0, border:`1.5px solid #dde0e8`,borderRight:"none", borderLeft:"none",
-                                  background: (!journey.activeLuggageType || journey.activeLuggageType === 'none') ? "#f9fafb" : "#fff",
-                                  cursor:(!journey.activeLuggageType || journey.activeLuggageType === 'none')?"default":"pointer",fontSize:16,fontWeight:700,color:PX.navy800 }}>−</button>
-                              
-                              <input type="number" min={0} 
-                                disabled={!journey.activeLuggageType || journey.activeLuggageType === 'none'}
-                                value={(!journey.activeLuggageType || journey.activeLuggageType === 'none') ? 0 : (journey.activeLuggageType === 'suitcase' ? (journey.suitcaseCount||0) : (journey.handbagCount||0))}
-                                onChange={e=>{
-                                  const v = parseInt(e.target.value)||0;
-                                  if (journey.activeLuggageType === 'suitcase') setJ(j=>({...j,suitcaseCount:v}));
-                                  else if (journey.activeLuggageType === 'handbag') setJ(j=>({...j,handbagCount:v}));
-                                }}
-                                style={{ width:46, height: "100%", boxSizing: "border-box", margin: 0, textAlign:"center",borderRadius:0,borderLeft:"none",borderRight:"none", padding:0, border:`1.5px solid #dde0e8`, borderLeftWidth:0, borderRightWidth:0,
-                                  background: (!journey.activeLuggageType || journey.activeLuggageType === 'none') ? "#f9fafb" : "#fff" }}/>
-                              
-                              <button type="button" 
-                                disabled={!journey.activeLuggageType || journey.activeLuggageType === 'none'}
-                                onClick={()=>{
-                                  if (journey.activeLuggageType === 'suitcase') setJ(j=>({...j,suitcaseCount:(j.suitcaseCount||0)+1}));
-                                  else if (journey.activeLuggageType === 'handbag') setJ(j=>({...j,handbagCount:(j.handbagCount||0)+1}));
-                                }}
-                                style={{ width:40, height: "100%", boxSizing: "border-box", margin: 0, border:`1.5px solid #dde0e8`,borderLeft:"none",
-                                  borderRadius:"0 6px 6px 0",
-                                  background: (!journey.activeLuggageType || journey.activeLuggageType === 'none') ? "#f9fafb" : "#fff",
-                                  cursor:(!journey.activeLuggageType || journey.activeLuggageType === 'none')?"default":"pointer",fontSize:16,fontWeight:700,color:PX.navy800 }}>＋</button>
-                            </div>
-                          </Field>
-                        </div>
-
-                        {/* ROW 4: Special Requests */}
-                        <div>
-                          <Field label="Special Requests">
-                            <input type="text" placeholder="e.g. Wheelchair access, extra stops" value={journey.specialRequests} onChange={e=>setJ(j=>({...j,specialRequests:e.target.value}))}/>
-                          </Field>
-                        </div>
-
-                        {/* ROW 5: Customer Contact Info */}
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.25rem" }}>
-                          <Field label="Full Name" required>
-                            <input type="text" placeholder="e.g. John Doe" value={journey.name} onChange={e=>setJ(j=>({...j,name:e.target.value}))}/>
-                          </Field>
-                          <Field label="Email Address" required>
-                            <input type="email" placeholder="e.g. john@example.com" value={journey.email} onChange={e=>setJ(j=>({...j,email:e.target.value}))}/>
-                          </Field>
-                          <Field label="Phone" required>
-                            <input type="text" placeholder="e.g. +44 7700 900077" value={journey.phone} onChange={e=>setJ(j=>({...j,phone:e.target.value}))}/>
-                          </Field>
-                        </div>
-
-                        {validationError && (
-                          <div style={{ background: PX.red100, border: `1px solid ${PX.red700}`, color: PX.red700, borderRadius: 8, padding: "10px 14px", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-                            <SvgAlert size={14} /> {validationError}
+                        <h1 className="font-headline-xl text-headline-xl leading-[1.1] mb-6">Experience Executive Travel <br/>Defined by <span className="text-impact-red">Precision</span>.</h1>
+                        <p className="text-body-lg font-body-lg max-w-xl opacity-90 leading-relaxed mb-10">From elite corporate events to bespoke group logistics, we provide high-fidelity transport solutions that keep your business moving with uncompromising excellence.</p>
+                        <div className="flex items-center gap-8">
+                          <div className="flex flex-col">
+                            <span className="text-headline-lg font-headline-lg">25+</span>
+                            <span className="text-label-sm font-label-sm opacity-70">Years Excellence</span>
                           </div>
-                        )}
-
-                        {/* CALCULATION TRIGGERS */}
-                        <div style={{ display:"flex", justifyContent:"flex-end", marginTop:10 }}>
-                          <Btn variant="primary" size="lg" onClick={handleCalculateClick} disabled={loadingQuotes}>
-                            {loadingQuotes ? <><span className="spinning" style={{ marginRight: 6 }}>⟳</span> Re-calculating...</> : "Get instant quote →"}
-                          </Btn>
+                          <div className="w-[1px] h-12 bg-stark-white/20"></div>
+                          <div className="flex flex-col">
+                            <span className="text-headline-lg font-headline-lg">150+</span>
+                            <span className="text-label-sm font-label-sm opacity-70">Luxury Coaches</span>
+                          </div>
+                          <div className="w-[1px] h-12 bg-stark-white/20"></div>
+                          <div className="flex flex-col">
+                            <span className="text-headline-lg font-headline-lg">5★</span>
+                            <span className="text-label-sm font-label-sm opacity-70">Safety Rating</span>
+                          </div>
                         </div>
-
                       </div>
-
+                      
+                      <div className="lg:col-span-6 flex justify-center lg:justify-end">
+                        <div className="w-full max-w-[520px] glass-panel rounded-[2.5rem] shadow-2xl p-10 transform transition-all duration-500 hover:shadow-deep-navy/20 border border-white/50">
+                          <div className="flex justify-between items-center mb-8">
+                            <h2 className="font-headline-md text-headline-md text-deep-navy">Fast Quote</h2>
+                            <div className="flex gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-deep-navy/20"></span>
+                              <span className="w-1.5 h-1.5 rounded-full bg-deep-navy/20"></span>
+                              <span className="w-1.5 h-1.5 rounded-full bg-impact-red"></span>
+                            </div>
+                          </div>
+                          <div className="flex p-1.5 bg-surface-container rounded-full mb-8">
+                            <button type="button" onClick={()=>setJ(j=>({...j, journeyType: "return"}))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType === "return" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>Return</button>
+                            <button type="button" onClick={()=>setJ(j=>({...j, journeyType: "one-way"}))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType === "one-way" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>One-Way</button>
+                            <button type="button" onClick={()=>setJ(j=>({...j, journeyType: "multi-stop"}))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType === "multi-stop" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>Multi-Stop</button>
+                          </div>
+                          
+                          <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleCalculateClick(); }}>
+                            <div className="space-y-4">
+                              <div className="relative group">
+                                <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-[#4ADE80] z-10" style={{pointerEvents: "none"}}>location_on</span>
+                                <PlacesInput 
+                                  value={journey.origin} 
+                                  onChange={(val, geo) => setJ(j=>({...j, origin: val, wpCoords: [geo, ...(j.wpCoords?.slice(1) || [])]}))}
+                                  placeholder="Pickup location" 
+                                  icon={null} 
+                                  mapsLoaded={mapsLoaded} 
+                                />
+                              </div>
+                              <div className="relative group">
+                                <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-impact-red z-10" style={{pointerEvents: "none"}}>location_on</span>
+                                <PlacesInput 
+                                  value={journey.destination} 
+                                  onChange={(val, geo) => setJ(j=>({...j, destination: val, wpCoords: [...(j.wpCoords?.slice(0, j.wpCoords.length > 1 ? j.wpCoords.length - 1 : 1) || []), geo]}))}
+                                  placeholder="Destination" 
+                                  icon={null} 
+                                  mapsLoaded={mapsLoaded} 
+                                />
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div className="relative group">
+                                <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant z-10" style={{pointerEvents: "none"}}>calendar_month</span>
+                                <input className="w-full pl-12 pr-6 py-4 bg-white border border-outline-variant capsule-input focus:outline-none focus:border-deep-navy transition-all font-body-md text-on-surface shadow-sm" type="datetime-local" value={journey.departureDate} onChange={e=>setJ(j=>({...j, departureDate: e.target.value}))} required />
+                              </div>
+                              <div className="relative group flex items-center justify-between px-6 py-4 bg-white border border-outline-variant capsule-input shadow-sm">
+                                <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.max(1, (j.passengers || 16) - 1)}))} className="text-on-surface-variant hover:text-impact-red transition-colors w-8 h-8 flex items-center justify-center"><span className="material-symbols-outlined">remove</span></button>
+                                <div className="text-center">
+                                  <span className="font-headline-md text-[18px] text-deep-navy leading-none">{journey.passengers || 16}</span>
+                                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Passengers</div>
+                                </div>
+                                <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.min(100, (j.passengers || 16) + 1)}))} className="text-on-surface-variant hover:text-impact-red transition-colors w-8 h-8 flex items-center justify-center"><span className="material-symbols-outlined">add</span></button>
+                              </div>
+                            </div>
+                            
+                            {validationError && (
+                              <div style={{ padding: "10px", background: "#fee2e2", color: "#b91c1c", borderRadius: "8px", fontSize: "14px" }}>
+                                {validationError}
+                              </div>
+                            )}
+                            
+                            <button type="submit" className="w-full py-5 bg-impact-red text-white font-headline-md rounded-full hover:bg-secondary transition-all transform active:scale-[0.98] flex items-center justify-center gap-3 group shadow-xl shadow-impact-red/30 mt-4">
+                              Get Instant Quote
+                              <span className="material-symbols-outlined transition-transform group-hover:translate-x-2">arrow_forward</span>
+                            </button>
+                          </form>
+                        </div>
+                      </div>
                     </div>
-
+                  </section>
+                  
+                  <section className="bg-surface py-20 relative border-b border-outline-variant">
+                    <div className="max-w-container-max mx-auto px-gutter px-6">
+                      <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+                        <div className="max-w-xs text-center md:text-left">
+                          <h3 className="font-headline-md text-deep-navy mb-2">Our Partnerships</h3>
+                          <p className="text-label-sm text-on-surface-variant opacity-60">Providing logistics for the world&apos;s leading enterprises and sports organizations.</p>
+                        </div>
+                        <div className="flex flex-wrap justify-center items-center gap-12 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all duration-700 flex-1">
+                          <img className="h-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5L448RNk5wXm0Q2D6aM-QXigHIg8x8lOz4XZ3lfrkhuZOkcPFayB6twwwp6Q8L16tmF2Vyn9Sv4GJXiGn_RQM1PvfVl0OsdZ-b12Gou3aLaNmTSSZrHPNpBJHdUskEGjvRIV8oPERBTe7m8LmeAFdq52fu6mMA3VDTNqaaosaEWQJTLWwpmFsKhoPVAkvZ217J-4FNW2KARuOhfDDfzOU97jhNNDuofKK9gWIvz4DqDIZUoJAFL_Q"/>
+                          <img className="h-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkls7qdqetN4GV299QodVbmISoMXylpPic015TUL42cgNEmE1RS1qlVjORL-HSK1qZJNVAlz1369J81KVQ5Cuydj_wo4_q-nRhn6Af51rJ7xaQTn9veoEpXYxqorCsP1XcA0eZqTqCk9xEPWcgPT2ixL9Z2Tij9NtvSonGMPe529UKWfLD917cXswtMXVtVJdGzhHz-97SpUYT9MtC57Xd3kwXn2FXhPXs9DloAdTbz4F0pMlFoGVa"/>
+                          <img className="h-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnmJLkrPdiYkhkhw9CVxnUPBtdD9USA2XyKD22GGWnBgKvbVIPPgUKQXGAHHEc6EpY2SvWQDT3PX2XBtWWobYYl39lZ9GpDDbxmcbpKEmLhAchyYVmJQp2yPU4IcMznhaD_GuewM9vhgM_FuQF47xLm9Owc4lg8Guty-WTUpolgkN0aThROZRnX60DyUO89P3BkruEE6vw7wHZ9XIpXwJ5t4gxI_AHwvSA2Q5bQfq6VwlJogEZiL_3"/>
+                          <img className="h-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfOjyv2w_koqHZyz-_RH3M2UZokGnXtj8X8Ct3dDZ3sqLO_2hMjpqwbPyp4BuKODHcFJeXBXgPUNaAadnmnFzpfTrHVLtIjfVzwcWlr4GpiXhy9cZgsm37KbL0KVJ8cvptTJ7szPud1yWLQbQcueg8sMhHZQ-1AiOLgaS4yqeARc8uNP9PeeCLvocHogLjlAX5quRV5KLVL6eiHN7Z8emxEM0PQZuwm_tb0QpqMJ83j51CCNNnxr-Z"/>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                  
+                  <section className="py-section-gap-lg px-gutter max-w-container-max mx-auto px-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-20 mt-20">
+                      <div>
+                        <h2 className="font-headline-xl text-headline-xl text-deep-navy mb-6">Why Professionals <br/>Choose Carolean</h2>
+                        <p className="text-body-lg text-on-surface-variant mb-8 leading-relaxed">For over a quarter-century, we have been the preferred choice for organizations that value reliability above all else. Our service isn&apos;t just about transport; it&apos;s about providing a seamless extension of your professional environment.</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div className="flex gap-4">
+                            <span className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center text-primary">
+                              <span className="material-symbols-outlined">verified_user</span>
+                            </span>
+                            <div>
+                              <h4 className="font-headline-md text-body-md font-bold text-deep-navy mb-1">Vetted Drivers</h4>
+                              <p className="text-label-sm text-on-surface-variant">Enhanced DBS checked & professional training.</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-4">
+                            <span className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center text-primary">
+                              <span className="material-symbols-outlined">track_changes</span>
+                            </span>
+                            <div>
+                              <h4 className="font-headline-md text-body-md font-bold text-deep-navy mb-1">Live Tracking</h4>
+                              <p className="text-label-sm text-on-surface-variant">Real-time GPS updates for every journey.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative group">
+                        <img alt="Our Executive Fleet" className="rounded-3xl shadow-2xl w-full object-cover h-[400px] transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida/AP1WRLscQ-j4rvucIt-jHd557isjboYDcNkRJBLg75SkZyJMjGwJmdbJfYFRGIXqAT7NHHqoDZFwh2jvsipnE0WlEtxU0mw1-polKzcSYRahY9tt1FS_mt6_iOuKEQKBFywK3Q815mbTUksVlHni8FANt-K-czjRD_tuFbD9TaBBWiWp6ecgND-pSaMb_ao7fmt2VrqkqPZtujF4KNmM87I8ggUZZ931Tpj25qc5ewNjMqe9srjFjGbHLjq_ZzE"/>
+                        <div className="absolute -bottom-6 -left-6 bg-impact-red text-white p-8 rounded-2xl shadow-xl max-w-[240px]">
+                          <p className="text-headline-lg font-bold mb-1">99.8%</p>
+                          <p className="text-label-sm font-semibold uppercase tracking-wider opacity-90">On-Time Arrival Rate Across 10,000+ Trips</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+                      <div className="md:col-span-2 relative overflow-hidden rounded-3xl group h-[500px]">
+                        <img alt="Interior Comfort" className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9cR8gpZZ4KyIUvunnm3cLhqSYmlrmvpdLszkMOhqlcx-Aa6CBtnTVfRr4z4sW3Ml4YO5AsJS4kCOEDHtGVzvKqW1peiIHV0pCm5IKRa2KnWuaSrUvZH-j9XAmOMEPXv9kdkODkhXGWC9IZ-ojPV66gCyY1OD0dL-rasI_4x6pLpjIANfB0mRGPsryr63g3Qh151NmT1WSb3dBECQqe9Z5mqH1HTX0XRBVdhJE7IyOPeJo9fF2vn2D"/>
+                        <div className="absolute inset-0 bg-gradient-to-t from-deep-navy via-transparent to-transparent opacity-80"></div>
+                        <div className="absolute bottom-0 left-0 p-10 text-stark-white">
+                          <span className="material-symbols-outlined text-4xl mb-4 text-impact-red">airline_seat_recline_extra</span>
+                          <h3 className="font-headline-lg text-headline-lg mb-4">Executive Cabin Comfort</h3>
+                          <p className="font-body-md opacity-90 max-w-lg leading-relaxed">Reimagining on-road productivity with ergonomic leather seating, climate control, and enterprise-grade Wi-Fi in every vehicle.</p>
+                        </div>
+                      </div>
+                      <div className="relative overflow-hidden rounded-3xl group bg-primary-container p-10 flex flex-col justify-between">
+                        <div className="relative z-10 text-stark-white">
+                          <h4 className="font-headline-md text-headline-md mb-4">Corporate Group Travel</h4>
+                          <p className="text-label-sm opacity-80 leading-relaxed mb-6">Bespoke logistics for large teams, conferences, and executive retreats. We handle the complexity, you enjoy the ride.</p>
+                          <ul className="space-y-3">
+                            <li className="flex items-center gap-2 text-label-sm font-semibold">
+                              <span className="material-symbols-outlined text-impact-red text-[18px]">check_circle</span>
+                              Dedicated Account Manager
+                            </li>
+                            <li className="flex items-center gap-2 text-label-sm font-semibold">
+                              <span className="material-symbols-outlined text-impact-red text-[18px]">check_circle</span>
+                              Custom Branding Options
+                            </li>
+                          </ul>
+                        </div>
+                        <img alt="Corporate shuttle" className="absolute right-[-20%] bottom-[-10%] w-[120%] opacity-20 rotate-[-12deg]" src="https://lh3.googleusercontent.com/aida/AP1WRLtixZVJHuwXCDmL8wJm7HkR1O4Qc8uVQDS2SRcxtw9IsELfxsjyQiFhtyFg8SY7MnTNn6r09s0tVgoWyiYG1WcSP7SuOtHUuh5b1P1-uLzDsplIwS1ioQd04Vspw1bcZUnek3k6UW7AinKxmF7pVvmMpOJ7vg25d_Plh7DAleM3Sobh3Y_PARpRXEcBWX4PwdGvOVU_cGDrg0pEtQysxg1ax5qq-yhLnwD0oag-Xd9gy_ehDPKn1ILFpdI"/>
+                      </div>
+                    </div>
+                  </section>
+                  
+                  <section className="bg-surface-container-high py-section-gap-lg overflow-hidden relative">
+                    <div className="max-w-container-max mx-auto px-gutter grid grid-cols-1 lg:grid-cols-2 gap-16 items-center px-6 py-20">
+                      <div className="relative">
+                        <div className="absolute -top-10 -left-10 w-40 h-40 bg-impact-red/10 rounded-full blur-3xl"></div>
+                        <img alt="Client Testimonial" className="rounded-[3rem] shadow-2xl relative z-10 w-full max-w-md mx-auto grayscale hover:grayscale-0 transition-all duration-700" src="https://lh3.googleusercontent.com/aida/AP1WRLv4cSPzSp6GJDn4x-2rTHrlYzdCsDNcKjwFrsedpDKB_mczNaTFfaMYRCCtrWcDc-bW7QjiZeT6zyyMXfVac98LaCCPnW025S4DST8_RBD1cWk37DVIIDglFEX2M1HCmv54TF4XVb-NAfnbf4CCeeKGahU9qCe4JU5iZv6q8uQ1Yg2ElPX39g050YpR286f0CnL6e38UFUYY6U36-AJbC9t5wY0fnF-XbqFDms9GkQL2l-9eJG7k98OaX0"/>
+                        <div className="absolute -bottom-8 right-0 z-20">
+                          <div className="bg-white p-6 rounded-2xl shadow-xl flex items-center gap-4">
+                            <div className="flex -space-x-3">
+                              <div className="w-10 h-10 rounded-full border-2 border-white bg-surface-dim"></div>
+                              <div className="w-10 h-10 rounded-full border-2 border-white bg-surface-dim"></div>
+                              <div className="w-10 h-10 rounded-full border-2 border-white bg-primary text-white flex items-center justify-center text-[10px] font-bold">500+</div>
+                            </div>
+                            <span className="text-label-sm font-bold text-deep-navy">Happy Corporate Clients</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <span className="material-symbols-outlined text-6xl text-impact-red mb-8 opacity-20">format_quote</span>
+                        <h3 className="font-headline-lg text-headline-lg text-deep-navy mb-8">"Carolean Coaches has transformed how our executive team moves. Their punctuality and the sheer quality of the fleet are unmatched in the industry."</h3>
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-1 gap-1 bg-impact-red rounded-full"></div>
+                          <div>
+                            <p className="font-headline-md text-body-md font-bold text-deep-navy">Sarah Jenkins</p>
+                            <p className="text-label-sm text-on-surface-variant">Director of Logistics, Global Tech Corp</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                  
+                  <section className="bg-tertiary py-24 overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-1/3 h-full opacity-5 pointer-events-none">
+                      <span className="material-symbols-outlined text-[400px] leading-none select-none text-white">directions_bus</span>
+                    </div>
+                    <div className="max-w-container-max mx-auto px-gutter flex flex-col md:flex-row items-center justify-between gap-12 relative z-10 px-6">
+                      <div className="md:max-w-xl">
+                        <h2 className="font-headline-xl text-headline-lg text-stark-white mb-4">Stay Ahead of the Curve</h2>
+                        <p className="text-body-lg text-surface-variant opacity-80">Join 5,000+ corporate travel managers. Receive priority fleet updates, industry insights, and specialized corporate rates.</p>
+                      </div>
+                      <div className="w-full md:w-auto">
+                        <div className="bg-white/10 p-2 rounded-full backdrop-blur-md border border-white/20 flex flex-col sm:flex-row gap-2">
+                          <input className="px-8 py-4 bg-transparent border-none focus:ring-0 text-white placeholder:text-surface-variant w-full sm:w-80" placeholder="Professional Email" type="email"/>
+                          <button className="bg-impact-red text-white px-10 py-4 rounded-full font-headline-md hover:bg-white hover:text-tertiary transition-all shadow-lg shadow-impact-red/20">Subscribe</button>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                </main>
+                
+                <footer className="bg-tertiary text-tertiary-fixed py-20 border-t border-white/5">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-gutter max-w-container-max mx-auto px-6">
+                    <div className="space-y-8">
+                      <div className="flex items-center gap-3">
+                        <img alt="Carolean Coaches" className="h-8 w-auto brightness-0 invert" src="https://lh3.googleusercontent.com/aida/AP1WRLumoQP5jmF1XgJNC5lNqtwGhsObTeB2YXZkQzSTm7Amj6eXg01uUEKMrO_KkHhNSorr8c9oB_YrR156TkK9Ack2vFR2RvFAZ-UTleuTEHXLn7eCAnQdiPLN9rUUZC0KsfYt-Zf0VLvkQzw7Xg61mqzhHnSrGOSII7xC_vAJozhOvJkgNpomQVykVjs4NxPBKkLHKVgHSIqRbv-Mt5dcowl1V6T8TIC73_nk86d9LCHtWX2KJY8zODlCLA"/>
+                        <span className="text-headline-md font-headline-md text-stark-white">Carolean</span>
+                      </div>
+                      <p className="text-body-md opacity-60 leading-relaxed">Providing world-class transportation solutions since 1999. Precision, punctuality, and professionalism in every mile.</p>
+                      <div className="flex gap-4">
+                        <a className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-impact-red transition-all" href="#"><span className="material-symbols-outlined text-stark-white text-[20px]">public</span></a>
+                        <a className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-impact-red transition-all" href="#"><span className="material-symbols-outlined text-stark-white text-[20px]">chat</span></a>
+                        <a className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-impact-red transition-all" href="#"><span className="material-symbols-outlined text-stark-white text-[20px]">share</span></a>
+                      </div>
+                    </div>
+                    <div>
+                      <h5 className="text-stark-white font-headline-md mb-8">Our Services</h5>
+                      <ul className="space-y-4">
+                        <li><a className="text-surface-variant opacity-80 hover:text-impact-red transition-colors" href="#">Corporate Travel</a></li>
+                        <li><a className="text-surface-variant opacity-80 hover:text-impact-red transition-colors" href="#">Airport Transfers</a></li>
+                        <li><a className="text-surface-variant opacity-80 hover:text-impact-red transition-colors" href="#">Special Events</a></li>
+                        <li><a className="text-surface-variant opacity-80 hover:text-impact-red transition-colors" href="#">Fleet Overview</a></li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h5 className="text-stark-white font-headline-md mb-8">Quick Links</h5>
+                      <ul className="space-y-4">
+                        <li><a className="text-surface-variant opacity-80 hover:text-impact-red transition-colors" href="#">Privacy Policy</a></li>
+                        <li><a className="text-surface-variant opacity-80 hover:text-impact-red transition-colors" href="#">Terms & Conditions</a></li>
+                        <li><a className="text-surface-variant opacity-80 hover:text-impact-red transition-colors" href="#">Booking FAQs</a></li>
+                        <li><a className="text-surface-variant opacity-80 hover:text-impact-red transition-colors" href="#">Contact Us</a></li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h5 className="text-stark-white font-headline-md mb-8">Headquarters</h5>
+                      <ul className="space-y-6">
+                        <li className="flex gap-4 text-surface-variant opacity-80">
+                          <span className="material-symbols-outlined text-impact-red">pin_drop</span>
+                          12-16 Corporate Drive, <br/>London, EC2A 4NE
+                        </li>
+                        <li className="flex gap-4 text-surface-variant opacity-80">
+                          <span className="material-symbols-outlined text-impact-red">call</span>
+                          +44 (0) 20 7834 1234
+                        </li>
+                        <li className="flex gap-4 text-surface-variant opacity-80">
+                          <span className="material-symbols-outlined text-impact-red">mail</span>
+                          bookings@carolean.com
+                        </li>
+                      </ul>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                /* PAGE 2: QUOTATION PRICE SCREEN */
+                  <div className="max-w-container-max mx-auto px-gutter mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 px-6">
+                    <p className="text-label-sm font-label-sm opacity-60">© 2024 Carolean Coaches. Executive Precision in Motion.</p>
+                    <div className="flex gap-8">
+                      <span className="text-label-sm font-label-sm opacity-40">ISO 9001 Certified</span>
+                      <span className="text-label-sm font-label-sm opacity-40">Site by Precision Agency</span>
+                    </div>
+                  </div>
+                </footer>
+              </div>
+            ) : (
+
+/* PAGE 2: QUOTATION PRICE SCREEN */
                 <main style={{ maxWidth:1160, margin:"0 auto", padding:"2.5rem 1.5rem 5rem" }} className="fade-up">
                   
                   {/* Sleek Horizontal Dark Journey Summary Header */}
@@ -1637,8 +1699,7 @@ export default function App() {
                 </main>
               )}
             </div>
-        
-        <footer style={{ background: PX.offWhite, borderTop: `1px solid ${PX.gray200}`, padding: "2rem 1.5rem", textAlign: "center", fontSize: 12, color: PX.gray600 }}>
+          <footer style={{ background: PX.offWhite, borderTop: `1px solid ${PX.gray200}`, padding: "2rem 1.5rem", textAlign: "center", fontSize: 12, color: PX.gray600 }}>
           <div style={{ maxWidth: 1140, margin: "0 auto", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
             <div>
               <strong>Carolean Coaches Ltd</strong> · Unit 1, Bentley Lane, Walsall WS2 8TL
