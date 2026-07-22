@@ -1102,7 +1102,6 @@ export default function App() {
   const [quotes, setQ]             = useState([]);
   const [selected, setSel]         = useState(null);
   const [showQuotes, setShowQuotes] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
   const [loadingQuotes, setLoadingQuotes] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted]   = useState(false);
@@ -1565,47 +1564,17 @@ export default function App() {
                         <div style={{ display: "inline-flex", background: PX.teal100, borderRadius: "50%", padding: 16, marginBottom: 20, color: PX.teal700 }}>
                           <SvgCheck size={48} />
                         </div>
-                        <h2 style={{ fontSize: 26, fontWeight: 900, color: PX.teal700, marginBottom: 12 }}>Request Successfully Sent!</h2>
+                        <h2 style={{ fontSize: 26, fontWeight: 900, color: PX.teal700, marginBottom: 12 }}>Thank You! Request Successfully Sent.</h2>
                         <p style={{ fontSize: 15, color: PX.gray700, lineHeight: 1.6, marginBottom: 24 }}>
                           We will contact you at <strong>{journey.email}</strong> within 2 hours.
                         </p>
                         
                         <div style={{ background: "#fff", border: `1px solid #bfdbfe`, padding: "16px", borderRadius: 8, marginBottom: 24, fontSize: 14, color: PX.navy800, lineHeight: 1.5 }}>
-                          <strong>Thank you for your inquiry.</strong><br/>
                           Our dedicated team will reach out to you shortly to discuss your requirements and provide the best possible quotation for your journey.
                         </div>
 
                         <div style={{ background: PX.gray100, padding: "10px 20px", borderRadius: 8, display: "inline-block", fontFamily: "monospace", fontWeight: 800, fontSize: 16, color: PX.navy800, letterSpacing: 1 }}>
                           REF: {bookingRef}
-                        </div>
-                      </div>
-                    </Card>
-                  ) : showCheckout ? (
-                    <Card style={{ maxWidth: 640, margin: "3rem auto", padding: "2.5rem", border: `1.5px solid #10b981`, background: "#f0fdf4" }}>
-                      <div className="fade-up">
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-                          <div>
-                            <span style={{ fontSize: 11, fontWeight: 800, color: "#15803d", textTransform: "uppercase", letterSpacing: 0.5 }}>Selected Category</span>
-                            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 20, fontWeight: 900, color: PX.navy800, marginTop: 4 }}>
-                              {selectedQuote?.vehicle?.name} {selectedQuote?.vehicle?.capacity} seats
-                            </div>
-                          </div>
-                        </div>
-
-                        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                          <Field label="Company / Organisation Name (Optional)">
-                            <input type="text" placeholder="e.g. Acme Corporation" value={journey.company} onChange={e=>setJ(j=>({...j,company:e.target.value}))}/>
-                          </Field>
-                          
-                          <Btn variant="teal" size="lg" full onClick={handleFinalBookingSubmit} disabled={submitting}>
-                            {submitting ? <><span className="spinning" style={{ marginRight: 8 }}>⟳</span> Sending Request...</> : "Submit Quote Request"}
-                          </Btn>
-
-                          <div style={{ textAlign: "center", marginTop: 8 }}>
-                            <Btn variant="ghost" size="sm" onClick={() => setShowCheckout(false)} style={{ color: PX.gray500 }}>
-                              ← Back to Options
-                            </Btn>
-                          </div>
                         </div>
                       </div>
                     </Card>
@@ -1634,8 +1603,8 @@ export default function App() {
                               
                               {selected && (
                                 <div style={{ marginTop: "2rem", borderTop: "1px solid #e2e8f0", paddingTop: "1.5rem" }} className="fade-up">
-                                  <Btn variant="teal" size="lg" full onClick={() => setShowCheckout(true)}>
-                                    Confirm Vehicle
+                                  <Btn variant="teal" size="lg" full onClick={handleFinalBookingSubmit} disabled={submitting}>
+                                    {submitting ? <><span className="spinning" style={{ marginRight: 8 }}>⟳</span> Confirming...</> : "Confirm Booking"}
                                   </Btn>
                                 </div>
                               )}
