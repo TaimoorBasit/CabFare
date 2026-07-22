@@ -1102,6 +1102,7 @@ export default function App() {
   const [quotes, setQ]             = useState([]);
   const [selected, setSel]         = useState(null);
   const [showQuotes, setShowQuotes] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
   const [loadingQuotes, setLoadingQuotes] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted]   = useState(false);
@@ -1254,7 +1255,8 @@ export default function App() {
   const addStop    = () => setJ(j => ({ ...j, stops: [...(j.stops||[]), { place: "", coords: null, wait: 30 }] }));
   const updateStop = (i, k, v) => setJ(j => ({ ...j, stops: j.stops.map((st, idx) => idx === i ? { ...st, [k]: v } : st) }));
   const removeStop = i => setJ(j => ({ ...j, stops: j.stops.filter((_, idx) => idx !== i) }));
-  const filteredQuotes = quotes.filter(({vehicle}) => !journey.vehiclePreference || vehicle.id === journey.vehiclePreference);
+  const preferredId = journey.vehiclePreference || (quotes.length > 0 ? quotes[0].vehicle.id : null);
+  const filteredQuotes = preferredId ? quotes.filter(({vehicle}) => vehicle.id === preferredId) : quotes;
   const selectedQuote = filteredQuotes.find(q => q.vehicle.id === selected) || filteredQuotes[0];
   const activeResult = selectedQuote?.result;
 
@@ -1578,6 +1580,35 @@ export default function App() {
                         </div>
                       </div>
                     </Card>
+                  ) : showCheckout ? (
+                    <Card style={{ maxWidth: 640, margin: "3rem auto", padding: "2.5rem", border: `1.5px solid #10b981`, background: "#f0fdf4" }}>
+                      <div className="fade-up">
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+                          <div>
+                            <span style={{ fontSize: 11, fontWeight: 800, color: "#15803d", textTransform: "uppercase", letterSpacing: 0.5 }}>Selected Category</span>
+                            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 20, fontWeight: 900, color: PX.navy800, marginTop: 4 }}>
+                              {selectedQuote?.vehicle?.name} {selectedQuote?.vehicle?.capacity} seats
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                          <Field label="Company / Organisation Name (Optional)">
+                            <input type="text" placeholder="e.g. Acme Corporation" value={journey.company} onChange={e=>setJ(j=>({...j,company:e.target.value}))}/>
+                          </Field>
+                          
+                          <Btn variant="teal" size="lg" full onClick={handleFinalBookingSubmit} disabled={submitting}>
+                            {submitting ? <><span className="spinning" style={{ marginRight: 8 }}>⟳</span> Sending Request...</> : "Submit Quote Request"}
+                          </Btn>
+
+                          <div style={{ textAlign: "center", marginTop: 8 }}>
+                            <Btn variant="ghost" size="sm" onClick={() => setShowCheckout(false)} style={{ color: PX.gray500 }}>
+                              ← Back to Options
+                            </Btn>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
                   ) : (
                     <div className="results-layout">
                       
@@ -1603,8 +1634,8 @@ export default function App() {
                               
                               {selected && (
                                 <div style={{ marginTop: "2rem", borderTop: "1px solid #e2e8f0", paddingTop: "1.5rem" }} className="fade-up">
-                                  <Btn variant="teal" size="lg" full onClick={handleFinalBookingSubmit} disabled={submitting}>
-                                    {submitting ? <><span className="spinning" style={{ marginRight: 8 }}>⟳</span> Sending Request...</> : "Submit Quote Request"}
+                                  <Btn variant="teal" size="lg" full onClick={() => setShowCheckout(true)}>
+                                    Confirm Vehicle
                                   </Btn>
                                 </div>
                               )}
