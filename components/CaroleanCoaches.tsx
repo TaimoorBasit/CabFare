@@ -275,6 +275,40 @@ function GlobalStyle() {
       .newsletter-email::placeholder {
         color: rgba(255,255,255,.6) !important;
       }
+      /* Form-only integration surface for embedding on the company website. */
+      .booking-embed-root {
+        min-height: 0 !important;
+        background: transparent !important;
+      }
+      .booking-embed-root #main-nav,
+      .booking-embed-root .booking-hero-background,
+      .booking-embed-root .booking-hero-copy,
+      .booking-embed-root main > section:not(:first-child),
+      .booking-embed-root footer {
+        display: none !important;
+      }
+      .booking-embed-root main {
+        padding: 0 !important;
+      }
+      .booking-embed-root main > section:first-child {
+        min-height: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+      }
+      .booking-embed-root .booking-hero-grid {
+        display: block !important;
+        width: 100% !important;
+        max-width: 520px !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+      }
+      .booking-embed-root .booking-form-column {
+        display: block !important;
+      }
+      .booking-embed-root #fast-quote {
+        transform: none !important;
+        margin: 0 auto !important;
+      }
 
       /* ── Animations ── */
       @keyframes fadeUp {
@@ -1180,7 +1214,16 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcase
 // ── Admin Dashboard ────────────────────────────────────────────────────────────
 // ── Fleet Economics Panel ──────────────────────────────────────────────────────
 // ── Root App ──────────────────────────────────────────────────────────────────
-export default function App() {
+export default function App({ embed = false }) {
+  useEffect(() => {
+    if (!embed) return;
+    const previousBackground = document.body.style.background;
+    document.body.style.background = "transparent";
+    return () => {
+      document.body.style.background = previousBackground;
+    };
+  }, [embed]);
+
   const [db, setDb]         = useState({ vehicles: [
     { id: 'minibus', name: 'Executive Minibus', capacity: 16 },
     { id: 'bus', name: 'Standard Bus', capacity: 33 },
@@ -1384,7 +1427,7 @@ export default function App() {
   return (
     <>
       <GlobalStyle/>
-      <div style={{ minHeight:"100vh", background:"#f4f6f9" }}>
+      <div className={embed ? "booking-embed-root" : ""} style={{ minHeight:"100vh", background:"#f4f6f9" }}>
         <div className="fade-up">
             
             {!showQuotes ? (
@@ -1411,12 +1454,12 @@ export default function App() {
                 
                 <main className="pt-20">
                   <section className="relative min-h-[95vh] flex items-center justify-center py-section-gap-md overflow-hidden">
-                    <div className="absolute inset-0 z-0">
+                    <div className="booking-hero-background absolute inset-0 z-0">
                       <div className="absolute inset-0 hero-gradient-overlay z-10"></div>
                       <img alt="Carolean executive coach" className="w-full h-full object-cover" src="/header-bg.png"/>
                     </div>
-                    <div className="relative z-20 w-full max-w-container-max px-gutter mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center px-6">
-                      <div className="lg:col-span-6 text-stark-white mb-10 lg:mb-0">
+                    <div className="booking-hero-grid relative z-20 w-full max-w-container-max px-gutter mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center px-6">
+                      <div className="booking-hero-copy lg:col-span-6 text-stark-white mb-10 lg:mb-0">
                         <div className="inline-flex items-center gap-2 py-2 px-4 bg-white/10 backdrop-blur-md text-white text-label-sm font-label-sm mb-8 rounded-full border border-white/20 uppercase tracking-widest">
                           <span className="w-2 h-2 rounded-full bg-impact-red animate-pulse"></span>
                           Premium Travel Solutions
@@ -1441,7 +1484,7 @@ export default function App() {
                         </div>
                       </div>
                       
-                      <div className="lg:col-span-6 flex justify-center lg:justify-end">
+                      <div className="booking-form-column lg:col-span-6 flex justify-center lg:justify-end">
                         <div id="fast-quote" className={`w-full ${bookingStep === 3 ? "max-w-[490px] p-6" : "max-w-[445px] p-6 sm:p-7"} glass-panel rounded-[2.5rem] shadow-2xl transform lg:translate-x-16 transition-all duration-500 hover:shadow-deep-navy/20 border border-white/50`}>
                           <div className="flex justify-between items-center mb-8">
                             <h2 className="font-headline-md text-headline-md text-deep-navy">
