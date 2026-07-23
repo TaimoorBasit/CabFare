@@ -213,16 +213,14 @@ function GlobalStyle() {
         cursor: pointer;
         opacity: .85;
       }
-      #fast-quote .quote-location > div {
-        width: 100%;
-      }
       #fast-quote .luggage-select {
         display: block !important;
-        width: 82px !important;
+        width: auto !important;
+        max-width: 70px !important;
         height: 20px !important;
         min-height: 20px !important;
-        margin: 2px auto 0 !important;
-        padding: 0 13px 0 2px !important;
+        margin: 0 !important;
+        padding: 0 !important;
         border: 0 !important;
         border-radius: 4px !important;
         background-color: transparent !important;
@@ -231,9 +229,12 @@ function GlobalStyle() {
         font-weight: 800 !important;
         line-height: 20px !important;
         text-align: center;
+        text-align-last: center;
         text-transform: uppercase;
         box-shadow: none !important;
         cursor: pointer;
+        appearance: none !important;
+        -webkit-appearance: none !important;
       }
       #fast-quote .luggage-select:focus {
         background-color: #f1f5f9 !important;
@@ -1218,11 +1219,12 @@ export default function App() {
   }, []);
 
   const buildQuotes = useCallback(async (currentJourney = journey) => {
-    const wp = currentJourney.journeyType === "multi-stop"
+    const hasStops = (currentJourney.stops || []).length > 0;
+    const wp = hasStops
       ? [currentJourney.origin, ...currentJourney.stops.map(s => s.place).filter(Boolean), currentJourney.destination]
       : [currentJourney.origin, currentJourney.destination];
 
-    const wc = currentJourney.journeyType === "multi-stop"
+    const wc = hasStops
       ? [currentJourney.wpCoords?.[0], ...currentJourney.stops.map(s => s.coords || null), currentJourney.wpCoords?.[currentJourney.wpCoords.length - 1]]
       : [currentJourney.wpCoords?.[0], currentJourney.wpCoords?.[1]];
 
@@ -1288,13 +1290,13 @@ export default function App() {
 
     const hasOriginCoords = journey.wpCoords && journey.wpCoords[0];
     const hasDestCoords = journey.wpCoords && (
-      journey.journeyType === "multi-stop"
+      (journey.stops || []).length > 0
         ? journey.wpCoords[journey.wpCoords.length - 1]
         : journey.wpCoords[1]
     );
     
     let allStopsHaveCoords = true;
-    if (journey.journeyType === "multi-stop" && journey.stops) {
+    if ((journey.stops || []).length > 0) {
       allStopsHaveCoords = journey.stops.every(s => s.coords);
     }
 
@@ -1344,7 +1346,7 @@ export default function App() {
   };
 
   const setOrigin = (val,coords) => setJ(j=>({ ...j, origin:val, wpCoords: setAt(j.wpCoords, 0, coords, 2) }));
-  const setDest   = (val,coords) => setJ(j=>({ ...j, destination:val, wpCoords: setAt(j.wpCoords, j.journeyType==="multi-stop"?1+(j.stops||[]).length:1, coords, j.journeyType==="multi-stop"?2+(j.stops||[]).length:2) }));
+  const setDest   = (val,coords) => setJ(j=>({ ...j, destination:val, wpCoords: setAt(j.wpCoords, (j.stops||[]).length ? 1+(j.stops||[]).length : 1, coords, (j.stops||[]).length ? 2+(j.stops||[]).length : 2) }));
   
   const setAt = (arr, idx, val, len) => {
     const a = arr ? [...arr] : Array(len).fill(null);
@@ -1352,14 +1354,21 @@ export default function App() {
     a[idx] = val; return a;
   };
 
-  const addStop    = () => setJ(j => ({ ...j, journeyType: "multi-stop", stops: [...(j.stops||[]), { place: "", coords: null, wait: 30 }] }));
+  const addStop    = () => setJ(j => ({ ...j, stops: [...(j.stops||[]), { place: "", coords: null, wait: 30 }] }));
   const updateStop = (i, k, v) => setJ(j => ({ ...j, stops: j.stops.map((st, idx) => idx === i ? { ...st, [k]: v } : st) }));
   const removeStop = i => setJ(j => {
     const stops = j.stops.filter((_, idx) => idx !== i);
     const wpCoords = stops.length
       ? j.wpCoords
       : [j.wpCoords?.[0] || null, j.wpCoords?.[j.wpCoords.length - 1] || null];
-    return { ...j, stops, wpCoords, journeyType: stops.length ? "multi-stop" : "one-way" };
+    return { ...j, stops, wpCoords };
+  });
+  const moveStop = (index, direction) => setJ(j => {
+    const stops = [...(j.stops || [])];
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= stops.length) return j;
+    [stops[index], stops[nextIndex]] = [stops[nextIndex], stops[index]];
+    return { ...j, stops };
   });
   const preferredId = journey.vehiclePreference || (quotes.length > 0 ? quotes[0].vehicle.id : null);
   const filteredQuotes = preferredId ? quotes.filter(({vehicle}) => vehicle.id === preferredId) : quotes;
@@ -1433,7 +1442,7 @@ export default function App() {
                       </div>
                       
                       <div className="lg:col-span-6 flex justify-center lg:justify-end">
-                        <div id="fast-quote" className={`w-full ${bookingStep === 3 ? "max-w-[550px] p-6 sm:p-7" : "max-w-[520px] p-6 sm:p-10"} glass-panel rounded-[2.5rem] shadow-2xl transform transition-all duration-500 hover:shadow-deep-navy/20 border border-white/50`}>
+                        <div id="fast-quote" className={`w-full ${bookingStep === 3 ? "max-w-[490px] p-6" : "max-w-[445px] p-6 sm:p-7"} glass-panel rounded-[2.5rem] shadow-2xl transform lg:translate-x-16 transition-all duration-500 hover:shadow-deep-navy/20 border border-white/50`}>
                           <div className="flex justify-between items-center mb-8">
                             <h2 className="font-headline-md text-headline-md text-deep-navy">
                               {bookingStep === 1 ? "Fast Quote" : bookingStep === 2 ? "Your Details" : bookingStep === 3 ? "Review Booking" : "Booking Confirmed"}
@@ -1444,12 +1453,12 @@ export default function App() {
                           </div>
                           {bookingStep === 1 && <>
                           <div className="flex p-1.5 bg-surface-container rounded-full mb-8">
-                            <button type="button" onClick={()=>setJ(j=>({...j, journeyType: "one-way", stops: [], wpCoords: [j.wpCoords?.[0] || null, j.wpCoords?.[j.wpCoords.length - 1] || null]}))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType !== "return" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>One-Way</button>
-                            <button type="button" onClick={()=>setJ(j=>({...j, journeyType: "return", stops: [], wpCoords: [j.wpCoords?.[0] || null, j.wpCoords?.[j.wpCoords.length - 1] || null]}))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType === "return" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>Return</button>
+                            <button type="button" onClick={()=>setJ(j=>({...j, journeyType: "one-way"}))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType !== "return" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>One-Way</button>
+                            <button type="button" onClick={()=>setJ(j=>({...j, journeyType: "return"}))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType === "return" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>Return</button>
                           </div>
                           
                           <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleCalculateClick(); }}>
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                               <div className="relative group quote-location">
                                 <PlacesInput 
                                   value={journey.origin} 
@@ -1459,18 +1468,25 @@ export default function App() {
                                   mapsLoaded={mapsLoaded} 
                                 />
                               </div>
-                              <div className="relative group quote-location">
-                                <PlacesInput 
-                                  value={journey.destination} 
-                                  onChange={setDest}
-                                  placeholder="Destination" 
-                                  icon={<SvgMapPinRed size={22}/>}
-                                  mapsLoaded={mapsLoaded} 
-                                />
-                              </div>
+                              {(journey.stops || []).length === 0 && (
+                                <div className="h-6 flex items-center justify-end pr-2">
+                                  <button type="button" onClick={addStop} className="h-7 px-3 rounded-full bg-white border border-outline-variant text-deep-navy text-[11px] font-bold flex items-center gap-1.5 hover:border-deep-navy hover:shadow-sm transition-all">
+                                    <span className="material-symbols-outlined text-[16px]">add</span>
+                                    Add stop
+                                  </button>
+                                </div>
+                              )}
                               {(journey.stops || []).map((stop, index) => (
-                                <div className="relative group flex gap-2 quote-location" key={`stop-${index}`}>
-                                  <div className="flex-1">
+                                <div className="relative group flex items-center gap-2 quote-location" key={`stop-${index}`}>
+                                  <div className="w-7 shrink-0 flex flex-col items-center gap-0.5">
+                                    <button type="button" disabled={index === 0} aria-label={`Move stop ${index + 1} up`} onClick={()=>moveStop(index, -1)} className="w-7 h-6 rounded-md text-gray-400 hover:text-deep-navy hover:bg-surface-container disabled:opacity-20 flex items-center justify-center">
+                                      <span className="material-symbols-outlined text-[16px]">keyboard_arrow_up</span>
+                                    </button>
+                                    <button type="button" disabled={index === journey.stops.length - 1} aria-label={`Move stop ${index + 1} down`} onClick={()=>moveStop(index, 1)} className="w-7 h-6 rounded-md text-gray-400 hover:text-deep-navy hover:bg-surface-container disabled:opacity-20 flex items-center justify-center">
+                                      <span className="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
+                                    </button>
+                                  </div>
+                                  <div style={{ flex: "1 1 auto", minWidth: 0, width: "auto" }}>
                                     <PlacesInput
                                       value={stop.place}
                                       onChange={(val, geo) => {
@@ -1482,15 +1498,28 @@ export default function App() {
                                       mapsLoaded={mapsLoaded}
                                     />
                                   </div>
-                                  <button type="button" aria-label={`Remove stop ${index + 1}`} onClick={() => removeStop(index)} className="w-12 h-12 rounded-full border border-outline-variant bg-white text-impact-red flex items-center justify-center">
-                                    <span className="material-symbols-outlined">close</span>
+                                  <button type="button" aria-label={`Remove stop ${index + 1}`} onClick={() => removeStop(index)} className="w-8 h-8 shrink-0 rounded-full bg-red-50 text-impact-red flex items-center justify-center hover:bg-red-100 transition-colors">
+                                    <span className="material-symbols-outlined text-[18px]">close</span>
                                   </button>
                                 </div>
                               ))}
-                              <button type="button" onClick={addStop} className="w-full h-11 rounded-full border border-dashed border-outline-variant bg-white/60 text-deep-navy text-sm font-bold flex items-center justify-center gap-2 hover:border-deep-navy hover:bg-white transition-all">
-                                <span className="material-symbols-outlined text-[19px]">add_circle</span>
-                                {(journey.stops || []).length ? "Add another stop" : "Add a stop"}
-                              </button>
+                              {(journey.stops || []).length > 0 && (
+                                <div className="flex justify-end pr-10">
+                                  <button type="button" onClick={addStop} className="h-7 px-3 rounded-full border border-dashed border-outline-variant bg-white/70 text-deep-navy text-[11px] font-bold flex items-center justify-center gap-1.5 hover:border-deep-navy hover:bg-white transition-all">
+                                    <span className="material-symbols-outlined text-[16px]">add</span>
+                                    Add another stop
+                                  </button>
+                                </div>
+                              )}
+                              <div className="relative group quote-location">
+                                <PlacesInput 
+                                  value={journey.destination} 
+                                  onChange={setDest}
+                                  placeholder="Destination" 
+                                  icon={<SvgMapPinRed size={22}/>}
+                                  mapsLoaded={mapsLoaded} 
+                                />
+                              </div>
                             </div>
 
                             {/* Date / Return row */}
@@ -1510,7 +1539,7 @@ export default function App() {
                             {/* Vehicle, Passengers & Luggage */}
                             <div className="flex gap-2 w-full">
                               {/* Vehicle ~45% */}
-                              <div className="relative group" style={{flex:'0 0 40%'}}>
+                              <div className="relative group" style={{flex:'0 0 38%'}}>
                                 <select className="w-full h-[56px] !appearance-none pl-4 pr-8 bg-white border border-outline-variant rounded-full focus:outline-none focus:border-deep-navy transition-all text-[12px] font-bold text-deep-navy cursor-pointer shadow-sm"
                                   style={{ backgroundImage: 'none' }}
                                   value={journey.vehiclePreference || 'minibus'} onChange={e=>{
@@ -1538,7 +1567,7 @@ export default function App() {
                               </div>
 
                               {/* Luggage ~27.5% — each type keeps its own quantity */}
-                              <div className="relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden" style={{flex: "0 0 27%"}}>
+                              <div className="relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden" style={{flex: "0 0 31%"}}>
                                 <button
                                   type="button"
                                   aria-label={`Decrease ${luggageType === "handbag" ? "handbags" : "23kg suitcases"}`}
@@ -1549,18 +1578,23 @@ export default function App() {
                                   className="absolute left-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center z-10 focus:outline-none"
                                 ><span className="material-symbols-outlined text-[18px]">remove</span></button>
                                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                  <span className="text-[17px] font-bold text-deep-navy leading-none pointer-events-none">
+                                  <span className="text-[17px] font-bold text-deep-navy leading-none">
                                     {luggageType === "handbag" ? (journey.handbagCount ?? 0) : (journey.suitcaseCount ?? 0)}
                                   </span>
-                                  <select
-                                    aria-label="Choose luggage type"
-                                    value={luggageType}
-                                    onChange={e=>setLuggageType(e.target.value)}
-                                    className="luggage-select"
-                                  >
-                                    <option value="handbag">Handbags</option>
-                                    <option value="suitcase">Suitcase 23kg</option>
-                                  </select>
+                                  <div className="relative text-[9px] font-bold text-gray-500 uppercase tracking-tight leading-none mt-[2px] text-center whitespace-nowrap">
+                                    <span>
+                                      {luggageType === "handbag" ? "Handbags" : "Suitcase 23kg"}
+                                    </span>
+                                    <select
+                                      aria-label="Choose luggage type"
+                                      value={luggageType}
+                                      onChange={e=>setLuggageType(e.target.value)}
+                                      className="absolute inset-0 !w-full !h-full !min-h-0 !m-0 !p-0 opacity-0 cursor-pointer"
+                                    >
+                                      <option value="handbag">Handbags</option>
+                                      <option value="suitcase">Suitcase 23kg</option>
+                                    </select>
+                                  </div>
                                 </div>
                                 <button
                                   type="button"
