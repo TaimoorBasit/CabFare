@@ -180,6 +180,101 @@ function GlobalStyle() {
       input::placeholder { color: #94a3b8; }
       select { cursor: pointer; }
 
+      /* Customer fast-quote fields are scoped so admin inputs stay compact. */
+      #fast-quote input[type="text"],
+      #fast-quote input[type="datetime-local"] {
+        width: 100% !important;
+        height: 58px !important;
+        min-height: 58px !important;
+        padding: 0 52px !important;
+        border: 1px solid #c7c5d1 !important;
+        border-radius: 9999px !important;
+        background: #fff !important;
+        color: #1c1b1b !important;
+        font-size: 16px !important;
+        line-height: 58px !important;
+        box-shadow: 0 1px 2px rgba(29, 34, 92, 0.06) !important;
+      }
+      #fast-quote input[type="text"]::placeholder {
+        color: #b8b7bd !important;
+        opacity: 1;
+      }
+      #fast-quote input[type="text"]:focus,
+      #fast-quote input[type="datetime-local"]:focus {
+        border-color: #1d225c !important;
+        box-shadow: 0 0 0 4px rgba(29, 34, 92, 0.08) !important;
+      }
+      #fast-quote input[type="datetime-local"] {
+        padding-right: 20px !important;
+      }
+      #fast-quote input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        opacity: .85;
+      }
+      #fast-quote .quote-location > div {
+        width: 100%;
+      }
+      #fast-quote .luggage-select {
+        display: block !important;
+        width: 82px !important;
+        height: 20px !important;
+        min-height: 20px !important;
+        margin: 2px auto 0 !important;
+        padding: 0 13px 0 2px !important;
+        border: 0 !important;
+        border-radius: 4px !important;
+        background-color: transparent !important;
+        color: #475569 !important;
+        font-size: 9.5px !important;
+        font-weight: 800 !important;
+        line-height: 20px !important;
+        text-align: center;
+        text-transform: uppercase;
+        box-shadow: none !important;
+        cursor: pointer;
+      }
+      #fast-quote .luggage-select:focus {
+        background-color: #f1f5f9 !important;
+        outline: 2px solid rgba(29, 34, 92, .18) !important;
+      }
+      #fast-quote .quote-details-field {
+        width: 100% !important;
+        height: 52px !important;
+        padding: 0 18px !important;
+        border: 1px solid #c7c5d1 !important;
+        border-radius: 14px !important;
+        background: #fff !important;
+        color: #1c1b1b !important;
+        font-size: 15px !important;
+      }
+      #fast-quote textarea.quote-details-field {
+        height: 104px !important;
+        padding: 14px 18px !important;
+        line-height: 1.45 !important;
+        resize: vertical;
+      }
+      #fast-quote .quote-details-field:focus {
+        border-color: #1d225c !important;
+        box-shadow: 0 0 0 4px rgba(29, 34, 92, .08) !important;
+        outline: none;
+      }
+      .newsletter-email {
+        width: 100% !important;
+        height: 54px !important;
+        padding: 0 24px !important;
+        border: 0 !important;
+        border-radius: 9999px !important;
+        background: transparent !important;
+        color: #fff !important;
+        font-size: 15px !important;
+        box-shadow: none !important;
+      }
+      .newsletter-email::placeholder {
+        color: rgba(255,255,255,.6) !important;
+      }
+
       /* ── Animations ── */
       @keyframes fadeUp {
         from { opacity: 0; transform: translateY(12px); }
@@ -821,7 +916,7 @@ function ProgressBar({ pct, color }) {
 }
 
 // ── Route map ─────────────────────────────────────────────────────────────────
-function GoogleMapPreview({ result, journey, gv }) {
+function GoogleMapPreview({ result, journey, gv, compact = false }) {
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
   const [directionsRenderer, setDirectionsRenderer] = useState(null);
@@ -890,7 +985,7 @@ function GoogleMapPreview({ result, journey, gv }) {
 
   return (
     <div>
-      <div ref={mapRef} style={{ width: '100%', height: 320, borderRadius: 12, border: `1.5px solid ${PX.gray200}` }}></div>
+      <div ref={mapRef} style={{ width: '100%', height: compact ? 160 : 320, borderRadius: 12, border: `1.5px solid ${PX.gray200}` }}></div>
       {result && <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:8, marginTop:12 }}>
         {[["Total route",result.totalKm+" "+(gv?.distanceUnit === "miles" ? "mi" : "km")],["Live km",result.revenueKm+" "+(gv?.distanceUnit === "miles" ? "mi" : "km")],
           ["Duration",result.totalShiftHrs+"h"],["Est. Days",result.opDays]].map(([l,v])=>(
@@ -904,12 +999,12 @@ function GoogleMapPreview({ result, journey, gv }) {
   );
 }
 
-function RouteMap({ result, journey, gv }) {
-  if (window.google?.maps && (result?.pts?.length >= 2 || journey?.origin)) return <GoogleMapPreview result={result} journey={journey} gv={gv} />;
+function RouteMap({ result, journey, gv, compact = false }) {
+  if (window.google?.maps && (result?.pts?.length >= 2 || journey?.origin)) return <GoogleMapPreview result={result} journey={journey} gv={gv} compact={compact} />;
 
   if (!result?.pts?.length || result.pts.length < 2)
     return <div style={{ display:"flex", flexDirection:"column", alignItems:"center",
-      justifyContent:"center", height:320, gap:10, color:PX.gray400, border:`1.5px dashed ${PX.gray200}`, borderRadius:12 }}>
+      justifyContent:"center", height:compact ? 160 : 320, gap:10, color:PX.gray400, border:`1.5px dashed ${PX.gray200}`, borderRadius:12 }}>
       <SvgMap size={36} color={PX.gray400} />
       <p style={{ fontSize:13, fontWeight:500 }}>Enter pickup & drop-off locations to generate route map</p>
     </div>;
@@ -929,7 +1024,7 @@ function RouteMap({ result, journey, gv }) {
       label:(p.name||"").split(",")[0].substring(0,16), yard:false })),
   ];
   return <div>
-    <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display:"block", background:PX.gray50, borderRadius:12, border:`1.5px solid ${PX.gray200}` }}>
+    <svg width="100%" height={compact ? 160 : undefined} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" style={{ display:"block", background:PX.gray50, borderRadius:12, border:`1.5px solid ${PX.gray200}` }}>
       <defs>
         <marker id="a1" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
           <path d="M1,1 L6,3.5 L1,6Z" fill={PX.navy600}/>
@@ -962,7 +1057,7 @@ function RouteMap({ result, journey, gv }) {
       })}
     </svg>
     <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:8, marginTop:12 }}>
-      {[["Total route",`${result.totalKm} ${gv?.distanceUnit === "miles" ? "mi" : "km"}`],["Revenue km",`${result.revenueKm} ${gv?.distanceUnit === "miles" ? "mi" : "km"}`],
+      {[["Total route",`${result.totalKm} ${gv?.distanceUnit === "miles" ? "mi" : "km"}`],["Live km",`${result.revenueKm} ${gv?.distanceUnit === "miles" ? "mi" : "km"}`],
         ["Duration",`${result.totalShiftHrs}h`],["Days",result.opDays]].map(([l,v])=>(
         <div key={l} style={{ background:PX.gray50, border:`1px solid ${PX.gray200}`, borderRadius:8, padding:"8px", textAlign:"center" }}>
           <div style={{ fontSize:10, fontWeight:700, color:PX.gray400, textTransform:"uppercase", marginBottom:2 }}>{l}</div>
@@ -1094,7 +1189,7 @@ export default function App() {
     journeyType:"one-way", origin:"", destination:"",
     departureDate:"", returnDate:"",
     passengers:16, suitcaseCount:16, handbagCount:16, waitingMins:0,
-    vehiclePreference: "",
+    vehiclePreference: "minibus",
     waypoints:[], wpCoords:[], stops:[],
     name: "", phone: "", email: "", company: "", specialRequests: ""
   });
@@ -1106,6 +1201,8 @@ export default function App() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted]   = useState(false);
   const [bookingRef, setBookingRef] = useState("");
+  const [luggageType, setLuggageType] = useState("handbag");
+  const [bookingStep, setBookingStep] = useState(1);
   const fetchIdRef = useRef(0);
   const [validationError, setValidationError] = useState("");
 
@@ -1184,14 +1281,17 @@ export default function App() {
 
   const handleCalculateClick = () => {
     setValidationError("");
-    if (!journey.origin || !journey.destination || !journey.departureDate || !journey.name || !journey.email || !journey.phone) {
-      setValidationError("Please fill in all required fields (Name, Email, Phone, Date, Pickup, and Destination).");
+    if (!journey.origin || !journey.destination || !journey.departureDate) {
+      setValidationError("Please enter pickup location, destination, and departure date.");
       return;
     }
 
-    const destIdx = journey.journeyType === "multi-stop" ? 1 + (journey.stops || []).length : 1;
     const hasOriginCoords = journey.wpCoords && journey.wpCoords[0];
-    const hasDestCoords = journey.wpCoords && journey.wpCoords[destIdx];
+    const hasDestCoords = journey.wpCoords && (
+      journey.journeyType === "multi-stop"
+        ? journey.wpCoords[journey.wpCoords.length - 1]
+        : journey.wpCoords[1]
+    );
     
     let allStopsHaveCoords = true;
     if (journey.journeyType === "multi-stop" && journey.stops) {
@@ -1203,8 +1303,8 @@ export default function App() {
       return;
     }
 
-    setShowQuotes(true);
     buildQuotes();
+    setBookingStep(2);
   };
 
   const handleFinalBookingSubmit = async () => {
@@ -1232,6 +1332,7 @@ export default function App() {
       if (data.success) {
         setBookingRef(data.booking.id);
         setSubmitted(true);
+        setBookingStep(4);
       } else {
         alert("Booking request failed: " + (data.error || "Unknown error"));
       }
@@ -1251,13 +1352,22 @@ export default function App() {
     a[idx] = val; return a;
   };
 
-  const addStop    = () => setJ(j => ({ ...j, stops: [...(j.stops||[]), { place: "", coords: null, wait: 30 }] }));
+  const addStop    = () => setJ(j => ({ ...j, journeyType: "multi-stop", stops: [...(j.stops||[]), { place: "", coords: null, wait: 30 }] }));
   const updateStop = (i, k, v) => setJ(j => ({ ...j, stops: j.stops.map((st, idx) => idx === i ? { ...st, [k]: v } : st) }));
-  const removeStop = i => setJ(j => ({ ...j, stops: j.stops.filter((_, idx) => idx !== i) }));
+  const removeStop = i => setJ(j => {
+    const stops = j.stops.filter((_, idx) => idx !== i);
+    const wpCoords = stops.length
+      ? j.wpCoords
+      : [j.wpCoords?.[0] || null, j.wpCoords?.[j.wpCoords.length - 1] || null];
+    return { ...j, stops, wpCoords, journeyType: stops.length ? "multi-stop" : "one-way" };
+  });
   const preferredId = journey.vehiclePreference || (quotes.length > 0 ? quotes[0].vehicle.id : null);
   const filteredQuotes = preferredId ? quotes.filter(({vehicle}) => vehicle.id === preferredId) : quotes;
   const selectedQuote = filteredQuotes.find(q => q.vehicle.id === selected) || filteredQuotes[0];
   const activeResult = selectedQuote?.result;
+  const selectedVehicleCount = selectedQuote
+    ? Math.max(1, Math.ceil(journey.passengers / Math.max(1, selectedQuote.vehicle.capacity || 1)))
+    : 1;
 
   const showReturnDate = journey.journeyType === "return";
   const showLuggageCount = journey.largeLuggage !== "none";
@@ -1266,17 +1376,14 @@ export default function App() {
     <>
       <GlobalStyle/>
       <div style={{ minHeight:"100vh", background:"#f4f6f9" }}>
-        <Navbar />
-        
         <div className="fade-up">
             
             {!showQuotes ? (
-              <div className="bg-background text-on-surface font-body-md selection:bg-secondary selection:text-white overflow-x-hidden" style={{marginTop: -40}}>
+              <div className="bg-background text-on-surface font-body-md selection:bg-secondary selection:text-white overflow-x-hidden">
                 <header className="fixed top-0 left-0 right-0 z-50 bg-surface h-20 border-b border-outline-variant transition-all duration-300 shadow-xl bg-white/95 backdrop-blur-md" id="main-nav">
                   <div className="flex justify-between items-center w-full px-gutter max-w-container-max mx-auto h-full px-6">
                     <div className="flex items-center gap-4">
-                      <img alt="Carolean Coaches Logo" className="h-10 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLumoQP5jmF1XgJNC5lNqtwGhsObTeB2YXZkQzSTm7Amj6eXg01uUEKMrO_KkHhNSorr8c9oB_YrR156TkK9Ack2vFR2RvFAZ-UTleuTEHXLn7eCAnQdiPLN9rUUZC0KsfYt-Zf0VLvkQzw7Xg61mqzhHnSrGOSII7xC_vAJozhOvJkgNpomQVykVjs4NxPBKkLHKVgHSIqRbv-Mt5dcowl1V6T8TIC73_nk86d9LCHtWX2KJY8zODlCLA"/>
-                      <span className="text-headline-md font-headline-lg font-bold text-deep-navy">Carolean Coaches</span>
+                      <img alt="Carolean Coaches" className="h-14 w-auto object-contain" src="/carolean%20image.png"/>
                     </div>
                     <nav className="hidden md:flex items-center gap-8">
                       <a className="font-label-lg text-label-lg text-secondary border-b-2 border-secondary pb-1 transition-colors duration-200" href="#">Our Fleet</a>
@@ -1286,7 +1393,7 @@ export default function App() {
                     </nav>
                     <div className="flex items-center gap-4">
                       <a className="hidden lg:block font-label-lg text-label-lg text-on-surface-variant hover:text-secondary transition-colors" href="#">Login</a>
-                      <button onClick={() => window.scrollTo({top: 0, behavior: "smooth"})} className="bg-impact-red text-white font-label-lg px-8 py-3 rounded-full hover:bg-secondary transition-all transform active:scale-95 shadow-lg shadow-impact-red/20">
+                      <button onClick={() => document.getElementById("fast-quote")?.scrollIntoView({behavior: "smooth", block: "center"})} className="bg-impact-red text-white font-label-lg px-5 sm:px-8 py-3 rounded-full hover:bg-secondary transition-all transform active:scale-95 shadow-lg shadow-impact-red/20">
                         Get a Quote
                       </button>
                     </div>
@@ -1297,7 +1404,7 @@ export default function App() {
                   <section className="relative min-h-[95vh] flex items-center justify-center py-section-gap-md overflow-hidden">
                     <div className="absolute inset-0 z-0">
                       <div className="absolute inset-0 hero-gradient-overlay z-10"></div>
-                      <img alt="Luxury Carolean Coach on road" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AP1WRLv55cwxeMUYfCKyBaSOD03fhTX9LR1pTm4Qxp4qCVrH2ssPRuuiLG7uDsDOJ5Kl6ptIbxoUE-3psVUb3ueJuYMpUgfaBMAbQYR_eWy2CIO-bYvLPZd1rPq11u-q-hmtg-fimN5OZrY1Hh64ePcqv2htmxi5jnm8FVaFm4EldIwKOORHqOgW0UjNHJJ2OlU1S8ehmf5SX5YHCrPodBud8ajq1vpSkZq1dogDTG7_ueOuYhVW-Jq-ObzLGA"/>
+                      <img alt="Carolean executive coach" className="w-full h-full object-cover" src="/header-bg.png"/>
                     </div>
                     <div className="relative z-20 w-full max-w-container-max px-gutter mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center px-6">
                       <div className="lg:col-span-6 text-stark-white mb-10 lg:mb-0">
@@ -1326,71 +1433,261 @@ export default function App() {
                       </div>
                       
                       <div className="lg:col-span-6 flex justify-center lg:justify-end">
-                        <div className="w-full max-w-[520px] glass-panel rounded-[2.5rem] shadow-2xl p-10 transform transition-all duration-500 hover:shadow-deep-navy/20 border border-white/50">
+                        <div id="fast-quote" className={`w-full ${bookingStep === 3 ? "max-w-[550px] p-6 sm:p-7" : "max-w-[520px] p-6 sm:p-10"} glass-panel rounded-[2.5rem] shadow-2xl transform transition-all duration-500 hover:shadow-deep-navy/20 border border-white/50`}>
                           <div className="flex justify-between items-center mb-8">
-                            <h2 className="font-headline-md text-headline-md text-deep-navy">Fast Quote</h2>
+                            <h2 className="font-headline-md text-headline-md text-deep-navy">
+                              {bookingStep === 1 ? "Fast Quote" : bookingStep === 2 ? "Your Details" : bookingStep === 3 ? "Review Booking" : "Booking Confirmed"}
+                            </h2>
                             <div className="flex gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-deep-navy/20"></span>
-                              <span className="w-1.5 h-1.5 rounded-full bg-deep-navy/20"></span>
-                              <span className="w-1.5 h-1.5 rounded-full bg-impact-red"></span>
+                              {[1,2,3,4].map(step => <span key={step} className={`w-1.5 h-1.5 rounded-full ${bookingStep === step ? "bg-impact-red" : "bg-deep-navy/20"}`}></span>)}
                             </div>
                           </div>
+                          {bookingStep === 1 && <>
                           <div className="flex p-1.5 bg-surface-container rounded-full mb-8">
-                            <button type="button" onClick={()=>setJ(j=>({...j, journeyType: "return"}))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType === "return" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>Return</button>
-                            <button type="button" onClick={()=>setJ(j=>({...j, journeyType: "one-way"}))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType === "one-way" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>One-Way</button>
-                            <button type="button" onClick={()=>setJ(j=>({...j, journeyType: "multi-stop"}))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType === "multi-stop" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>Multi-Stop</button>
+                            <button type="button" onClick={()=>setJ(j=>({...j, journeyType: "one-way", stops: [], wpCoords: [j.wpCoords?.[0] || null, j.wpCoords?.[j.wpCoords.length - 1] || null]}))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType !== "return" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>One-Way</button>
+                            <button type="button" onClick={()=>setJ(j=>({...j, journeyType: "return", stops: [], wpCoords: [j.wpCoords?.[0] || null, j.wpCoords?.[j.wpCoords.length - 1] || null]}))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType === "return" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>Return</button>
                           </div>
                           
                           <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleCalculateClick(); }}>
                             <div className="space-y-4">
-                              <div className="relative group">
-                                <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-[#4ADE80] z-10" style={{pointerEvents: "none"}}>location_on</span>
+                              <div className="relative group quote-location">
                                 <PlacesInput 
                                   value={journey.origin} 
-                                  onChange={(val, geo) => setJ(j=>({...j, origin: val, wpCoords: [geo, ...(j.wpCoords?.slice(1) || [])]}))}
+                                  onChange={setOrigin}
                                   placeholder="Pickup location" 
-                                  icon={null} 
+                                  icon={<SvgMapPinGreen size={22}/>}
                                   mapsLoaded={mapsLoaded} 
                                 />
                               </div>
-                              <div className="relative group">
-                                <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-impact-red z-10" style={{pointerEvents: "none"}}>location_on</span>
+                              <div className="relative group quote-location">
                                 <PlacesInput 
                                   value={journey.destination} 
-                                  onChange={(val, geo) => setJ(j=>({...j, destination: val, wpCoords: [...(j.wpCoords?.slice(0, j.wpCoords.length > 1 ? j.wpCoords.length - 1 : 1) || []), geo]}))}
+                                  onChange={setDest}
                                   placeholder="Destination" 
-                                  icon={null} 
+                                  icon={<SvgMapPinRed size={22}/>}
                                   mapsLoaded={mapsLoaded} 
                                 />
                               </div>
+                              {(journey.stops || []).map((stop, index) => (
+                                <div className="relative group flex gap-2 quote-location" key={`stop-${index}`}>
+                                  <div className="flex-1">
+                                    <PlacesInput
+                                      value={stop.place}
+                                      onChange={(val, geo) => {
+                                        updateStop(index, "place", val);
+                                        updateStop(index, "coords", geo);
+                                      }}
+                                      placeholder={`Stop ${index + 1}`}
+                                      icon={<SvgMapPinBlue size={22}/>}
+                                      mapsLoaded={mapsLoaded}
+                                    />
+                                  </div>
+                                  <button type="button" aria-label={`Remove stop ${index + 1}`} onClick={() => removeStop(index)} className="w-12 h-12 rounded-full border border-outline-variant bg-white text-impact-red flex items-center justify-center">
+                                    <span className="material-symbols-outlined">close</span>
+                                  </button>
+                                </div>
+                              ))}
+                              <button type="button" onClick={addStop} className="w-full h-11 rounded-full border border-dashed border-outline-variant bg-white/60 text-deep-navy text-sm font-bold flex items-center justify-center gap-2 hover:border-deep-navy hover:bg-white transition-all">
+                                <span className="material-symbols-outlined text-[19px]">add_circle</span>
+                                {(journey.stops || []).length ? "Add another stop" : "Add a stop"}
+                              </button>
                             </div>
-                            
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                            {/* Date / Return row */}
+                            <div className={`grid grid-cols-1 ${journey.journeyType === "return" ? "sm:grid-cols-2" : ""} gap-4`}>
                               <div className="relative group">
                                 <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant z-10" style={{pointerEvents: "none"}}>calendar_month</span>
-                                <input className="w-full pl-12 pr-6 py-4 bg-white border border-outline-variant capsule-input focus:outline-none focus:border-deep-navy transition-all font-body-md text-on-surface shadow-sm" type="datetime-local" value={journey.departureDate} onChange={e=>setJ(j=>({...j, departureDate: e.target.value}))} required />
+                                <input className="w-full pl-12 pr-6 py-4 bg-white border border-outline-variant capsule-input focus:outline-none focus:border-deep-navy transition-all font-body-md text-on-surface shadow-sm cursor-pointer" type="datetime-local" value={journey.departureDate} onClick={e=>e.currentTarget.showPicker?.()} onChange={e=>setJ(j=>({...j, departureDate: e.target.value}))} required />
                               </div>
-                              <div className="relative group flex items-center justify-between px-6 py-4 bg-white border border-outline-variant capsule-input shadow-sm">
-                                <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.max(1, (j.passengers || 16) - 1)}))} className="text-on-surface-variant hover:text-impact-red transition-colors w-8 h-8 flex items-center justify-center"><span className="material-symbols-outlined">remove</span></button>
-                                <div className="text-center">
-                                  <span className="font-headline-md text-[18px] text-deep-navy leading-none">{journey.passengers || 16}</span>
-                                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Passengers</div>
+                              {journey.journeyType === 'return' && (
+                              <div className="relative group">
+                                <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant z-10" style={{pointerEvents: "none"}}>calendar_month</span>
+                                <input className="w-full pl-12 pr-6 py-4 bg-white border border-outline-variant capsule-input focus:outline-none focus:border-deep-navy transition-all font-body-md text-on-surface shadow-sm cursor-pointer" type="datetime-local" value={journey.returnDate || ''} onClick={e=>e.currentTarget.showPicker?.()} onChange={e=>setJ(j=>({...j, returnDate: e.target.value}))} required />
+                              </div>
+                              )}
+                            </div>
+
+                            {/* Vehicle, Passengers & Luggage */}
+                            <div className="flex gap-2 w-full">
+                              {/* Vehicle ~45% */}
+                              <div className="relative group" style={{flex:'0 0 40%'}}>
+                                <select className="w-full h-[56px] !appearance-none pl-4 pr-8 bg-white border border-outline-variant rounded-full focus:outline-none focus:border-deep-navy transition-all text-[12px] font-bold text-deep-navy cursor-pointer shadow-sm"
+                                  style={{ backgroundImage: 'none' }}
+                                  value={journey.vehiclePreference || 'minibus'} onChange={e=>{
+                                    const v = e.target.value;
+                                    let p = 16;
+                                    if (v === 'bus') p = 33;
+                                    if (v === 'coach') p = 49;
+                                    setJ(j=>({...j, vehiclePreference: v, passengers: p, handbagCount: p, suitcaseCount: p}));
+                                  }}>
+                                  <option value="minibus">Executive Minibus (16 Seats)</option>
+                                  <option value="bus">Standard Bus (33 Seats)</option>
+                                  <option value="coach">Premium Coach (49 Seats)</option>
+                                </select>
+                                <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[18px]">expand_more</span>
+                              </div>
+
+                              {/* Passengers ~27.5% */}
+                              <div className="flex-1 relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden">
+                                <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.max(1, (j.passengers || 16) - 1)}))} className="absolute left-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none z-10"><span className="material-symbols-outlined text-[18px]">remove</span></button>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                  <span className="text-[17px] font-bold text-deep-navy leading-none">{journey.passengers || 16}</span>
+                                  <div className="text-[9px] font-bold text-gray-500 uppercase tracking-tight leading-none mt-[2px]">Passengers</div>
                                 </div>
-                                <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.min(100, (j.passengers || 16) + 1)}))} className="text-on-surface-variant hover:text-impact-red transition-colors w-8 h-8 flex items-center justify-center"><span className="material-symbols-outlined">add</span></button>
+                                <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.min(100, (j.passengers || 16) + 1)}))} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4ADE80] rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none z-10"><span className="material-symbols-outlined text-[18px]">add</span></button>
+                              </div>
+
+                              {/* Luggage ~27.5% — each type keeps its own quantity */}
+                              <div className="relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden" style={{flex: "0 0 27%"}}>
+                                <button
+                                  type="button"
+                                  aria-label={`Decrease ${luggageType === "handbag" ? "handbags" : "23kg suitcases"}`}
+                                  onClick={()=>setJ(j => luggageType === "handbag"
+                                    ? {...j, handbagCount: Math.max(0, (j.handbagCount ?? 0) - 1)}
+                                    : {...j, suitcaseCount: Math.max(0, (j.suitcaseCount ?? 0) - 1)}
+                                  )}
+                                  className="absolute left-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center z-10 focus:outline-none"
+                                ><span className="material-symbols-outlined text-[18px]">remove</span></button>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                  <span className="text-[17px] font-bold text-deep-navy leading-none pointer-events-none">
+                                    {luggageType === "handbag" ? (journey.handbagCount ?? 0) : (journey.suitcaseCount ?? 0)}
+                                  </span>
+                                  <select
+                                    aria-label="Choose luggage type"
+                                    value={luggageType}
+                                    onChange={e=>setLuggageType(e.target.value)}
+                                    className="luggage-select"
+                                  >
+                                    <option value="handbag">Handbags</option>
+                                    <option value="suitcase">Suitcase 23kg</option>
+                                  </select>
+                                </div>
+                                <button
+                                  type="button"
+                                  aria-label={`Increase ${luggageType === "handbag" ? "handbags" : "23kg suitcases"}`}
+                                  onClick={()=>setJ(j => luggageType === "handbag"
+                                    ? {...j, handbagCount: (j.handbagCount ?? 0) + 1}
+                                    : {...j, suitcaseCount: (j.suitcaseCount ?? 0) + 1}
+                                  )}
+                                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4ADE80] rounded-full transition-all w-7 h-7 flex items-center justify-center z-10 focus:outline-none"
+                                ><span className="material-symbols-outlined text-[18px]">add</span></button>
                               </div>
                             </div>
-                            
+
                             {validationError && (
                               <div style={{ padding: "10px", background: "#fee2e2", color: "#b91c1c", borderRadius: "8px", fontSize: "14px" }}>
                                 {validationError}
                               </div>
                             )}
+
                             
                             <button type="submit" className="w-full py-5 bg-impact-red text-white font-headline-md rounded-full hover:bg-secondary transition-all transform active:scale-[0.98] flex items-center justify-center gap-3 group shadow-xl shadow-impact-red/30 mt-4">
-                              Get Instant Quote
+                              Continue
                               <span className="material-symbols-outlined transition-transform group-hover:translate-x-2">arrow_forward</span>
                             </button>
                           </form>
+                          </>}
+
+                          {bookingStep === 2 && (
+                            <form className="space-y-4 fade-up" onSubmit={e => {
+                              e.preventDefault();
+                              setValidationError("");
+                              if (!journey.name.trim() || !journey.email.trim() || !journey.phone.trim()) {
+                                setValidationError("Please enter your name, email address, and phone number.");
+                                return;
+                              }
+                              setBookingStep(3);
+                            }}>
+                              <div>
+                                <label className="field-label">Full name</label>
+                                <input className="quote-details-field" type="text" value={journey.name} onChange={e=>setJ(j=>({...j,name:e.target.value}))} placeholder="Your full name" required/>
+                              </div>
+                              <div>
+                                <label className="field-label">Email address</label>
+                                <input className="quote-details-field" type="email" value={journey.email} onChange={e=>setJ(j=>({...j,email:e.target.value}))} placeholder="you@example.com" required/>
+                              </div>
+                              <div>
+                                <label className="field-label">Phone number</label>
+                                <input className="quote-details-field" type="tel" value={journey.phone} onChange={e=>setJ(j=>({...j,phone:e.target.value}))} placeholder="+44 7700 900000" required/>
+                              </div>
+                              <div>
+                                <label className="field-label">Special requests <span className="normal-case font-normal">(optional)</span></label>
+                                <textarea className="quote-details-field" value={journey.specialRequests} onChange={e=>setJ(j=>({...j,specialRequests:e.target.value}))} placeholder="Wheelchair access, mobility assistance, child seats, additional stops, or other instructions"/>
+                              </div>
+                              {validationError && <div className="p-3 bg-red-50 text-red-700 rounded-xl text-sm">{validationError}</div>}
+                              <div className="flex gap-3 pt-2">
+                                <button type="button" onClick={()=>setBookingStep(1)} className="h-14 px-6 rounded-full border border-outline-variant text-deep-navy font-bold flex items-center justify-center gap-2">
+                                  <span className="material-symbols-outlined text-[18px]">arrow_back</span> Back
+                                </button>
+                                <button type="submit" className="flex-1 h-14 bg-impact-red text-white rounded-full font-bold shadow-lg shadow-impact-red/20 flex items-center justify-center gap-2">
+                                  Continue <span className="material-symbols-outlined text-[19px]">arrow_forward</span>
+                                </button>
+                              </div>
+                            </form>
+                          )}
+
+                          {bookingStep === 3 && (
+                            <div className="space-y-3 fade-up">
+                              <div className="rounded-2xl bg-primary text-white px-5 py-4 flex items-center justify-between gap-3">
+                                <div>
+                                  <div className="text-lg font-bold">{journey.origin.split(",")[0]} <span className="text-impact-red">→</span> {journey.destination.split(",")[0]}</div>
+                                  <div className="text-xs opacity-75 mt-1">{new Date(journey.departureDate).toLocaleString("en-GB")} · {journey.passengers} passengers</div>
+                                </div>
+                                <button type="button" onClick={()=>setBookingStep(1)} aria-label="Edit journey details" title="Edit journey details" className="w-9 h-9 shrink-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                                  <span className="material-symbols-outlined text-[18px]">edit</span>
+                                </button>
+                              </div>
+                              <div className="grid grid-cols-3 gap-2 text-xs">
+                                <div className="rounded-xl bg-surface-container-low p-3"><span className="field-label">Journey</span><strong>{journey.journeyType === "return" ? "Return" : (journey.stops?.length ? "With stops" : "One-way")}</strong></div>
+                                <div className="rounded-xl bg-surface-container-low p-3"><span className="field-label">Luggage</span><strong>{journey.handbagCount} hand · {journey.suitcaseCount} cases</strong></div>
+                                <div className="rounded-xl bg-surface-container-low p-3 min-w-0"><span className="field-label">Contact</span><strong>{journey.name}</strong><br/><span className="text-[10px] break-all">{journey.email}</span></div>
+                              </div>
+                              {journey.specialRequests && <div className="rounded-xl border border-outline-variant p-4 text-sm"><span className="field-label">Special requests</span>{journey.specialRequests}</div>}
+                              <div className="rounded-2xl border border-outline-variant bg-white p-3.5">
+                                <div className="flex items-start justify-between gap-4 mb-3">
+                                  <div>
+                                    <span className="field-label">Selected option</span>
+                                    <strong className="text-deep-navy">{selectedQuote ? `${selectedVehicleCount} × ${selectedQuote.vehicle.name}` : "Calculating vehicle option..."}</strong>
+                                    <p className="text-xs text-on-surface-variant mt-1">{journey.passengers} passengers · {journey.suitcaseCount} suitcases · {journey.handbagCount} handbags</p>
+                                  </div>
+                                  {selectedQuote && (
+                                    <div className="text-right shrink-0">
+                                      <span className="field-label">Estimated price</span>
+                                      <strong className="text-lg text-deep-navy">£{fmt(selectedQuote.result?.finalPrice || selectedQuote.result?.finalFare || 0)}{selectedQuote.result?.upperBoundPrice ? `–£${fmt(selectedQuote.result.upperBoundPrice)}` : ""}</strong>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 text-sm font-bold text-deep-navy mb-2">
+                                  <SvgMap size={18}/> Route planning & mileage
+                                </div>
+                                {loadingQuotes
+                                  ? <div className="h-[160px] rounded-xl bg-surface-container-low flex items-center justify-center text-sm text-on-surface-variant">Calculating route and pricing...</div>
+                                  : <RouteMap result={activeResult} journey={journey} gv={db.globalVars} compact/>
+                                }
+                              </div>
+                              <div className="flex gap-3 pt-2">
+                                <button type="button" onClick={()=>setBookingStep(2)} className="h-14 px-6 rounded-full border border-outline-variant text-deep-navy font-bold flex items-center justify-center gap-2">
+                                  <span className="material-symbols-outlined text-[18px]">arrow_back</span> Back
+                                </button>
+                                <button type="button" onClick={handleFinalBookingSubmit} disabled={submitting || loadingQuotes || !selected} className="flex-1 h-14 bg-impact-red disabled:opacity-50 text-white rounded-full font-bold shadow-lg shadow-impact-red/20 flex items-center justify-center gap-2">
+                                  {submitting ? "Confirming..." : <>Confirm Booking <span className="material-symbols-outlined text-[19px]">arrow_forward</span></>}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {bookingStep === 4 && (
+                            <div className="text-center py-4 fade-up">
+                              <div className="w-16 h-16 rounded-full bg-green-100 text-green-700 flex items-center justify-center mx-auto mb-5"><SvgCheck size={34}/></div>
+                              <h3 className="text-2xl font-bold text-deep-navy mb-2">Your booking request is confirmed</h3>
+                              <p className="text-sm text-on-surface-variant mb-5">Your request has been recorded for <strong>{journey.email}</strong>. Our team will contact you shortly to finalize the journey and assist with any special requirements.</p>
+                              <div className="rounded-2xl bg-surface-container-low p-5 mb-5">
+                                <span className="field-label">Booking reference</span>
+                                <strong className="text-xl tracking-wider text-deep-navy">{bookingRef}</strong>
+                              </div>
+                              <p className="text-xs text-on-surface-variant">Please keep this reference for any questions about your booking.</p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1403,11 +1700,10 @@ export default function App() {
                           <h3 className="font-headline-md text-deep-navy mb-2">Our Partnerships</h3>
                           <p className="text-label-sm text-on-surface-variant opacity-60">Providing logistics for the world&apos;s leading enterprises and sports organizations.</p>
                         </div>
-                        <div className="flex flex-wrap justify-center items-center gap-12 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all duration-700 flex-1">
-                          <img className="h-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5L448RNk5wXm0Q2D6aM-QXigHIg8x8lOz4XZ3lfrkhuZOkcPFayB6twwwp6Q8L16tmF2Vyn9Sv4GJXiGn_RQM1PvfVl0OsdZ-b12Gou3aLaNmTSSZrHPNpBJHdUskEGjvRIV8oPERBTe7m8LmeAFdq52fu6mMA3VDTNqaaosaEWQJTLWwpmFsKhoPVAkvZ217J-4FNW2KARuOhfDDfzOU97jhNNDuofKK9gWIvz4DqDIZUoJAFL_Q"/>
-                          <img className="h-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkls7qdqetN4GV299QodVbmISoMXylpPic015TUL42cgNEmE1RS1qlVjORL-HSK1qZJNVAlz1369J81KVQ5Cuydj_wo4_q-nRhn6Af51rJ7xaQTn9veoEpXYxqorCsP1XcA0eZqTqCk9xEPWcgPT2ixL9Z2Tij9NtvSonGMPe529UKWfLD917cXswtMXVtVJdGzhHz-97SpUYT9MtC57Xd3kwXn2FXhPXs9DloAdTbz4F0pMlFoGVa"/>
-                          <img className="h-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnmJLkrPdiYkhkhw9CVxnUPBtdD9USA2XyKD22GGWnBgKvbVIPPgUKQXGAHHEc6EpY2SvWQDT3PX2XBtWWobYYl39lZ9GpDDbxmcbpKEmLhAchyYVmJQp2yPU4IcMznhaD_GuewM9vhgM_FuQF47xLm9Owc4lg8Guty-WTUpolgkN0aThROZRnX60DyUO89P3BkruEE6vw7wHZ9XIpXwJ5t4gxI_AHwvSA2Q5bQfq6VwlJogEZiL_3"/>
-                          <img className="h-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfOjyv2w_koqHZyz-_RH3M2UZokGnXtj8X8Ct3dDZ3sqLO_2hMjpqwbPyp4BuKODHcFJeXBXgPUNaAadnmnFzpfTrHVLtIjfVzwcWlr4GpiXhy9cZgsm37KbL0KVJ8cvptTJ7szPud1yWLQbQcueg8sMhHZQ-1AiOLgaS4yqeARc8uNP9PeeCLvocHogLjlAX5quRV5KLVL6eiHN7Z8emxEM0PQZuwm_tb0QpqMJ83j51CCNNnxr-Z"/>
+                        <div className="flex flex-wrap justify-center items-center gap-4 flex-1">
+                          {["Corporate Events", "Sports Travel", "Airport Transfers", "Executive Groups"].map(partner => (
+                            <span key={partner} className="px-5 py-3 rounded-full border border-outline-variant bg-white text-deep-navy text-sm font-bold">{partner}</span>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -1440,7 +1736,7 @@ export default function App() {
                         </div>
                       </div>
                       <div className="relative group">
-                        <img alt="Our Executive Fleet" className="rounded-3xl shadow-2xl w-full object-cover h-[400px] transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida/AP1WRLscQ-j4rvucIt-jHd557isjboYDcNkRJBLg75SkZyJMjGwJmdbJfYFRGIXqAT7NHHqoDZFwh2jvsipnE0WlEtxU0mw1-polKzcSYRahY9tt1FS_mt6_iOuKEQKBFywK3Q815mbTUksVlHni8FANt-K-czjRD_tuFbD9TaBBWiWp6ecgND-pSaMb_ao7fmt2VrqkqPZtujF4KNmM87I8ggUZZ931Tpj25qc5ewNjMqe9srjFjGbHLjq_ZzE"/>
+                        <img alt="Our Executive Fleet" className="rounded-3xl shadow-2xl w-full object-cover h-[400px] transition-transform duration-700 group-hover:scale-105" src="/header-bg.png"/>
                         <div className="absolute -bottom-6 -left-6 bg-impact-red text-white p-8 rounded-2xl shadow-xl max-w-[240px]">
                           <p className="text-headline-lg font-bold mb-1">99.8%</p>
                           <p className="text-label-sm font-semibold uppercase tracking-wider opacity-90">On-Time Arrival Rate Across 10,000+ Trips</p>
@@ -1450,7 +1746,7 @@ export default function App() {
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
                       <div className="md:col-span-2 relative overflow-hidden rounded-3xl group h-[500px]">
-                        <img alt="Interior Comfort" className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9cR8gpZZ4KyIUvunnm3cLhqSYmlrmvpdLszkMOhqlcx-Aa6CBtnTVfRr4z4sW3Ml4YO5AsJS4kCOEDHtGVzvKqW1peiIHV0pCm5IKRa2KnWuaSrUvZH-j9XAmOMEPXv9kdkODkhXGWC9IZ-ojPV66gCyY1OD0dL-rasI_4x6pLpjIANfB0mRGPsryr63g3Qh151NmT1WSb3dBECQqe9Z5mqH1HTX0XRBVdhJE7IyOPeJo9fF2vn2D"/>
+                        <img alt="Carolean executive coach" className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" src="/header-bg.png"/>
                         <div className="absolute inset-0 bg-gradient-to-t from-deep-navy via-transparent to-transparent opacity-80"></div>
                         <div className="absolute bottom-0 left-0 p-10 text-stark-white">
                           <span className="material-symbols-outlined text-4xl mb-4 text-impact-red">airline_seat_recline_extra</span>
@@ -1473,18 +1769,22 @@ export default function App() {
                             </li>
                           </ul>
                         </div>
-                        <img alt="Corporate shuttle" className="absolute right-[-20%] bottom-[-10%] w-[120%] opacity-20 rotate-[-12deg]" src="https://lh3.googleusercontent.com/aida/AP1WRLtixZVJHuwXCDmL8wJm7HkR1O4Qc8uVQDS2SRcxtw9IsELfxsjyQiFhtyFg8SY7MnTNn6r09s0tVgoWyiYG1WcSP7SuOtHUuh5b1P1-uLzDsplIwS1ioQd04Vspw1bcZUnek3k6UW7AinKxmF7pVvmMpOJ7vg25d_Plh7DAleM3Sobh3Y_PARpRXEcBWX4PwdGvOVU_cGDrg0pEtQysxg1ax5qq-yhLnwD0oag-Xd9gy_ehDPKn1ILFpdI"/>
+                        <img alt="" aria-hidden="true" className="absolute right-[-12%] bottom-[-4%] w-[85%] opacity-10 rotate-[-8deg]" src="/carolean%20image.png"/>
                       </div>
                     </div>
                   </section>
                   
                   <section className="bg-surface-container-high py-section-gap-lg overflow-hidden relative">
                     <div className="max-w-container-max mx-auto px-gutter grid grid-cols-1 lg:grid-cols-2 gap-16 items-center px-6 py-20">
-                      <div className="relative">
+                      <div className="relative pb-8 lg:pb-0">
                         <div className="absolute -top-10 -left-10 w-40 h-40 bg-impact-red/10 rounded-full blur-3xl"></div>
-                        <img alt="Client Testimonial" className="rounded-[3rem] shadow-2xl relative z-10 w-full max-w-md mx-auto grayscale hover:grayscale-0 transition-all duration-700" src="https://lh3.googleusercontent.com/aida/AP1WRLv4cSPzSp6GJDn4x-2rTHrlYzdCsDNcKjwFrsedpDKB_mczNaTFfaMYRCCtrWcDc-bW7QjiZeT6zyyMXfVac98LaCCPnW025S4DST8_RBD1cWk37DVIIDglFEX2M1HCmv54TF4XVb-NAfnbf4CCeeKGahU9qCe4JU5iZv6q8uQ1Yg2ElPX39g050YpR286f0CnL6e38UFUYY6U36-AJbC9t5wY0fnF-XbqFDms9GkQL2l-9eJG7k98OaX0"/>
-                        <div className="absolute -bottom-8 right-0 z-20">
-                          <div className="bg-white p-6 rounded-2xl shadow-xl flex items-center gap-4">
+                        <img
+                          alt="Sarah Jenkins, corporate travel client"
+                          className="relative z-10 w-full max-w-md h-[396px] mx-auto rounded-[3rem] object-cover shadow-2xl grayscale"
+                          src="/testimonial-client.jpg"
+                        />
+                        <div className="absolute bottom-0 right-0 z-20">
+                          <div className="bg-white p-5 rounded-2xl shadow-xl flex items-center gap-4">
                             <div className="flex -space-x-3">
                               <div className="w-10 h-10 rounded-full border-2 border-white bg-surface-dim"></div>
                               <div className="w-10 h-10 rounded-full border-2 border-white bg-surface-dim"></div>
@@ -1495,7 +1795,7 @@ export default function App() {
                         </div>
                       </div>
                       <div>
-                        <span className="material-symbols-outlined text-6xl text-impact-red mb-8 opacity-20">format_quote</span>
+                        <span className="text-6xl font-headline-lg text-impact-red mb-6 block opacity-25" aria-hidden="true">“</span>
                         <h3 className="font-headline-lg text-headline-lg text-deep-navy mb-8">"Carolean Coaches has transformed how our executive team moves. Their punctuality and the sheer quality of the fleet are unmatched in the industry."</h3>
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-1 gap-1 bg-impact-red rounded-full"></div>
@@ -1519,7 +1819,7 @@ export default function App() {
                       </div>
                       <div className="w-full md:w-auto">
                         <div className="bg-white/10 p-2 rounded-full backdrop-blur-md border border-white/20 flex flex-col sm:flex-row gap-2">
-                          <input className="px-8 py-4 bg-transparent border-none focus:ring-0 text-white placeholder:text-surface-variant w-full sm:w-80" placeholder="Professional Email" type="email"/>
+                          <input className="newsletter-email sm:w-80" placeholder="Professional Email" type="email"/>
                           <button className="bg-impact-red text-white px-10 py-4 rounded-full font-headline-md hover:bg-white hover:text-tertiary transition-all shadow-lg shadow-impact-red/20">Subscribe</button>
                         </div>
                       </div>
@@ -1531,8 +1831,7 @@ export default function App() {
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-gutter max-w-container-max mx-auto px-6">
                     <div className="space-y-8">
                       <div className="flex items-center gap-3">
-                        <img alt="Carolean Coaches" className="h-8 w-auto brightness-0 invert" src="https://lh3.googleusercontent.com/aida/AP1WRLumoQP5jmF1XgJNC5lNqtwGhsObTeB2YXZkQzSTm7Amj6eXg01uUEKMrO_KkHhNSorr8c9oB_YrR156TkK9Ack2vFR2RvFAZ-UTleuTEHXLn7eCAnQdiPLN9rUUZC0KsfYt-Zf0VLvkQzw7Xg61mqzhHnSrGOSII7xC_vAJozhOvJkgNpomQVykVjs4NxPBKkLHKVgHSIqRbv-Mt5dcowl1V6T8TIC73_nk86d9LCHtWX2KJY8zODlCLA"/>
-                        <span className="text-headline-md font-headline-md text-stark-white">Carolean</span>
+                        <img alt="Carolean Coaches" className="h-14 w-auto object-contain bg-white rounded-xl p-2" src="/carolean%20image.png"/>
                       </div>
                       <p className="text-body-md opacity-60 leading-relaxed">Providing world-class transportation solutions since 1999. Precision, punctuality, and professionalism in every mile.</p>
                       <div className="flex gap-4">
@@ -1578,7 +1877,7 @@ export default function App() {
                     </div>
                   </div>
                   <div className="max-w-container-max mx-auto px-gutter mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 px-6">
-                    <p className="text-label-sm font-label-sm opacity-60">© 2024 Carolean Coaches. Executive Precision in Motion.</p>
+                    <p className="text-label-sm font-label-sm opacity-60">© 2026 Carolean Coaches. Executive Precision in Motion.</p>
                     <div className="flex gap-8">
                       <span className="text-label-sm font-label-sm opacity-40">ISO 9001 Certified</span>
                       <span className="text-label-sm font-label-sm opacity-40">Site by Precision Agency</span>
@@ -1699,7 +1998,7 @@ export default function App() {
                 </main>
               )}
             </div>
-          <footer style={{ background: PX.offWhite, borderTop: `1px solid ${PX.gray200}`, padding: "2rem 1.5rem", textAlign: "center", fontSize: 12, color: PX.gray600 }}>
+          {showQuotes && <footer style={{ background: PX.offWhite, borderTop: `1px solid ${PX.gray200}`, padding: "2rem 1.5rem", textAlign: "center", fontSize: 12, color: PX.gray600 }}>
           <div style={{ maxWidth: 1140, margin: "0 auto", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
             <div>
               <strong>Carolean Coaches Ltd</strong> · Unit 1, Bentley Lane, Walsall WS2 8TL
@@ -1708,7 +2007,7 @@ export default function App() {
               PSV Operator License: PM0003456 · Fare Engine v3.0
             </div>
           </div>
-        </footer>
+        </footer>}
       </div>
     </>
   );
