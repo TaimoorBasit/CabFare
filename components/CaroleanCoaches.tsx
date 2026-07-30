@@ -1697,19 +1697,22 @@ export default function App({ embed = false }) {
                             }}>
                               <div>
                                 <label className="field-label">Full name</label>
-                                <input className="quote-details-field" type="text" value={journey.name} onChange={e=>setJ(j=>({...j,name:e.target.value}))} placeholder="Your full name" required/>
+                                <input className="quote-details-field !text-left" type="text" value={journey.name} onChange={e=>setJ(j=>({...j,name:e.target.value}))} placeholder="Your full name" required/>
                               </div>
                               <div>
                                 <label className="field-label">Email address</label>
-                                <input className="quote-details-field" type="email" value={journey.email} onChange={e=>setJ(j=>({...j,email:e.target.value}))} placeholder="you@example.com" pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" required/>
+                                <input className="quote-details-field !text-left" type="email" value={journey.email} onChange={e=>setJ(j=>({...j,email:e.target.value}))} placeholder="you@example.com" pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" required/>
                               </div>
                               <div>
                                 <label className="field-label">Phone number</label>
-                                <input className="quote-details-field" type="tel" value={journey.phone} onChange={e=>setJ(j=>({...j,phone:e.target.value}))} placeholder="+44 7700 900000" pattern="^[\+]?[0-9\s\-()]{10,20}$" required/>
+                                <input className="quote-details-field !text-left" type="tel" value={journey.phone} onChange={e=>{
+                                  const val = e.target.value.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, '');
+                                  setJ(j=>({...j,phone:val}));
+                                }} placeholder="+44 7700 900000" pattern="^[\+]?[0-9\s\-()]{10,20}$" required/>
                               </div>
                               <div>
                                 <label className="field-label">Special requests <span className="normal-case font-normal">(optional)</span></label>
-                                <textarea className="quote-details-field" value={journey.specialRequests} onChange={e=>setJ(j=>({...j,specialRequests:e.target.value}))} placeholder="Wheelchair access, mobility assistance, child seats, additional stops, or other instructions"/>
+                                <textarea className="quote-details-field !text-left" value={journey.specialRequests} onChange={e=>setJ(j=>({...j,specialRequests:e.target.value}))} placeholder="Wheelchair access, mobility assistance, child seats, additional stops, or other instructions"/>
                               </div>
                               {validationError && <div className="p-3 bg-red-50 text-red-700 rounded-xl text-sm">{validationError}</div>}
                               <div className="flex gap-3 pt-2">
