@@ -1697,7 +1697,7 @@ export default function App({ embed = false }) {
                             }}>
                               <div>
                                 <label className="field-label">Full name</label>
-                                <input className="quote-details-field !text-left" type="text" value={journey.name} onChange={e=>setJ(j=>({...j,name:e.target.value}))} placeholder="Your full name" required/>
+                                <input className="quote-details-field !text-left" type="text" value={journey.name} onChange={e=>setJ(j=>({...j,name:e.target.value.trimStart()}))} placeholder="Your full name" required minLength={2}/>
                               </div>
                               <div>
                                 <label className="field-label">Email address</label>
@@ -1708,7 +1708,7 @@ export default function App({ embed = false }) {
                                 <input className="quote-details-field !text-left" type="tel" value={journey.phone} onChange={e=>{
                                   const val = e.target.value.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, '');
                                   setJ(j=>({...j,phone:val}));
-                                }} placeholder="+44 7700 900000" pattern="^[\+]?[0-9\s\-()]{10,20}$" required/>
+                                }} placeholder="+44 7700 900000" pattern="^[\+]?[0-9]{10,15}$" minLength={10} maxLength={15} required/>
                               </div>
                               <div>
                                 <label className="field-label">Special requests <span className="normal-case font-normal">(optional)</span></label>
