@@ -1697,15 +1697,15 @@ export default function App({ embed = false }) {
                             }}>
                               <div>
                                 <label className="field-label">Full name</label>
-                                <input className="quote-details-field !text-left" type="text" value={journey.name} onChange={e=>setJ(j=>({...j,name:e.target.value.trimStart()}))} placeholder="Your full name" required minLength={2}/>
+                                <input className="quote-details-field !text-left" style={{ textAlign: 'left' }} type="text" value={journey.name} onChange={e=>setJ(j=>({...j,name:e.target.value.trimStart()}))} placeholder="Your full name" required minLength={2}/>
                               </div>
                               <div>
                                 <label className="field-label">Email address</label>
-                                <input className="quote-details-field !text-left" type="email" value={journey.email} onChange={e=>setJ(j=>({...j,email:e.target.value}))} placeholder="you@example.com" pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" required/>
+                                <input className="quote-details-field !text-left" style={{ textAlign: 'left' }} type="email" value={journey.email} onChange={e=>setJ(j=>({...j,email:e.target.value}))} placeholder="you@example.com" pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" required/>
                               </div>
                               <div>
                                 <label className="field-label">Phone number</label>
-                                <input className="quote-details-field !text-left" type="tel" value={journey.phone} onChange={e=>{
+                                <input className="quote-details-field !text-left" style={{ textAlign: 'left' }} type="tel" value={journey.phone} onChange={e=>{
                                   const val = e.target.value.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, '');
                                   setJ(j=>({...j,phone:val}));
                                 }} placeholder="+44 7700 900000" pattern="^[\+]?[0-9]{10,15}$" minLength={10} maxLength={15} required/>
