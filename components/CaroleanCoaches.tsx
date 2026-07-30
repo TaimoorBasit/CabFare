@@ -1,26 +1,26 @@
 
-// @ts-nocheck
+
 'use client';
 import { API_BASE_URL } from '../lib/api';
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 
-// ── Design tokens ─────────────────────────────────────────────────────────────
+
 const PX = {
-  navy800: "#0D0E48",       // Primary Navy Blue from website
-  navy700: "#13155C",       // Dark Accent
-  navy600: "#1E228E",       // Medium Navy
-  brandRed: "#CD202C",      // Primary Brand Red from website
-  brandRedHover: "#b01c26", // Hover state for primary buttons
-  amber500: "#E6A11D",      // Brand Gold/Accent
+  navy800: "#0D0E48",       
+  navy700: "#13155C",       
+  navy600: "#1E228E",       
+  brandRed: "#CD202C",      
+  brandRedHover: "#b01c26", 
+  amber500: "#E6A11D",      
   amber400: "#d4a832",
   amber100: "#fdf3dc",
   teal700: "#0c6e55",
   teal100: "#e0f5ef",
   red700: "#b91c1c",
   red100: "#fee2e2",
-  gray50: "#f8fafc",        // Light slate backgrounds
+  gray50: "#f8fafc",        
   gray100: "#f1f5f9",
   gray200: "#e2e8f0",
   gray400: "#94a3b8",
@@ -29,7 +29,7 @@ const PX = {
   offWhite: "#f4f5f7",
 };
 
-// ── Inline Vector SVG Components (Replacing Emojis) ───────────────────────────
+
 function SvgMapPinGreen({ size = 16 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
@@ -80,7 +80,7 @@ function SvgBus({ size = 28, color = "currentColor" }) {
   );
 }
 
-// ── Minibus drawing ──
+
 function SvgMinibus({ size = 28, color = "currentColor" }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
@@ -94,7 +94,7 @@ function SvgMinibus({ size = 28, color = "currentColor" }) {
   );
 }
 
-// ── Coach drawing ──
+
 function SvgCoach({ size = 28, color = "currentColor" }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}>
@@ -135,7 +135,7 @@ function SvgClose({ size = 14, color = "currentColor" }) {
   );
 }
 
-// ── Global CSS & Montserrat Font loading ───────────────────────────────────────
+
 function GlobalStyle() {
   useEffect(() => {
     const el = document.createElement("style");
@@ -249,6 +249,12 @@ function GlobalStyle() {
         background: #fff !important;
         color: #1c1b1b !important;
         font-size: 15px !important;
+        text-align: left !important;
+      }
+      #fast-quote .quote-details-field:invalid:not(:placeholder-shown) {
+        border-color: #ef4444 !important;
+        background-color: #fef2f2 !important;
+        color: #b91c1c !important;
       }
       #fast-quote textarea.quote-details-field {
         height: 104px !important;
@@ -596,7 +602,7 @@ function GlobalStyle() {
   return null;
 }
 
-// ── Google Maps loader ────────────────────────────────────────────────────────
+
 function useGoogleMaps(apiKey) {
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
@@ -616,7 +622,7 @@ function useGoogleMaps(apiKey) {
   return { loaded };
 }
 
-// ── Map Picker Modal ──────────────────────────────────────────────────────────
+
 function MapPickerModal({ isOpen, onClose, onConfirm, initialSearch }) {
   const mapRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -699,7 +705,7 @@ function MapPickerModal({ isOpen, onClose, onConfirm, initialSearch }) {
             handleSelect(p.geometry.location);
           });
         }
-      }, 400); // 400ms delay to ensure modal animation is fully complete
+      }, 400); 
     }
 
     return () => {
@@ -715,13 +721,13 @@ function MapPickerModal({ isOpen, onClose, onConfirm, initialSearch }) {
     <div style={{ position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(13,14,72,0.45)",backdropFilter:"blur(4px)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:20 }}>
       <div className="fade-up" style={{ width:"100%",maxWidth:600,maxHeight:"90vh",background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 20px 50px rgba(0,0,0,0.3)", display:"flex", flexDirection:"column" }}>
         
-        {/* Header */}
+        {}
         <div style={{ padding:"16px 20px",borderBottom:"1px solid #e2e8f0",display:"flex",justifyContent:"space-between",alignItems:"center", flexShrink:0 }}>
           <div style={{ fontWeight:700,color:PX.navy800,fontSize:16, display:"flex", alignItems:"center", gap:6 }}><SvgMapPinRed /> Pinpoint Location</div>
           <button type="button" onClick={onClose} style={{ background:"none",border:"none",fontSize:20,cursor:"pointer",color:PX.gray400,lineHeight:1, display:"flex", alignItems:"center" }}><SvgClose size={18} /></button>
         </div>
 
-        {/* Search Bar */}
+        {}
         <div style={{ padding:"12px 20px", borderBottom:"1px solid #e2e8f0", background: "#f8fafc", flexShrink:0 }}>
           <div style={{ background:"#fff",padding:"10px 16px",borderRadius:8,border:`1.5px solid #fee2e2`,boxShadow:"0 2px 4px rgba(0,0,0,.02)",display:"flex",alignItems:"center",gap:8 }}>
             {loading ? <span className="spinning" style={{color:PX.navy800}}>⟳</span> : <SvgMapPinRed />}
@@ -736,12 +742,12 @@ function MapPickerModal({ isOpen, onClose, onConfirm, initialSearch }) {
           </div>
         </div>
 
-        {/* Map Container (Flexible Height) */}
+        {}
         <div style={{ position:"relative", flex:1, minHeight: 250, height: 360 }}>
           <div ref={mapRef} style={{ position: "absolute", top:0, left:0, right:0, bottom:0, background:PX.gray100 }}/>
         </div>
 
-        {/* Footer */}
+        {}
         <div style={{ padding:"16px 20px",display:"flex",justifyContent:"flex-end",gap:12,background:PX.gray50,borderTop:"1px solid #e2e8f0", flexShrink:0 }}>
           <button type="button" onClick={onClose} style={{ padding:"8px 16px",borderRadius:8,border:`1px solid ${PX.gray200}`,background:"#fff",cursor:"pointer",fontWeight:600,color:PX.gray600 }}>Cancel</button>
           <button type="button" onClick={()=>{ if(selectedGeo) onConfirm(selectedAddr, selectedGeo); }} disabled={!selectedGeo} style={{ padding:"8px 16px",borderRadius:8,border:"none",background:PX.navy800,color:"#fff",cursor:selectedGeo?"pointer":"not-allowed",fontWeight:600,opacity:selectedGeo?1:0.5 }}>Confirm Location</button>
@@ -752,7 +758,7 @@ function MapPickerModal({ isOpen, onClose, onConfirm, initialSearch }) {
   );
 }
 
-// ── Places Autocomplete Input ─────────────────────────────────────────────────
+
 function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded, onIconClick }) {
   const inputRef = useRef(null);
   const acRef = useRef(null);
@@ -835,7 +841,7 @@ function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded, onIconCli
   );
 }
 
-// ── UK Cities fallback geocoder ───────────────────────────────────────────────
+
 const UK_CITIES = {
   "walsall":[52.5863,-1.9817],"london":[51.5074,-0.1278],"birmingham":[52.4862,-1.8904],
   "manchester":[53.4808,-2.2426],"liverpool":[53.4084,-2.9916],"leeds":[53.8008,-1.5491],
@@ -852,7 +858,7 @@ const UK_CITIES = {
   "milton keynes":[52.0406,-0.7594],"worcester":[52.1920,-2.2200],"gloucester":[51.8642,-2.2380],
 };
 const YARD_GEO = { lat:52.5863, lng:-1.9817, name:"Walsall Yard (Base)" };
-// ── Default database ──────────────────────────────────────────────────────────
+
 
 function Btn({ children, onClick, variant="primary", size="md", disabled, full, style:sx={} }) {
   const v = {
@@ -943,14 +949,14 @@ function Badge({ children, color="blue" }) {
 
 function fmt(n)  { return Number(n).toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2}); }
 
-// ── Progress bar ──────────────────────────────────────────────────────────────
+
 function ProgressBar({ pct, color }) {
   return <div style={{ height:6, background:PX.gray200, borderRadius:10, overflow:"hidden" }}>
     <div style={{ width:`${Math.min(100,pct)}%`, height:"100%", background:color, borderRadius:10, transition:"width .4s" }}/>
   </div>;
 }
 
-// ── Route map ─────────────────────────────────────────────────────────────────
+
 function GoogleMapPreview({ result, journey, gv, compact = false }) {
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
@@ -1108,14 +1114,14 @@ function RouteMap({ result, journey, gv, compact = false }) {
   </div>;
 }
 
-// ── Navbar ────────────────────────────────────────────────────────────────────
+
 function Navbar() {
   return (
     <header style={{ background: PX.navy800, borderTop: `4px solid ${PX.brandRed}`, position:"sticky", top:0, zIndex:100, boxShadow:"0 4px 20px rgba(0,0,0,.15)" }}>
       <div style={{ maxWidth:1160, margin:"0 auto", padding:"0 1.5rem",
         display:"flex", alignItems:"center", justifyContent:"space-between", height:72 }}>
         
-        {/* Logo and Brand Title */}
+        {}
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
           <img src="/carolean image.png" alt="Carolean Coaches Logo" style={{ height: 32, width: "auto" }} />
           <div>
@@ -1128,7 +1134,7 @@ function Navbar() {
   );
 }
 
-// ── VehicleCard (Step 2 equivalent) ──────────────────────────────────────────
+
 function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcaseCount, handbagCount }) {
   const usableCapacity = vehicle.capacity || 1;
   const requiredVehicles = Math.ceil((passengers || 1) / usableCapacity);
@@ -1211,9 +1217,9 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcase
   );
 }
 
-// ── Admin Dashboard ────────────────────────────────────────────────────────────
-// ── Fleet Economics Panel ──────────────────────────────────────────────────────
-// ── Root App ──────────────────────────────────────────────────────────────────
+
+
+
 export default function App({ embed = false }) {
   useEffect(() => {
     if (!embed) return;
@@ -1565,7 +1571,7 @@ export default function App({ embed = false }) {
                               </div>
                             </div>
 
-                            {/* Date / Return row */}
+                            {}
                             <div className={`grid grid-cols-1 ${journey.journeyType === "return" ? "sm:grid-cols-2" : ""} gap-4`}>
                               <div className="relative group">
                                 <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant z-10" style={{pointerEvents: "none"}}>calendar_month</span>
@@ -1599,7 +1605,7 @@ export default function App({ embed = false }) {
                                 <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[18px]">expand_more</span>
                               </div>
 
-                              {/* Passengers ~27.5% */}
+                              {}
                               <div className="flex-1 relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden">
                                 <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.max(1, (j.passengers || 16) - 1)}))} className="absolute left-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none z-10"><span className="material-symbols-outlined text-[18px]">remove</span></button>
                                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
@@ -1609,7 +1615,7 @@ export default function App({ embed = false }) {
                                 <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.min(100, (j.passengers || 16) + 1)}))} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4ADE80] rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none z-10"><span className="material-symbols-outlined text-[18px]">add</span></button>
                               </div>
 
-                              {/* Luggage ~27.5% — each type keeps its own quantity */}
+                              {}
                               <div className="relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden" style={{flex: "0 0 31%"}}>
                                 <button
                                   type="button"
@@ -1669,10 +1675,24 @@ export default function App({ embed = false }) {
                             <form className="space-y-4 fade-up" onSubmit={e => {
                               e.preventDefault();
                               setValidationError("");
-                              if (!journey.name.trim() || !journey.email.trim() || !journey.phone.trim()) {
-                                setValidationError("Please enter your name, email address, and phone number.");
+                              
+                              if (!journey.name.trim() || journey.name.trim().length < 2) {
+                                setValidationError("Please enter a valid full name.");
                                 return;
                               }
+                              
+                              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                              if (!emailRegex.test(journey.email.trim())) {
+                                setValidationError("Please enter a valid email address.");
+                                return;
+                              }
+                              
+                              const phoneRegex = /^[\+]?[0-9\s\-()]{10,20}$/;
+                              if (!phoneRegex.test(journey.phone.trim())) {
+                                setValidationError("Please enter a valid phone number (min. 10 digits).");
+                                return;
+                              }
+                              
                               setBookingStep(3);
                             }}>
                               <div>
@@ -1681,11 +1701,11 @@ export default function App({ embed = false }) {
                               </div>
                               <div>
                                 <label className="field-label">Email address</label>
-                                <input className="quote-details-field" type="email" value={journey.email} onChange={e=>setJ(j=>({...j,email:e.target.value}))} placeholder="you@example.com" required/>
+                                <input className="quote-details-field" type="email" value={journey.email} onChange={e=>setJ(j=>({...j,email:e.target.value}))} placeholder="you@example.com" pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" required/>
                               </div>
                               <div>
                                 <label className="field-label">Phone number</label>
-                                <input className="quote-details-field" type="tel" value={journey.phone} onChange={e=>setJ(j=>({...j,phone:e.target.value}))} placeholder="+44 7700 900000" required/>
+                                <input className="quote-details-field" type="tel" value={journey.phone} onChange={e=>setJ(j=>({...j,phone:e.target.value}))} placeholder="+44 7700 900000" pattern="^[\+]?[0-9\s\-()]{10,20}$" required/>
                               </div>
                               <div>
                                 <label className="field-label">Special requests <span className="normal-case font-normal">(optional)</span></label>
@@ -1948,7 +1968,7 @@ export default function App({ embed = false }) {
                         </li>
                         <li className="flex gap-4 text-surface-variant opacity-80">
                           <span className="material-symbols-outlined text-impact-red">mail</span>
-                          bookings@carolean.com
+                          {db.operatorDetails?.notificationEmail || "bookings@carolean.com"}
                         </li>
                       </ul>
                     </div>
@@ -1964,10 +1984,10 @@ export default function App({ embed = false }) {
               </div>
             ) : (
 
-/* PAGE 2: QUOTATION PRICE SCREEN */
+
                 <main style={{ maxWidth:1160, margin:"0 auto", padding:"2.5rem 1.5rem 5rem" }} className="fade-up">
                   
-                  {/* Sleek Horizontal Dark Journey Summary Header */}
+                  {}
                   <div style={{ 
                     background: `linear-gradient(135deg, ${PX.navy800} 0%, ${PX.navy700} 100%)`,
                     borderRadius: 12,
@@ -2019,7 +2039,7 @@ export default function App({ embed = false }) {
                   ) : (
                     <div className="results-layout">
                       
-                      {/* LEFT COLUMN: Available Options */}
+                      {}
                       <div className="left-panel-options">
                         <Card style={{ padding: "2rem" }}>
                           <SectionHead sub={`${journey.passengers} passengers · ${(journey.journeyType).replace("-"," ")}`}>
@@ -2051,10 +2071,10 @@ export default function App({ embed = false }) {
                         </Card>
                       </div>
 
-                      {/* RIGHT COLUMN: Map Card & Stacked Checkout Form */}
+                      {}
                       <div className="right-panel-map" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                         
-                        {/* Map Card */}
+                        {}
                         <Card style={{ padding: "1.5rem" }}>
                           <div style={{ fontSize:14, fontWeight:800, color:PX.navy800, marginBottom:"0.75rem", display:"flex", alignItems:"center", gap:8 }}>
                             <SvgMap /> Route Planning & Dead Mileage
@@ -2063,7 +2083,7 @@ export default function App({ embed = false }) {
                           <RouteMap result={activeResult} journey={journey} gv={db.globalVars} />
                         </Card>
 
-                        {/* Contact Message Box */}
+                        {}
                         <div style={{ padding:"12px 16px", background:"#eff6ff", borderRadius:8, fontSize:12, color:PX.navy800, border:`1px solid #bfdbfe`, lineHeight: 1.4, textAlign: "center" }}>
                           <strong>Thank you for your inquiry.</strong> Our dedicated team will reach out to you shortly to discuss your requirements and provide the best possible quotation for your journey.
                         </div>
@@ -2078,10 +2098,10 @@ export default function App({ embed = false }) {
           {showQuotes && <footer style={{ background: PX.offWhite, borderTop: `1px solid ${PX.gray200}`, padding: "2rem 1.5rem", textAlign: "center", fontSize: 12, color: PX.gray600 }}>
           <div style={{ maxWidth: 1140, margin: "0 auto", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
             <div>
-              <strong>Carolean Coaches Ltd</strong> · Unit 1, Bentley Lane, Walsall WS2 8TL
+              <strong>{db.operatorDetails?.companyName || "Carolean Coaches Ltd"}</strong> · {db.globalVars?.yardAddress || "Unit 1, Bentley Lane, Walsall WS2 8TL"}
             </div>
             <div>
-              PSV Operator License: PM0003456 · Fare Engine v3.0
+              PSV Operator License: {db.operatorDetails?.operatorLicence || "PM0003456"} · Fare Engine v3.0
             </div>
           </div>
         </footer>}
