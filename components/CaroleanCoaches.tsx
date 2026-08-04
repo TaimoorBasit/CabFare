@@ -2,7 +2,7 @@
 
 
 'use client';
-import { API_BASE_URL } from '../lib/api';
+import { ApiRequestError, requestJson } from '../lib/api';
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
@@ -36,6 +36,10 @@ const PX = {
   gray900: "#0f172a",
   offWhite: "#f4f5f7",
 };
+
+const PUBLIC_CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() || '';
+const PUBLIC_CONTACT_PHONE = process.env.NEXT_PUBLIC_CONTACT_PHONE?.trim() || '';
+const PUBLIC_CONTACT_ADDRESS = process.env.NEXT_PUBLIC_CONTACT_ADDRESS?.trim() || '';
 
 
 function SvgMapPinGreen({ size = 16 }) {
@@ -613,21 +617,53 @@ function GlobalStyle() {
 
 function useGoogleMaps(apiKey: string | undefined) {
   const [loaded, setLoaded] = useState(false);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'unavailable' | 'failed'>(
+    apiKey?.trim() ? 'loading' : 'unavailable'
+  );
   useEffect(() => {
-    if (!apiKey?.trim()) return;
-    if (window.google?.maps?.places) { setLoaded(true); return; }
+    if (!apiKey?.trim()) {
+      setLoaded(false);
+      setStatus('unavailable');
+      return;
+    }
+    if (window.google?.maps?.places) {
+      setLoaded(true);
+      setStatus('ready');
+      return;
+    }
+    setStatus('loading');
     const existing = document.getElementById("gm-script");
-    if (existing) { existing.onload = () => setLoaded(true); return; }
+    const markReady = () => {
+      if (window.google?.maps?.places) {
+        setLoaded(true);
+        setStatus('ready');
+      } else {
+        setLoaded(false);
+        setStatus('failed');
+      }
+    };
+    const markFailed = () => {
+      setLoaded(false);
+      setStatus('failed');
+    };
+    if (existing) {
+      existing.addEventListener('load', markReady);
+      existing.addEventListener('error', markFailed);
+      return () => {
+        existing.removeEventListener('load', markReady);
+        existing.removeEventListener('error', markFailed);
+      };
+    }
     const s = document.createElement("script");
     s.id = "gm-script";
     s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey.trim()}&libraries=places,geometry&callback=__gmCb`;
     s.async = true; s.defer = true;
-    window.__gmCb = () => setLoaded(true);
-    s.onerror = () => {};
+    window.__gmCb = markReady;
+    s.onerror = markFailed;
     document.head.appendChild(s);
     return () => { delete window.__gmCb; };
   }, [apiKey]);
-  return { loaded };
+  return { loaded, status };
 }
 
 
@@ -828,14 +864,14 @@ function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded, onIconCli
 
   return (
     <div style={{ position:"relative" }}>
-      <button type="button" onClick={()=>{ if (onIconClick) onIconClick(); else setPickerOpen(true); }} title="Choose on map"
+      <button type="button" disabled={!mapsLoaded} onClick={()=>{ if (!mapsLoaded) return; if (onIconClick) onIconClick(); else setPickerOpen(true); }} title={mapsLoaded ? "Choose on map" : "Map service unavailable"}
         style={{ position:"absolute", left:6, top:"50%", transform:"translateY(-50%)",
-          display:"flex", alignItems:"center", zIndex:1, background:"none", border:"none", cursor:"pointer",
+          display:"flex", alignItems:"center", zIndex:1, background:"none", border:"none", cursor:mapsLoaded?"pointer":"not-allowed", opacity:mapsLoaded?1:0.45,
           padding:"6px", borderRadius:6, transition:"background .15s" }}
         onMouseOver={e=>e.currentTarget.style.background="#f1f5f9"} onMouseOut={e=>e.currentTarget.style.background="none"}>
         {icon}
       </button>
-      <input ref={inputRef} type="text" placeholder={placeholder} value={localVal}
+      <input ref={inputRef} type="text" placeholder={mapsLoaded ? placeholder : "Map service unavailable"} value={localVal} disabled={!mapsLoaded}
         style={{ paddingLeft:38, paddingRight: 12 }} 
         onChange={e => handleTextChange(e.target.value)}
         onBlur={handleBlur}
@@ -848,24 +884,6 @@ function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded, onIconCli
     </div>
   );
 }
-
-
-const UK_CITIES = {
-  "walsall":[52.5863,-1.9817],"london":[51.5074,-0.1278],"birmingham":[52.4862,-1.8904],
-  "manchester":[53.4808,-2.2426],"liverpool":[53.4084,-2.9916],"leeds":[53.8008,-1.5491],
-  "sheffield":[53.3811,-1.4701],"bristol":[51.4545,-2.5879],"edinburgh":[55.9533,-3.1883],
-  "glasgow":[55.8642,-4.2518],"cardiff":[51.4816,-3.1791],"nottingham":[52.9548,-1.1581],
-  "leicester":[52.6369,-1.1398],"coventry":[52.4068,-1.5197],"derby":[52.9225,-1.4746],
-  "newcastle":[54.9783,-1.6178],"oxford":[51.7520,-1.2577],"cambridge":[52.2053,0.1218],
-  "brighton":[50.8225,-0.1372],"portsmouth":[50.8198,-1.0880],"southampton":[50.9097,-1.4044],
-  "exeter":[50.7184,-3.5339],"plymouth":[50.3755,-4.1427],"norwich":[52.6309,1.2974],
-  "wolverhampton":[52.5870,-2.1288],"stoke":[53.0027,-2.1794],"chester":[53.1905,-2.8910],
-  "york":[53.9590,-1.0815],"bath":[51.3758,-2.3599],"luton":[51.8787,-0.4200],
-  "reading":[51.4543,-0.9781],"blackpool":[53.8175,-3.0357],"bradford":[53.7960,-1.7594],
-  "hull":[53.7676,-0.3274],"swindon":[51.5558,-1.7797],"northampton":[52.2405,-0.9027],
-  "milton keynes":[52.0406,-0.7594],"worcester":[52.1920,-2.2200],"gloucester":[51.8642,-2.2380],
-};
-const YARD_GEO = { lat:52.5863, lng:-1.9817, name:"Walsall Yard (Base)" };
 
 
 function Btn({ children, onClick, variant="primary", size="md", disabled, full, style:sx={} }) {
@@ -957,6 +975,32 @@ function Badge({ children, color="blue" }) {
 
 function fmt(n)  { return Number(n).toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2}); }
 
+function RouteMetrics({ result, gv }) {
+  if (!result) return null;
+  const configuredUnit = result.distanceUnit || gv?.distanceUnit;
+  const hasTrustedUnit = configuredUnit === 'km' || configuredUnit === 'miles';
+  const unitLabel = configuredUnit === 'miles' ? 'mi' : 'km';
+  const metrics = [];
+  if (hasTrustedUnit && Number.isFinite(Number(result.totalKm)) && Number.isFinite(Number(result.revenueKm))) {
+    metrics.push(
+      ["Total route", `${result.totalKm} ${unitLabel}`],
+      ["Passenger route", `${result.revenueKm} ${unitLabel}`],
+    );
+  }
+  if (Number.isFinite(Number(result.totalShiftHrs))) metrics.push(["Duration", `${result.totalShiftHrs}h`]);
+  if (Number.isFinite(Number(result.opDays))) metrics.push(["Days", result.opDays]);
+  if (metrics.length === 0) return null;
+
+  return <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
+    {metrics.map(([label, value]) => (
+      <div key={label} style={{ background:PX.gray50, border:`1px solid ${PX.gray200}`, borderRadius:8, padding:"8px", textAlign:"center" }}>
+        <div style={{ fontSize:10, fontWeight:700, color:PX.gray400, textTransform:"uppercase", marginBottom:2 }}>{label}</div>
+        <div style={{ fontSize:13, fontWeight:800, color:PX.navy800 }}>{value}</div>
+      </div>
+    ))}
+  </div>;
+}
+
 
 function ProgressBar({ pct, color }) {
   return <div style={{ height:6, background:PX.gray200, borderRadius:10, overflow:"hidden" }}>
@@ -969,6 +1013,7 @@ function GoogleMapPreview({ result, journey, gv, compact = false }) {
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
   const [directionsRenderer, setDirectionsRenderer] = useState(null);
+  const [mapError, setMapError] = useState("");
 
   useEffect(() => {
     if (window.google?.maps && mapRef.current && !map) {
@@ -1023,9 +1068,11 @@ function GoogleMapPreview({ result, journey, gv, compact = false }) {
         },
         (response, status) => {
           if (status === "OK") {
+            setMapError("");
             directionsRenderer.setDirections(response);
           } else {
             console.error("Directions request failed due to " + status);
+            setMapError("The route map preview is temporarily unavailable. The displayed estimate still comes from the server calculation.");
           }
         }
       );
@@ -1035,90 +1082,29 @@ function GoogleMapPreview({ result, journey, gv, compact = false }) {
   return (
     <div>
       <div ref={mapRef} style={{ width: '100%', height: compact ? 160 : 320, borderRadius: 12, border: `1.5px solid ${PX.gray200}` }}></div>
-      {result && <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
-        {[["Total route",result.totalKm+" "+(gv?.distanceUnit === "miles" ? "mi" : "km")],["Live km",result.revenueKm+" "+(gv?.distanceUnit === "miles" ? "mi" : "km")],
-          ["Duration",result.totalShiftHrs+"h"],["Est. Days",result.opDays]].map(([l,v])=>(
-          <div key={l} style={{ background:PX.gray50, border:`1px solid ${PX.gray200}`, borderRadius:8, padding:"8px", textAlign:"center" }}>
-            <div style={{ fontSize:10, fontWeight:700, color:PX.gray400, textTransform:"uppercase", marginBottom:2 }}>{l}</div>
-            <div style={{ fontSize:13, fontWeight:800, color:PX.navy800 }}>{v}</div>
-          </div>
-        ))}
-      </div>}
+      {mapError && <div role="status" style={{ marginTop:8, padding:"8px 10px", borderRadius:8, background:"#fffbeb", color:"#92400e", fontSize:12 }}>{mapError}</div>}
+      <RouteMetrics result={result} gv={gv}/>
     </div>
   );
 }
 
 function RouteMap({ result, journey, gv, compact = false }) {
-  if (window.google?.maps && (result?.pts?.length >= 2 || journey?.origin)) return <GoogleMapPreview result={result} journey={journey} gv={gv} compact={compact} />;
+  const mapsReady = typeof window !== 'undefined' && Boolean(window.google?.maps);
+  if (mapsReady && (result?.pts?.length >= 2 || journey?.origin)) {
+    return <GoogleMapPreview result={result} journey={journey} gv={gv} compact={compact} />;
+  }
 
-  if (!result?.pts?.length || result.pts.length < 2)
-    return <div style={{ display:"flex", flexDirection:"column", alignItems:"center",
-      justifyContent:"center", height:compact ? 160 : 320, gap:10, color:PX.gray400, border:`1.5px dashed ${PX.gray200}`, borderRadius:12 }}>
-      <SvgMap size={36} color={PX.gray400} />
-      <p style={{ fontSize:13, fontWeight:500 }}>Enter pickup & drop-off locations to generate route map</p>
-    </div>;
-
-  const W=370, H=310, PAD=32;
-  const { pts, chain } = result;
-  const all = [YARD_GEO, ...pts];
-  const lats=all.map(p=>p.lat), lngs=all.map(p=>p.lng);
-  const minLat=Math.min(...lats)-.9, maxLat=Math.max(...lats)+.9;
-  const minLng=Math.min(...lngs)-.9, maxLng=Math.max(...lngs)+.9;
-  const tx=lng=>((lng-minLng)/(maxLng-minLng))*(W-PAD*2)+PAD;
-  const ty=lat=>(1-(lat-minLat)/(maxLat-minLat))*(H-PAD*2)+PAD;
-  const segs=chain.map(s=>({ x1:tx(s.from.lng), y1:ty(s.from.lat), x2:tx(s.to.lng), y2:ty(s.to.lat), dead:s.dead }));
-  const named=[
-    { geo:YARD_GEO, color:PX.navy800, label:"Walsall Base", yard:true },
-    ...pts.map((p,i)=>({ geo:p, color:i===0?PX.teal700:i===pts.length-1?PX.brandRed:PX.navy600,
-      label:(p.name||"").split(",")[0].substring(0,16), yard:false })),
-  ];
+  const message = result
+    ? "The map preview is unavailable. No substitute route or distance is being drawn."
+    : "Select verified pickup and drop-off locations to calculate a route.";
   return <div>
-    <svg width="100%" height={compact ? 160 : undefined} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" style={{ display:"block", background:PX.gray50, borderRadius:12, border:`1.5px solid ${PX.gray200}` }}>
-      <defs>
-        <marker id="a1" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
-          <path d="M1,1 L6,3.5 L1,6Z" fill={PX.navy600}/>
-        </marker>
-        <marker id="a2" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
-          <path d="M1,1 L6,3.5 L1,6Z" fill="#c8d0e0"/>
-        </marker>
-      </defs>
-      {[0,1,2,3,4,5].map(i=>(
-        <g key={i}>
-          <line x1={PAD} y1={PAD+i*(H-PAD*2)/5} x2={W-PAD} y2={PAD+i*(H-PAD*2)/5} stroke="#edf0f7" strokeWidth="1"/>
-          <line x1={PAD+i*(W-PAD*2)/5} y1={PAD} x2={PAD+i*(W-PAD*2)/5} y2={H-PAD} stroke="#edf0f7" strokeWidth="1"/>
-        </g>
-      ))}
-      {segs.map((s,i)=>(
-        <line key={i} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2}
-          stroke={s.dead?"#cbd5e1":PX.navy600} strokeWidth={s.dead?1.5:2.5}
-          strokeDasharray={s.dead?"6,4":"none"} markerEnd={s.dead?"url(#a2)":"url(#a1)"} strokeLinecap="round"/>
-      ))}
-      {named.map((p,i)=>{
-        const x=tx(p.geo.lng), y=ty(p.geo.lat), above=y<H/2;
-        return <g key={i}>
-          {p.yard
-            ? <polygon points={`${x},${y-8} ${x+8},${y} ${x},${y+8} ${x-8},${y}`} fill={p.color} stroke="#fff" strokeWidth={2}/>
-            : <circle cx={x} cy={y} r={6} fill={p.color} stroke="#fff" strokeWidth={2}/>}
-          <text x={x} y={above?y+17:y-11} textAnchor="middle" fontSize={9.5} fill="#374151" fontWeight="600">
-            {p.label.length>16?p.label.substring(0,14)+"…":p.label}
-          </text>
-        </g>;
-      })}
-    </svg>
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
-      {[["Total route",`${result.totalKm} ${gv?.distanceUnit === "miles" ? "mi" : "km"}`],["Live km",`${result.revenueKm} ${gv?.distanceUnit === "miles" ? "mi" : "km"}`],
-        ["Duration",`${result.totalShiftHrs}h`],["Days",result.opDays]].map(([l,v])=>(
-        <div key={l} style={{ background:PX.gray50, border:`1px solid ${PX.gray200}`, borderRadius:8, padding:"8px", textAlign:"center" }}>
-          <div style={{ fontSize:10, fontWeight:700, color:PX.gray400, textTransform:"uppercase", marginBottom:2 }}>{l}</div>
-          <div style={{ fontSize:13, fontWeight:800, color:PX.navy700 }}>{v}</div>
-        </div>
-      ))}
+    <div role="status" style={{ display:"flex", flexDirection:"column", alignItems:"center",
+      justifyContent:"center", height:compact ? 160 : 320, gap:10, color:PX.gray600, textAlign:"center", padding:20,
+      border:`1.5px dashed ${PX.gray200}`, borderRadius:12, background:PX.gray50 }}>
+      <SvgMap size={36} color={PX.gray400} />
+      <p style={{ fontSize:13, fontWeight:600, maxWidth:340 }}>{message}</p>
     </div>
-    <div style={{ display:"flex", gap:14, marginTop:10, justifyContent:"center", fontSize:11, color:PX.gray600 }}>
-      <span style={{ display:"flex",alignItems:"center",gap:5 }}><span style={{ width:12,height:3,background:PX.navy600,borderRadius:2,display:"inline-block" }}/>Live Route</span>
-      <span style={{ display:"flex",alignItems:"center",gap:5 }}><span style={{ width:12,height:1.5,background:"#cbd5e1",borderRadius:2,borderTop:"1.5px dashed #cbd5e1",display:"inline-block" }}/>Dead Mileage</span>
-      <span style={{ display:"flex",alignItems:"center",gap:5 }}><span style={{ width:8,height:8,background:PX.navy800,transform:"rotate(45deg)",display:"inline-block" }}/>Depot</span>
-    </div>
+    <RouteMetrics result={result} gv={gv}/>
   </div>;
 }
 
@@ -1225,6 +1211,61 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcase
   );
 }
 
+function isTrustedQuote(quote) {
+  if (!quote || typeof quote !== 'object' || !quote.vehicle || !quote.result) return false;
+  const vehicle = quote.vehicle;
+  const result = quote.result;
+  if (!String(vehicle.id || '').trim() || !String(vehicle.name || '').trim()) return false;
+  if (!Number.isFinite(Number(vehicle.capacity)) || Number(vehicle.capacity) <= 0) return false;
+  const requiredNumbers = [
+    result.finalPrice,
+    result.totalKm,
+    result.revenueKm,
+    result.totalShiftHrs,
+    result.opDays,
+  ];
+  if (requiredNumbers.some(value => !Number.isFinite(Number(value)) || Number(value) < 0)) return false;
+  if (result.upperBoundPrice !== undefined && result.upperBoundPrice !== null) {
+    const upperBound = Number(result.upperBoundPrice);
+    if (!Number.isFinite(upperBound) || upperBound < Number(result.finalPrice)) return false;
+  }
+  return true;
+}
+
+function quoteFailureMessage(error) {
+  if (!(error instanceof ApiRequestError)) {
+    return 'A verified quote could not be created. No estimated price has been shown.';
+  }
+  if (error.code === 'network') {
+    return 'The pricing server is unavailable. No mileage or price has been estimated. Please try again when the service is connected.';
+  }
+  if (error.code === 'timeout') {
+    return 'The pricing server did not respond in time. No mileage or price has been estimated.';
+  }
+  if (error.code === 'invalid-response') {
+    return 'The pricing server returned an invalid response. No mileage or price has been estimated.';
+  }
+  const message = String(error.message || '').toLowerCase();
+  if (/google maps|mileage|road route|depot|yard location/.test(message)) {
+    return 'Live route calculation is unavailable. No substitute mileage or price has been used.';
+  }
+  if (/pricing configuration|database|not initialized|missing|invalid/.test(message)) {
+    return 'Online pricing is unavailable because its business configuration is incomplete. No price has been estimated.';
+  }
+  if (error.status === 400 && error.message) return error.message;
+  return 'The pricing service could not create a verified quote. No estimated price has been shown.';
+}
+
+function bookingFailureMessage(error) {
+  if (error instanceof ApiRequestError) {
+    if (error.code === 'network') return 'The booking server is unavailable. Your request has not been recorded.';
+    if (error.code === 'timeout') return 'The booking server did not confirm the request in time. Your booking is not confirmed; please try again.';
+    if (error.code === 'invalid-response') return 'The booking server did not provide a valid confirmation. Your booking is not confirmed.';
+    if (error.status === 400 && error.message) return `${error.message} Your request has not been recorded.`;
+  }
+  return 'The server did not confirm that your booking was saved. Your booking is not confirmed.';
+}
+
 
 
 
@@ -1238,16 +1279,11 @@ export default function App({ embed = false }) {
     };
   }, [embed]);
 
-  const [db, setDb]         = useState({ vehicles: [
-    { id: 'minibus', name: 'Executive Minibus', capacity: 16 },
-    { id: 'bus', name: 'Standard Bus', capacity: 33 },
-    { id: 'coach', name: 'Premium Coach', capacity: 49 }
-  ], globalVars: {}, annualOverheads: [], surcharges: {}, blockedDates: [] });
   const [journey, setJ]     = useState({
     journeyType:"one-way", origin:"", destination:"",
     departureDate:"", returnDate:"",
     passengers:16, suitcaseCount:16, handbagCount:16, waitingMins:0,
-    vehiclePreference: "minibus",
+    vehiclePreference: "",
     waypoints:[], wpCoords:[], stops:[],
     name: "", phone: "", email: "", company: "", specialRequests: ""
   });
@@ -1259,21 +1295,13 @@ export default function App({ embed = false }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted]   = useState(false);
   const [bookingRef, setBookingRef] = useState("");
+  const [submissionError, setSubmissionError] = useState("");
   const [luggageType, setLuggageType] = useState("handbag");
   const [bookingStep, setBookingStep] = useState(1);
   const fetchIdRef = useRef(0);
   const [validationError, setValidationError] = useState("");
 
-  const { loaded: mapsLoaded } = useGoogleMaps(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "");
-
-  // Load configuration config
-  useEffect(() => {
-    fetch(API_BASE_URL + '/api/admin/config').then(r=>r.json()).then(data => {
-      if (data && data.vehicles && data.vehicles.length > 0) {
-        setDb(d => ({ ...d, ...data }));
-      }
-    }).catch(console.error);
-  }, []);
+  const { loaded: mapsLoaded, status: mapsStatus } = useGoogleMaps(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "");
 
   const buildQuotes = useCallback(async (currentJourney = journey) => {
     const hasStops = (currentJourney.stops || []).length > 0;
@@ -1288,36 +1316,44 @@ export default function App({ embed = false }) {
     if (!wp[0] || !wp[wp.length-1]) return;
     const currentFetchId = ++fetchIdRef.current;
     setLoadingQuotes(true);
+    setQ([]);
+    setSel(null);
+    setValidationError("");
     try {
-      const res = await fetch(API_BASE_URL + '/api/quotes/calculate', {
+      const { data } = await requestJson('/api/quotes/calculate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({...currentJourney, waypoints: wp, wpCoords: wc})
       });
-      const data = await res.json();
       if (currentFetchId !== fetchIdRef.current) return;
-      if (data.quotes && data.quotes.length > 0) {
-        setQ(data.quotes);
-        if (!selected) {
-          const preferred = data.quotes.find(q => q.vehicle.id === currentJourney.vehiclePreference);
-          const firstAvail = preferred || data.quotes.find(q => q.vehicle.capacity >= currentJourney.passengers) || data.quotes[0];
-          if (firstAvail) setSel(firstAvail.vehicle.id);
-        }
-      } else {
-        setQ([]);
-        setValidationError('No quotes could be generated for this route.');
+      if (!data || !Array.isArray(data.quotes)) {
+        throw new ApiRequestError('The quote response is missing its quote list.', { code: 'invalid-response' });
       }
+      if (data.quotes.some(quote => !isTrustedQuote(quote))) {
+        throw new ApiRequestError('The quote response contains invalid mileage or pricing data.', { code: 'invalid-response' });
+      }
+      if (data.quotes.length === 0) {
+        setQ([]);
+        setValidationError('No configured vehicle is available for this journey. No price has been estimated.');
+        return [];
+      }
+      const firstAvailable = data.quotes.find(quote => Number(quote.vehicle.capacity) >= Number(currentJourney.passengers)) || data.quotes[0];
+      setQ(data.quotes);
+      setSel(firstAvailable.vehicle.id);
+      return data.quotes;
     } catch(err) {
       if (currentFetchId !== fetchIdRef.current) return;
       console.error(err);
       setQ([]);
-      setValidationError('Failed to connect to the pricing server. Please ensure the backend is running.');
+      setSel(null);
+      setValidationError(quoteFailureMessage(err));
+      return [];
     } finally {
       if (currentFetchId === fetchIdRef.current) {
         setLoadingQuotes(false);
       }
     }
-  }, [journey, db, selected]);
+  }, [journey]);
 
   // Reactive updates for parameters once calculation layout is shown
   useEffect(() => {
@@ -1338,10 +1374,23 @@ export default function App({ embed = false }) {
     showQuotes
   ]);
 
-  const handleCalculateClick = () => {
+  const handleCalculateClick = async () => {
     setValidationError("");
+    setSubmissionError("");
+    if (mapsStatus !== 'ready') {
+      setValidationError(
+        mapsStatus === 'loading'
+          ? 'The map service is still loading. Please wait before requesting a quote.'
+          : 'The map service is unavailable, so a verified route and price cannot be calculated.'
+      );
+      return;
+    }
     if (!journey.origin || !journey.destination || !journey.departureDate) {
       setValidationError("Please enter pickup location, destination, and departure date.");
+      return;
+    }
+    if (journey.journeyType === 'return' && (!journey.returnDate || new Date(journey.returnDate) <= new Date(journey.departureDate))) {
+      setValidationError('Please choose a return date after the departure date.');
       return;
     }
 
@@ -1362,14 +1411,21 @@ export default function App({ embed = false }) {
       return;
     }
 
-    buildQuotes();
-    setBookingStep(2);
+    const verifiedQuotes = await buildQuotes();
+    if (Array.isArray(verifiedQuotes) && verifiedQuotes.length > 0) {
+      setBookingStep(2);
+    }
   };
 
   const handleFinalBookingSubmit = async () => {
-    if (!selected) return;
-    setSubmitting(true);
+    if (submitting) return;
     const quote = quotes.find(q => q.vehicle.id === selected);
+    if (!quote || !isTrustedQuote(quote)) {
+      setSubmissionError('A current, verified quote is required before a booking can be submitted. Please recalculate the journey.');
+      return;
+    }
+    setSubmissionError("");
+    setSubmitting(true);
     try {
       const payload = {
         customer: {
@@ -1382,21 +1438,22 @@ export default function App({ embed = false }) {
         quote: quote
       };
       
-      const res = await fetch(API_BASE_URL + '/api/bookings', {
+      const { data, status } = await requestJson('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      const data = await res.json();
-      if (data.success) {
-        setBookingRef(data.booking.id);
+      const persistedReference = String(data?.booking?.id || '').trim();
+      if (status === 201 && data?.success === true && persistedReference) {
+        setBookingRef(persistedReference);
         setSubmitted(true);
         setBookingStep(4);
       } else {
-        alert("Booking request failed: " + (data.error || "Unknown error"));
+        throw new ApiRequestError('The server did not confirm that the booking was persisted.', { code: 'invalid-response', status });
       }
     } catch(e) {
-      alert("Network error occurred while submitting quote request.");
+      console.error(e);
+      setSubmissionError(bookingFailureMessage(e));
     } finally {
       setSubmitting(false);
     }
@@ -1427,9 +1484,8 @@ export default function App({ embed = false }) {
     [stops[index], stops[nextIndex]] = [stops[nextIndex], stops[index]];
     return { ...j, stops };
   });
-  const preferredId = journey.vehiclePreference || (quotes.length > 0 ? quotes[0].vehicle.id : null);
-  const filteredQuotes = preferredId ? quotes.filter(({vehicle}) => vehicle.id === preferredId) : quotes;
-  const selectedQuote = filteredQuotes.find(q => q.vehicle.id === selected) || filteredQuotes[0];
+  const filteredQuotes = quotes;
+  const selectedQuote = quotes.find(q => q.vehicle.id === selected) || null;
   const activeResult = selectedQuote?.result;
   const selectedVehicleCount = selectedQuote
     ? Math.max(1, Math.ceil(journey.passengers / Math.max(1, selectedQuote.vehicle.capacity || 1)))
@@ -1482,18 +1538,18 @@ export default function App({ embed = false }) {
                         <p className="text-body-lg font-body-lg max-w-xl opacity-90 leading-relaxed mb-10">From elite corporate events to bespoke group logistics, we provide high-fidelity transport solutions that keep your business moving with uncompromising excellence.</p>
                         <div className="flex items-center gap-8">
                           <div className="flex flex-col">
-                            <span className="text-headline-lg font-headline-lg">25+</span>
-                            <span className="text-label-sm font-label-sm opacity-70">Years Excellence</span>
+                            <span className="text-headline-lg font-headline-lg">UK</span>
+                            <span className="text-label-sm font-label-sm opacity-70">Journey planning</span>
                           </div>
                           <div className="w-[1px] h-12 bg-stark-white/20"></div>
                           <div className="flex flex-col">
-                            <span className="text-headline-lg font-headline-lg">150+</span>
-                            <span className="text-label-sm font-label-sm opacity-70">Luxury Coaches</span>
+                            <span className="text-headline-lg font-headline-lg">Live</span>
+                            <span className="text-label-sm font-label-sm opacity-70">Server pricing</span>
                           </div>
                           <div className="w-[1px] h-12 bg-stark-white/20"></div>
                           <div className="flex flex-col">
-                            <span className="text-headline-lg font-headline-lg">5★</span>
-                            <span className="text-label-sm font-label-sm opacity-70">Safety Rating</span>
+                            <span className="text-headline-lg font-headline-lg">No</span>
+                            <span className="text-label-sm font-label-sm opacity-70">Fallback mileage</span>
                           </div>
                         </div>
                       </div>
@@ -1515,6 +1571,13 @@ export default function App({ embed = false }) {
                           </div>
                           
                           <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleCalculateClick(); }}>
+                            {mapsStatus !== 'ready' && (
+                              <div role="status" className={`rounded-xl px-4 py-3 text-sm font-semibold ${mapsStatus === 'loading' ? 'bg-amber-50 text-amber-800' : 'bg-red-50 text-red-700'}`}>
+                                {mapsStatus === 'loading'
+                                  ? 'Loading the map service needed for verified route mileage...'
+                                  : 'Verified route pricing is unavailable because the map service is not configured or could not load.'}
+                              </div>
+                            )}
                             <div className="space-y-3">
                               <div className="relative group quote-location">
                                 <PlacesInput 
@@ -1595,22 +1658,10 @@ export default function App({ embed = false }) {
 
                             {/* Vehicle, Passengers & Luggage */}
                             <div className="flex gap-2 w-full">
-                              {/* Vehicle ~45% */}
-                              <div className="relative group" style={{flex:'0 0 38%'}}>
-                                <select className="w-full h-[56px] !appearance-none pl-4 pr-8 bg-white border border-outline-variant rounded-full focus:outline-none focus:border-deep-navy transition-all text-[12px] font-bold text-deep-navy cursor-pointer shadow-sm"
-                                  style={{ backgroundImage: 'none' }}
-                                  value={journey.vehiclePreference || 'minibus'} onChange={e=>{
-                                    const v = e.target.value;
-                                    let p = 16;
-                                    if (v === 'bus') p = 33;
-                                    if (v === 'coach') p = 49;
-                                    setJ(j=>({...j, vehiclePreference: v, passengers: p, handbagCount: p, suitcaseCount: p}));
-                                  }}>
-                                  <option value="minibus">Executive Minibus (16 Seats)</option>
-                                  <option value="bus">Standard Bus (33 Seats)</option>
-                                  <option value="coach">Premium Coach (49 Seats)</option>
-                                </select>
-                                <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[18px]">expand_more</span>
+                              {/* The available fleet comes from the quote response; no local vehicle list is invented. */}
+                              <div className="h-[56px] px-4 bg-white border border-outline-variant rounded-full shadow-sm flex items-center gap-2 text-deep-navy" style={{flex:'0 0 38%'}} title="The pricing server selects from the currently configured and available fleet">
+                                <span className="material-symbols-outlined text-[19px] text-impact-red">directions_bus</span>
+                                <span className="text-[11px] font-bold leading-tight">Best live<br/>option</span>
                               </div>
 
                               {}
@@ -1672,8 +1723,8 @@ export default function App({ embed = false }) {
                             )}
 
                             
-                            <button type="submit" className="w-full py-5 bg-impact-red text-white font-headline-md rounded-full hover:bg-secondary transition-all transform active:scale-[0.98] flex items-center justify-center gap-3 group shadow-xl shadow-impact-red/30 mt-4">
-                              Continue
+                            <button type="submit" disabled={loadingQuotes || mapsStatus !== 'ready'} className="w-full py-5 bg-impact-red disabled:opacity-50 disabled:cursor-not-allowed text-white font-headline-md rounded-full hover:bg-secondary transition-all transform active:scale-[0.98] flex items-center justify-center gap-3 group shadow-xl shadow-impact-red/30 mt-4">
+                              {loadingQuotes ? 'Calculating verified quote...' : 'Continue'}
                               <span className="material-symbols-outlined transition-transform group-hover:translate-x-2">arrow_forward</span>
                             </button>
                           </form>
@@ -1698,6 +1749,10 @@ export default function App({ embed = false }) {
                               const phoneRegex = /^[\+]?[0-9\s\-()]{10,20}$/;
                               if (!phoneRegex.test(journey.phone.trim())) {
                                 setValidationError("Please enter a valid phone number (min. 10 digits).");
+                                return;
+                              }
+                              if (!selectedQuote || !isTrustedQuote(selectedQuote)) {
+                                setValidationError('The verified quote is no longer available. Please return to the journey step and calculate it again.');
                                 return;
                               }
                               
@@ -1755,13 +1810,13 @@ export default function App({ embed = false }) {
                                 <div className="flex items-start justify-between gap-4 mb-3">
                                   <div>
                                     <span className="field-label">Selected option</span>
-                                    <strong className="text-deep-navy">{selectedQuote ? `${selectedVehicleCount} × ${selectedQuote.vehicle.name}` : "Calculating vehicle option..."}</strong>
+                                    <strong className="text-deep-navy">{selectedQuote ? `${selectedVehicleCount} × ${selectedQuote.vehicle.name}` : "Verified option unavailable"}</strong>
                                     <p className="text-xs text-on-surface-variant mt-1">{journey.passengers} passengers · {journey.suitcaseCount} suitcases · {journey.handbagCount} handbags</p>
                                   </div>
                                   {selectedQuote && (
                                     <div className="text-right shrink-0">
                                       <span className="field-label">Estimated price</span>
-                                      <strong className="text-lg text-deep-navy">£{fmt(selectedQuote.result?.finalPrice || selectedQuote.result?.finalFare || 0)}{selectedQuote.result?.upperBoundPrice ? `–£${fmt(selectedQuote.result.upperBoundPrice)}` : ""}</strong>
+                                      <strong className="text-lg text-deep-navy">£{fmt(selectedQuote.result.finalPrice)}{Number(selectedQuote.result.upperBoundPrice) > Number(selectedQuote.result.finalPrice) ? `–£${fmt(selectedQuote.result.upperBoundPrice)}` : ""}</strong>
                                     </div>
                                   )}
                                 </div>
@@ -1770,14 +1825,15 @@ export default function App({ embed = false }) {
                                 </div>
                                 {loadingQuotes
                                   ? <div className="h-[160px] rounded-xl bg-surface-container-low flex items-center justify-center text-sm text-on-surface-variant">Calculating route and pricing...</div>
-                                  : <RouteMap result={activeResult} journey={journey} gv={db.globalVars} compact/>
+                                  : <RouteMap result={activeResult} journey={journey} compact/>
                                 }
                               </div>
+                              {submissionError && <div role="alert" className="p-3 bg-red-50 text-red-700 rounded-xl text-sm font-semibold">{submissionError}</div>}
                               <div className="flex gap-3 pt-2">
                                 <button type="button" onClick={()=>setBookingStep(2)} className="h-14 px-6 rounded-full border border-outline-variant text-deep-navy font-bold flex items-center justify-center gap-2">
                                   <span className="material-symbols-outlined text-[18px]">arrow_back</span> Back
                                 </button>
-                                <button type="button" onClick={handleFinalBookingSubmit} disabled={submitting || loadingQuotes || !selected} className="flex-1 h-14 bg-impact-red disabled:opacity-50 text-white rounded-full font-bold shadow-lg shadow-impact-red/20 flex items-center justify-center gap-2">
+                                <button type="button" onClick={handleFinalBookingSubmit} disabled={submitting || loadingQuotes || !selectedQuote} className="flex-1 h-14 bg-impact-red disabled:opacity-50 text-white rounded-full font-bold shadow-lg shadow-impact-red/20 flex items-center justify-center gap-2">
                                   {submitting ? "Confirming..." : <>Confirm Booking <span className="material-symbols-outlined text-[19px]">arrow_forward</span></>}
                                 </button>
                               </div>
@@ -1787,8 +1843,8 @@ export default function App({ embed = false }) {
                           {bookingStep === 4 && (
                             <div className="text-center py-4 fade-up">
                               <div className="w-16 h-16 rounded-full bg-green-100 text-green-700 flex items-center justify-center mx-auto mb-5"><SvgCheck size={34}/></div>
-                              <h3 className="text-2xl font-bold text-deep-navy mb-2">Your booking request is confirmed</h3>
-                              <p className="text-sm text-on-surface-variant mb-5">Your request has been recorded for <strong>{journey.email}</strong>. Our team will contact you shortly to finalize the journey and assist with any special requirements.</p>
+                              <h3 className="text-2xl font-bold text-deep-navy mb-2">Your booking request was saved</h3>
+                              <p className="text-sm text-on-surface-variant mb-5">The booking server confirmed that your request was recorded for <strong>{journey.email}</strong>. This is a request record, not a final journey confirmation.</p>
                               <div className="rounded-2xl bg-surface-container-low p-5 mb-5">
                                 <span className="field-label">Booking reference</span>
                                 <strong className="text-xl tracking-wider text-deep-navy">{bookingRef}</strong>
@@ -1941,7 +1997,7 @@ export default function App({ embed = false }) {
                       <div className="flex items-center gap-3">
                         <img alt="Carolean Coaches" className="h-14 w-auto object-contain bg-white rounded-xl p-2" src="/carolean%20image.png"/>
                       </div>
-                      <p className="text-body-md opacity-60 leading-relaxed">Providing world-class transportation solutions since 1999. Precision, punctuality, and professionalism in every mile.</p>
+                      <p className="text-body-md opacity-60 leading-relaxed">Executive group transport enquiries with route-based pricing supplied by the connected fare engine.</p>
                       <div className="flex gap-4">
                         <a className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-impact-red transition-all" href="#"><span className="material-symbols-outlined text-stark-white text-[20px]">public</span></a>
                         <a className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-impact-red transition-all" href="#"><span className="material-symbols-outlined text-stark-white text-[20px]">chat</span></a>
@@ -1967,27 +2023,21 @@ export default function App({ embed = false }) {
                       </ul>
                     </div>
                     <div>
-                      <h5 className="text-stark-white font-headline-md mb-8">Headquarters</h5>
-                      <ul className="space-y-6">
-                        <li className="flex gap-4 text-surface-variant opacity-80">
-                          <span className="material-symbols-outlined text-impact-red">pin_drop</span>
-                          12-16 Corporate Drive, <br/>London, EC2A 4NE
-                        </li>
-                        <li className="flex gap-4 text-surface-variant opacity-80">
-                          <span className="material-symbols-outlined text-impact-red">call</span>
-                          +44 (0) 20 7834 1234
-                        </li>
-                        <li className="flex gap-4 text-surface-variant opacity-80">
-                          <span className="material-symbols-outlined text-impact-red">mail</span>
-                          {db.operatorDetails?.notificationEmail || "bookings@carolean.com"}
-                        </li>
-                      </ul>
+                      <h5 className="text-stark-white font-headline-md mb-8">Contact</h5>
+                      {(PUBLIC_CONTACT_ADDRESS || PUBLIC_CONTACT_PHONE || PUBLIC_CONTACT_EMAIL) ? (
+                        <ul className="space-y-6">
+                          {PUBLIC_CONTACT_ADDRESS && <li className="flex gap-4 text-surface-variant opacity-80"><span className="material-symbols-outlined text-impact-red">pin_drop</span>{PUBLIC_CONTACT_ADDRESS}</li>}
+                          {PUBLIC_CONTACT_PHONE && <li className="flex gap-4 text-surface-variant opacity-80"><span className="material-symbols-outlined text-impact-red">call</span><a href={`tel:${PUBLIC_CONTACT_PHONE}`}>{PUBLIC_CONTACT_PHONE}</a></li>}
+                          {PUBLIC_CONTACT_EMAIL && <li className="flex gap-4 text-surface-variant opacity-80"><span className="material-symbols-outlined text-impact-red">mail</span><a href={`mailto:${PUBLIC_CONTACT_EMAIL}`}>{PUBLIC_CONTACT_EMAIL}</a></li>}
+                        </ul>
+                      ) : (
+                        <p className="text-surface-variant opacity-80">Submit the booking form and the team will respond using the contact details you provide.</p>
+                      )}
                     </div>
                   </div>
                   <div className="max-w-container-max mx-auto px-gutter mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 px-6">
                     <p className="text-label-sm font-label-sm opacity-60">© 2026 Carolean Coaches. Executive Precision in Motion.</p>
                     <div className="flex gap-8">
-                      <span className="text-label-sm font-label-sm opacity-40">ISO 9001 Certified</span>
                       <span className="text-label-sm font-label-sm opacity-40">Site by Precision Agency</span>
                     </div>
                   </div>
