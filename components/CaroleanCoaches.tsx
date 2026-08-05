@@ -632,7 +632,7 @@ function useGoogleMaps(apiKey: string | undefined) {
       return;
     }
     setStatus('loading');
-    const existing = document.getElementById("gm-script");
+    let existing = document.getElementById("gm-script") as HTMLScriptElement | null;
     const markReady = () => {
       if (window.google?.maps?.places) {
         setLoaded(true);
@@ -646,6 +646,12 @@ function useGoogleMaps(apiKey: string | undefined) {
       setLoaded(false);
       setStatus('failed');
     };
+    const existingKey = existing ? new URL(existing.src, window.location.href).searchParams.get('key') : '';
+    if (existing && existingKey !== apiKey.trim()) {
+      existing.remove();
+      existing = null;
+      delete window.google;
+    }
     if (existing) {
       existing.addEventListener('load', markReady);
       existing.addEventListener('error', markFailed);
@@ -975,23 +981,23 @@ function Badge({ children, color="blue" }) {
 
 function fmt(n)  { return Number(n).toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2}); }
 
-function RouteMetrics({ result, gv }) {
+function RouteMetrics({ result, journey, gv }) {
   if (!result) return null;
   const configuredUnit = result.distanceUnit || gv?.distanceUnit;
   const hasTrustedUnit = configuredUnit === 'km' || configuredUnit === 'miles';
   const unitLabel = configuredUnit === 'miles' ? 'mi' : 'km';
-  const metrics = [];
-  if (hasTrustedUnit && Number.isFinite(Number(result.totalKm)) && Number.isFinite(Number(result.revenueKm))) {
-    metrics.push(
-      ["Total route", `${result.totalKm} ${unitLabel}`],
-      ["Passenger route", `${result.revenueKm} ${unitLabel}`],
-    );
-  }
-  if (Number.isFinite(Number(result.totalShiftHrs))) metrics.push(["Duration", `${result.totalShiftHrs}h`]);
-  if (Number.isFinite(Number(result.opDays))) metrics.push(["Days", result.opDays]);
-  if (metrics.length === 0) return null;
+  const passengerDistance = Number(result.revenueKm);
+  const duration = Number(result.totalShiftHrs);
+  const days = Number(result.opDays);
+  const stopCount = Array.isArray(journey?.stops) ? journey.stops.filter(stop => stop?.place).length : 0;
+  const metrics = [
+    ["Distance", hasTrustedUnit && Number.isFinite(passengerDistance) ? `${passengerDistance} ${unitLabel}` : "Calculated"],
+    ["Duration", Number.isFinite(duration) ? `${duration}h` : "Calculated"],
+    ["Stops", stopCount > 0 ? stopCount : "Direct"],
+    ["Days", Number.isFinite(days) ? days : 1]
+  ];
 
-  return <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
+  return <div className="grid grid-cols-4 gap-2 mt-3">
     {metrics.map(([label, value]) => (
       <div key={label} style={{ background:PX.gray50, border:`1px solid ${PX.gray200}`, borderRadius:8, padding:"8px", textAlign:"center" }}>
         <div style={{ fontSize:10, fontWeight:700, color:PX.gray400, textTransform:"uppercase", marginBottom:2 }}>{label}</div>
@@ -1083,7 +1089,7 @@ function GoogleMapPreview({ result, journey, gv, compact = false }) {
     <div>
       <div ref={mapRef} style={{ width: '100%', height: compact ? 160 : 320, borderRadius: 12, border: `1.5px solid ${PX.gray200}` }}></div>
       {mapError && <div role="status" style={{ marginTop:8, padding:"8px 10px", borderRadius:8, background:"#fffbeb", color:"#92400e", fontSize:12 }}>{mapError}</div>}
-      <RouteMetrics result={result} gv={gv}/>
+      <RouteMetrics result={result} journey={journey} gv={gv}/>
     </div>
   );
 }
@@ -1104,10 +1110,9 @@ function RouteMap({ result, journey, gv, compact = false }) {
       <SvgMap size={36} color={PX.gray400} />
       <p style={{ fontSize:13, fontWeight:600, maxWidth:340 }}>{message}</p>
     </div>
-    <RouteMetrics result={result} gv={gv}/>
+    <RouteMetrics result={result} journey={journey} gv={gv}/>
   </div>;
 }
-
 
 function Navbar() {
   return (
@@ -1266,6 +1271,34 @@ function bookingFailureMessage(error) {
   return 'The server did not confirm that your booking was saved. Your booking is not confirmed.';
 }
 
+function localDateTimeTimestamp(value) {
+  const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/);
+  if (!match) return Number.NaN;
+  const [, year, month, day, hour, minute, second = '0'] = match;
+  const timestamp = Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second));
+  const parsed = new Date(timestamp);
+  if (
+    parsed.getUTCFullYear() !== Number(year) ||
+    parsed.getUTCMonth() !== Number(month) - 1 ||
+    parsed.getUTCDate() !== Number(day) ||
+    parsed.getUTCHours() !== Number(hour) ||
+    parsed.getUTCMinutes() !== Number(minute)
+  ) return Number.NaN;
+  return timestamp;
+}
+
+function isReturnAfterDeparture(departureValue, returnValue) {
+  const departure = localDateTimeTimestamp(departureValue);
+  const returning = localDateTimeTimestamp(returnValue);
+  return Number.isFinite(departure) && Number.isFinite(returning) && returning > departure;
+}
+
+function nextDayAtSameTime(value) {
+  const timestamp = localDateTimeTimestamp(value);
+  if (!Number.isFinite(timestamp)) return '';
+  return new Date(timestamp + 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
+}
+
 
 
 
@@ -1301,7 +1334,18 @@ export default function App({ embed = false }) {
   const fetchIdRef = useRef(0);
   const [validationError, setValidationError] = useState("");
 
-  const { loaded: mapsLoaded, status: mapsStatus } = useGoogleMaps(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "");
+  const [mapsApiKey, setMapsApiKey] = useState(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "");
+  useEffect(() => {
+    let active = true;
+    fetch('/api/maps-config', { cache: 'no-store' })
+      .then(response => response.ok ? response.json() : null)
+      .then(data => {
+        if (active && typeof data?.key === 'string' && data.key.trim()) setMapsApiKey(data.key.trim());
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+  const { loaded: mapsLoaded, status: mapsStatus } = useGoogleMaps(mapsApiKey);
 
   const buildQuotes = useCallback(async (currentJourney = journey) => {
     const hasStops = (currentJourney.stops || []).length > 0;
@@ -1337,7 +1381,15 @@ export default function App({ embed = false }) {
         setValidationError('No configured vehicle is available for this journey. No price has been estimated.');
         return [];
       }
-      const firstAvailable = data.quotes.find(quote => Number(quote.vehicle.capacity) >= Number(currentJourney.passengers)) || data.quotes[0];
+      // Keep the vehicle the customer explicitly selected. Previously this always
+      // replaced their choice with the first vehicle large enough for the group,
+      // so selecting a coach could incorrectly show an Executive Minibus here.
+      const preferredVehicle = data.quotes.find(
+        quote => quote.vehicle?.id === currentJourney.vehiclePreference
+      );
+      const firstAvailable = preferredVehicle
+        || data.quotes.find(quote => Number(quote.vehicle.capacity) >= Number(currentJourney.passengers))
+        || data.quotes[0];
       setQ(data.quotes);
       setSel(firstAvailable.vehicle.id);
       return data.quotes;
@@ -1389,7 +1441,7 @@ export default function App({ embed = false }) {
       setValidationError("Please enter pickup location, destination, and departure date.");
       return;
     }
-    if (journey.journeyType === 'return' && (!journey.returnDate || new Date(journey.returnDate) <= new Date(journey.departureDate))) {
+    if (journey.journeyType === 'return' && !isReturnAfterDeparture(journey.departureDate, journey.returnDate)) {
       setValidationError('Please choose a return date after the departure date.');
       return;
     }
@@ -1444,7 +1496,7 @@ export default function App({ embed = false }) {
         body: JSON.stringify(payload)
       });
       const persistedReference = String(data?.booking?.id || '').trim();
-      if (status === 201 && data?.success === true && persistedReference) {
+      if ((status === 201 || status === 200) && data?.success === true && persistedReference) {
         setBookingRef(persistedReference);
         setSubmitted(true);
         setBookingStep(4);
@@ -1567,7 +1619,11 @@ export default function App({ embed = false }) {
                           {bookingStep === 1 && <>
                           <div className="flex p-1.5 bg-surface-container rounded-full mb-8">
                             <button type="button" onClick={()=>setJ(j=>({...j, journeyType: "one-way"}))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType !== "return" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>One-Way</button>
-                            <button type="button" onClick={()=>setJ(j=>({...j, journeyType: "return"}))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType === "return" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>Return</button>
+                            <button type="button" onClick={()=>setJ(j=>({
+                              ...j,
+                              journeyType: "return",
+                              returnDate: isReturnAfterDeparture(j.departureDate, j.returnDate) ? j.returnDate : nextDayAtSameTime(j.departureDate)
+                            }))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType === "return" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>Return</button>
                           </div>
                           
                           <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleCalculateClick(); }}>
@@ -1644,77 +1700,33 @@ export default function App({ embed = false }) {
 
                             {}
                             <div className={`grid grid-cols-1 ${journey.journeyType === "return" ? "sm:grid-cols-2" : ""} gap-4`}>
-                              <div className="relative group">
-                                <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant z-10" style={{pointerEvents: "none"}}>calendar_month</span>
-                                <input className="w-full pl-12 pr-6 py-4 bg-white border border-outline-variant capsule-input focus:outline-none focus:border-deep-navy transition-all font-body-md text-on-surface shadow-sm cursor-pointer" type="datetime-local" value={journey.departureDate} onClick={e=>e.currentTarget.showPicker?.()} onChange={e=>setJ(j=>({...j, departureDate: e.target.value}))} required />
+                              <div>
+                                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1 ml-2">Departure Date & Time</label>
+                                <div className="relative group">
+                                  <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant z-10" style={{pointerEvents: "none"}}>calendar_month</span>
+                                  <input name="departureDate" className="w-full pl-12 pr-3 py-4 bg-white border border-outline-variant capsule-input focus:outline-none focus:border-deep-navy transition-all text-[13px] font-semibold text-on-surface shadow-sm cursor-pointer" type="datetime-local" value={journey.departureDate} onClick={e=>e.currentTarget.showPicker?.()} onChange={e=>setJ(j=>{
+                                    const departureDate = e.target.value;
+                                    return {
+                                      ...j,
+                                      departureDate,
+                                      returnDate: j.journeyType === 'return' && !isReturnAfterDeparture(departureDate, j.returnDate)
+                                        ? nextDayAtSameTime(departureDate)
+                                        : j.returnDate
+                                    };
+                                  })} required />
+                                </div>
                               </div>
                               {journey.journeyType === 'return' && (
-                              <div className="relative group">
-                                <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant z-10" style={{pointerEvents: "none"}}>calendar_month</span>
-                                <input className="w-full pl-12 pr-6 py-4 bg-white border border-outline-variant capsule-input focus:outline-none focus:border-deep-navy transition-all font-body-md text-on-surface shadow-sm cursor-pointer" type="datetime-local" value={journey.returnDate || ''} onClick={e=>e.currentTarget.showPicker?.()} onChange={e=>setJ(j=>({...j, returnDate: e.target.value}))} required />
+                              <div>
+                                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1 ml-2">Return Date & Time</label>
+                                <div className="relative group">
+                                  <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant z-10" style={{pointerEvents: "none"}}>calendar_month</span>
+                                  <input name="returnDate" className="w-full pl-12 pr-3 py-4 bg-white border border-outline-variant capsule-input focus:outline-none focus:border-deep-navy transition-all text-[13px] font-semibold text-on-surface shadow-sm cursor-pointer" type="datetime-local" min={journey.departureDate || undefined} value={journey.returnDate || ''} onClick={e=>e.currentTarget.showPicker?.()} onChange={e=>setJ(j=>({...j, returnDate: e.target.value}))} required />
+                                </div>
                               </div>
                               )}
                             </div>
 
-                            {/* Vehicle, Passengers & Luggage */}
-                            <div className="flex gap-2 w-full">
-                              {/* The available fleet comes from the quote response; no local vehicle list is invented. */}
-                              <div className="h-[56px] px-4 bg-white border border-outline-variant rounded-full shadow-sm flex items-center gap-2 text-deep-navy" style={{flex:'0 0 38%'}} title="The pricing server selects from the currently configured and available fleet">
-                                <span className="material-symbols-outlined text-[19px] text-impact-red">directions_bus</span>
-                                <span className="text-[11px] font-bold leading-tight">Best live<br/>option</span>
-                              </div>
-
-                              {}
-                              <div className="flex-1 relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden">
-                                <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.max(1, (j.passengers || 16) - 1)}))} className="absolute left-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none z-10"><span className="material-symbols-outlined text-[18px]">remove</span></button>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                  <span className="text-[17px] font-bold text-deep-navy leading-none">{journey.passengers || 16}</span>
-                                  <div className="text-[9px] font-bold text-gray-500 uppercase tracking-tight leading-none mt-[2px]">Passengers</div>
-                                </div>
-                                <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.min(100, (j.passengers || 16) + 1)}))} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4ADE80] rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none z-10"><span className="material-symbols-outlined text-[18px]">add</span></button>
-                              </div>
-
-                              {}
-                              <div className="relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden" style={{flex: "0 0 31%"}}>
-                                <button
-                                  type="button"
-                                  aria-label={`Decrease ${luggageType === "handbag" ? "handbags" : "23kg suitcases"}`}
-                                  onClick={()=>setJ(j => luggageType === "handbag"
-                                    ? {...j, handbagCount: Math.max(0, (j.handbagCount ?? 0) - 1)}
-                                    : {...j, suitcaseCount: Math.max(0, (j.suitcaseCount ?? 0) - 1)}
-                                  )}
-                                  className="absolute left-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center z-10 focus:outline-none"
-                                ><span className="material-symbols-outlined text-[18px]">remove</span></button>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                  <span className="text-[17px] font-bold text-deep-navy leading-none">
-                                    {luggageType === "handbag" ? (journey.handbagCount ?? 0) : (journey.suitcaseCount ?? 0)}
-                                  </span>
-                                  <div className="relative text-[9px] font-bold text-gray-500 uppercase tracking-tight leading-none mt-[2px] text-center whitespace-nowrap">
-                                    <span>
-                                      {luggageType === "handbag" ? "Handbags" : "Suitcase 23kg"}
-                                    </span>
-                                    <select
-                                      aria-label="Choose luggage type"
-                                      value={luggageType}
-                                      onChange={e=>setLuggageType(e.target.value)}
-                                      className="absolute inset-0 !w-full !h-full !min-h-0 !m-0 !p-0 opacity-0 cursor-pointer"
-                                    >
-                                      <option value="handbag">Handbags</option>
-                                      <option value="suitcase">Suitcase 23kg</option>
-                                    </select>
-                                  </div>
-                                </div>
-                                <button
-                                  type="button"
-                                  aria-label={`Increase ${luggageType === "handbag" ? "handbags" : "23kg suitcases"}`}
-                                  onClick={()=>setJ(j => luggageType === "handbag"
-                                    ? {...j, handbagCount: (j.handbagCount ?? 0) + 1}
-                                    : {...j, suitcaseCount: (j.suitcaseCount ?? 0) + 1}
-                                  )}
-                                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4ADE80] rounded-full transition-all w-7 h-7 flex items-center justify-center z-10 focus:outline-none"
-                                ><span className="material-symbols-outlined text-[18px]">add</span></button>
-                              </div>
-                            </div>
 
                             {validationError && (
                               <div style={{ padding: "10px", background: "#fee2e2", color: "#b91c1c", borderRadius: "8px", fontSize: "14px" }}>
@@ -1734,12 +1746,12 @@ export default function App({ embed = false }) {
                             <form className="space-y-4 fade-up" onSubmit={e => {
                               e.preventDefault();
                               setValidationError("");
-                              
+
                               if (!journey.name.trim() || journey.name.trim().length < 2) {
                                 setValidationError("Please enter a valid full name.");
                                 return;
                               }
-                              
+
                               const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                               if (!emailRegex.test(journey.email.trim())) {
                                 setValidationError("Please enter a valid email address.");
@@ -1777,6 +1789,77 @@ export default function App({ embed = false }) {
                                 <label className="field-label">Special requests <span className="normal-case font-normal">(optional)</span></label>
                                 <textarea className="quote-details-field !text-left" value={journey.specialRequests} onChange={e=>setJ(j=>({...j,specialRequests:e.target.value}))} placeholder="Wheelchair access, mobility assistance, child seats, additional stops, or other instructions"/>
                               </div>
+                            {/* Vehicle, Passengers & Luggage */}
+                            <div className="flex gap-2 w-full">
+                              {/* Vehicle ~45% */}
+                              <div className="relative group" style={{flex:'0 0 45%'}}>
+                                <select className="w-full h-[56px] !appearance-none pl-4 pr-8 bg-white border border-outline-variant rounded-full focus:outline-none focus:border-deep-navy transition-all text-[12px] font-bold text-deep-navy cursor-pointer shadow-sm"
+                                  style={{ backgroundImage: 'none' }}
+                                  value={journey.vehiclePreference || "minibus"} onChange={e=>{
+                                    const v = e.target.value;
+                                    let p = 16;
+                                    if (v === 'bus') p = 33;
+                                    if (v === 'coach') p = 49;
+                                    setJ(j=>({...j, vehiclePreference: v, passengers: p, handbagCount: p, suitcaseCount: p}));
+                                  }}>
+                                  <option value="minibus">Executive Minibus (16 Seats)</option>
+                                  <option value="bus">Standard Bus (33 Seats)</option>
+                                  <option value="coach">Premium Coach (49 Seats)</option>
+                                </select>
+                                <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[18px]">expand_more</span>
+                              </div>
+
+                              {/* Passengers ~27.5% */}
+                              <div className="flex-1 relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden">
+                                <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.max(1, (j.passengers || 16) - 1)}))} className="absolute left-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none z-10"><span className="material-symbols-outlined text-[18px]">remove</span></button>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                  <span className="text-[17px] font-bold text-deep-navy leading-none">{journey.passengers || 16}</span>
+                                  <div className="text-[9px] font-bold text-gray-500 uppercase tracking-tight leading-none mt-[2px]">Passengers</div>
+                                </div>
+                                <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.min(100, (j.passengers || 16) + 1)}))} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4ADE80] rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none z-10"><span className="material-symbols-outlined text-[18px]">add</span></button>
+                              </div>
+
+                              {/* Luggage ~27.5% */}
+                              <div className="relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden" style={{flex: "0 0 27.5%"}}>
+                                <button
+                                  type="button"
+                                  aria-label={`Decrease ${luggageType === "handbag" ? "handbags" : "23kg suitcases"}`}
+                                  onClick={()=>setJ(j => luggageType === "handbag"
+                                    ? {...j, handbagCount: Math.max(0, (j.handbagCount ?? 0) - 1)}
+                                    : {...j, suitcaseCount: Math.max(0, (j.suitcaseCount ?? 0) - 1)}
+                                  )}
+                                  className="absolute left-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center z-10 focus:outline-none"
+                                ><span className="material-symbols-outlined text-[18px]">remove</span></button>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                  <span className="text-[17px] font-bold text-deep-navy leading-none">
+                                    {luggageType === "handbag" ? (journey.handbagCount ?? 0) : (journey.suitcaseCount ?? 0)}
+                                  </span>
+                                  <div className="relative text-[9px] font-bold text-gray-500 uppercase tracking-tight leading-none mt-[2px] text-center whitespace-nowrap w-full pointer-events-auto flex items-center justify-center">
+                                    <div className="flex items-center justify-center gap-[1px] cursor-pointer">
+                                      {luggageType === "handbag" ? 'HANDBAGS' : 'SUITCASES'}<span className="material-symbols-outlined text-[12px] opacity-60">expand_more</span>
+                                    </div>
+                                    <select
+                                      aria-label="Choose luggage type"
+                                      value={luggageType}
+                                      onChange={e=>setLuggageType(e.target.value)}
+                                      className="absolute inset-0 !w-full !h-full !min-h-0 !m-0 !p-0 opacity-0 cursor-pointer"
+                                    >
+                                      <option value="handbag">Handbags</option>
+                                      <option value="suitcase">Suitcase 23kg</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  aria-label={`Increase ${luggageType === "handbag" ? "handbags" : "23kg suitcases"}`}
+                                  onClick={()=>setJ(j => luggageType === "handbag"
+                                    ? {...j, handbagCount: (j.handbagCount ?? 0) + 1}
+                                    : {...j, suitcaseCount: (j.suitcaseCount ?? 0) + 1}
+                                  )}
+                                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4ADE80] rounded-full transition-all w-7 h-7 flex items-center justify-center z-10 focus:outline-none"
+                                ><span className="material-symbols-outlined text-[18px]">add</span></button>
+                              </div>
+                            </div>
                               {validationError && <div className="p-3 bg-red-50 text-red-700 rounded-xl text-sm">{validationError}</div>}
                               <div className="flex gap-3 pt-2">
                                 <button type="button" onClick={()=>setBookingStep(1)} className="h-14 px-6 rounded-full border border-outline-variant text-deep-navy font-bold flex items-center justify-center gap-2">
