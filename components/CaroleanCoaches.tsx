@@ -809,7 +809,7 @@ function MapPickerModal({ isOpen, onClose, onConfirm, initialSearch }: { isOpen:
 }
 
 
-function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded, onIconClick }) {
+function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded, mapsStatus, onIconClick }) {
   const inputRef = useRef(null);
   const acRef = useRef(null);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -870,14 +870,14 @@ function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded, onIconCli
 
   return (
     <div style={{ position:"relative" }}>
-      <button type="button" disabled={!mapsLoaded} onClick={()=>{ if (!mapsLoaded) return; if (onIconClick) onIconClick(); else setPickerOpen(true); }} title={mapsLoaded ? "Choose on map" : "Map service unavailable"}
+      <button type="button" disabled={!mapsLoaded} onClick={()=>{ if (!mapsLoaded) return; if (onIconClick) onIconClick(); else setPickerOpen(true); }} title={mapsLoaded ? "Choose on map" : mapsStatus === 'loading' ? "Loading map..." : "Map service unavailable"}
         style={{ position:"absolute", left:6, top:"50%", transform:"translateY(-50%)",
           display:"flex", alignItems:"center", zIndex:1, background:"none", border:"none", cursor:mapsLoaded?"pointer":"not-allowed", opacity:mapsLoaded?1:0.45,
           padding:"6px", borderRadius:6, transition:"background .15s" }}
         onMouseOver={e=>e.currentTarget.style.background="#f1f5f9"} onMouseOut={e=>e.currentTarget.style.background="none"}>
         {icon}
       </button>
-      <input ref={inputRef} type="text" placeholder={mapsLoaded ? placeholder : "Map service unavailable"} value={localVal} disabled={!mapsLoaded}
+      <input ref={inputRef} type="text" placeholder={mapsLoaded ? placeholder : mapsStatus === 'loading' ? "Loading map service..." : "Map service unavailable"} value={localVal} disabled={!mapsLoaded}
         style={{ paddingLeft:38, paddingRight: 12 }} 
         onChange={e => handleTextChange(e.target.value)}
         onBlur={handleBlur}
@@ -1639,11 +1639,9 @@ export default function App({ embed = false }) {
                           </div>
                           
                           <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleCalculateClick(); }}>
-                            {mapsStatus !== 'ready' && (
-                              <div role="status" className={`rounded-xl px-4 py-3 text-sm font-semibold ${mapsStatus === 'loading' ? 'bg-amber-50 text-amber-800' : 'bg-red-50 text-red-700'}`}>
-                                {mapsStatus === 'loading'
-                                  ? 'Loading the map service needed for verified route mileage...'
-                                  : 'Verified route pricing is unavailable because the map service is not configured or could not load.'}
+                            {mapsStatus === 'error' && (
+                              <div role="status" className="rounded-xl px-4 py-3 text-sm font-semibold bg-red-50 text-red-700">
+                                Verified route pricing is unavailable because the map service is not configured or could not load.
                               </div>
                             )}
                             <div className="space-y-3">
@@ -1654,6 +1652,7 @@ export default function App({ embed = false }) {
                                   placeholder="Pickup location" 
                                   icon={<SvgMapPinGreen size={22}/>}
                                   mapsLoaded={mapsLoaded} 
+                                  mapsStatus={mapsStatus}
                                 />
                               </div>
                               {(journey.stops || []).length === 0 && (
@@ -1684,6 +1683,7 @@ export default function App({ embed = false }) {
                                       placeholder={`Stop ${index + 1}`}
                                       icon={<SvgMapPinBlue size={22}/>}
                                       mapsLoaded={mapsLoaded}
+                                      mapsStatus={mapsStatus}
                                     />
                                   </div>
                                   <button type="button" aria-label={`Remove stop ${index + 1}`} onClick={() => removeStop(index)} className="w-8 h-8 shrink-0 rounded-full bg-red-50 text-impact-red flex items-center justify-center hover:bg-red-100 transition-colors">
@@ -1706,6 +1706,7 @@ export default function App({ embed = false }) {
                                   placeholder="Destination" 
                                   icon={<SvgMapPinRed size={22}/>}
                                   mapsLoaded={mapsLoaded} 
+                                  mapsStatus={mapsStatus}
                                 />
                               </div>
                             </div>
