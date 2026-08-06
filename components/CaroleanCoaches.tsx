@@ -1461,7 +1461,7 @@ export default function App({ embed = false }) {
     let hasEmptyStops = false;
     let allStopsHaveCoords = true;
     if ((journey.stops || []).length > 0) {
-      hasEmptyStops = journey.stops.some(s => !s.value || s.value.trim() === '');
+      hasEmptyStops = journey.stops.some(s => !s.place || s.place.trim() === '');
       allStopsHaveCoords = journey.stops.every(s => s.coords);
     }
 
