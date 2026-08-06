@@ -93,14 +93,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         "section-gap-md": "80px"
                     },
                     "fontFamily": {
-                        "headline-lg": ["Hanken Grotesk"],
-                        "label-lg": ["Figtree"],
-                        "headline-xl-mobile": ["Hanken Grotesk"],
-                        "headline-md": ["Hanken Grotesk"],
-                        "body-md": ["Figtree"],
-                        "label-sm": ["Figtree"],
-                        "headline-xl": ["Hanken Grotesk"],
-                        "body-lg": ["Figtree"]
+                        "headline-lg": ["Hanken Grotesk", "sans-serif"],
+                        "label-lg": ["Figtree", "sans-serif"],
+                        "headline-xl-mobile": ["Hanken Grotesk", "sans-serif"],
+                        "headline-md": ["Hanken Grotesk", "sans-serif"],
+                        "body-md": ["Figtree", "sans-serif"],
+                        "label-sm": ["Figtree", "sans-serif"],
+                        "headline-xl": ["Hanken Grotesk", "sans-serif"],
+                        "body-lg": ["Figtree", "sans-serif"]
                     },
                     "fontSize": {
                         "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
