@@ -1458,9 +1458,16 @@ export default function App({ embed = false }) {
         : journey.wpCoords[1]
     );
     
+    let hasEmptyStops = false;
     let allStopsHaveCoords = true;
     if ((journey.stops || []).length > 0) {
+      hasEmptyStops = journey.stops.some(s => !s.value || s.value.trim() === '');
       allStopsHaveCoords = journey.stops.every(s => s.coords);
+    }
+
+    if (hasEmptyStops) {
+      setValidationError("❌ Please enter a location for all added stops, or remove any empty stops before continuing.");
+      return;
     }
 
     if (!hasOriginCoords || !hasDestCoords || !allStopsHaveCoords) {
