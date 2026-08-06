@@ -24,7 +24,7 @@ export async function POST(req: Request) {
       },
     });
 
-    const fromEmail = (smtpFrom || smtpEmail).replace(/^"|"$/g, '');
+    const fromAddress = smtpEmail.replace(/"/g, '');
     const adminEmail = smtpEmail.replace(/"/g, ''); // default admin notification email
 
     const subject = `New Quotation Request: ${booking.customer?.name} (${booking.id})`;
@@ -43,7 +43,10 @@ export async function POST(req: Request) {
     `;
 
     await transporter.sendMail({
-      from: fromEmail,
+      from: {
+        name: 'Carolean Coaches',
+        address: fromAddress
+      },
       to: adminEmail,
       subject,
       html,
