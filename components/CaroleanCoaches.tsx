@@ -1813,7 +1813,7 @@ export default function App({ embed = false }) {
                             <div className="flex gap-2 w-full">
                               {/* Vehicle ~45% */}
                               <div className="relative group" style={{flex:'0 0 45%'}}>
-                                <select className="w-full h-[56px] !appearance-none pl-4 pr-10 bg-white border border-outline-variant rounded-full focus:outline-none focus:border-deep-navy transition-all text-[12px] font-bold text-deep-navy cursor-pointer shadow-sm truncate"
+                                <select className="w-full h-[56px] !appearance-none pl-4 pr-8 bg-white border border-outline-variant rounded-full focus:outline-none focus:border-deep-navy transition-all text-[12px] font-bold text-deep-navy cursor-pointer shadow-sm"
                                   style={{ backgroundImage: 'none' }}
                                   value={journey.vehiclePreference || "minibus"} onChange={e=>{
                                     const v = e.target.value;
