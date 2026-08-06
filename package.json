@@ -9,14 +9,19 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/forms": "^0.5.11",
+    "autoprefixer": "^10.5.4",
     "clsx": "^2.1.1",
     "jsdom": "^29.1.1",
     "lucide-react": "^1.24.0",
     "next": "14.2.5",
     "nodemailer": "^9.0.4",
+    "postcss": "^8.5.26",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "recharts": "^3.9.2",
+    "tailwindcss": "^4.3.3",
     "xmldom": "^0.6.0"
   },
   "devDependencies": {
