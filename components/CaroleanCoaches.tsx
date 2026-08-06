@@ -991,13 +991,12 @@ function RouteMetrics({ result, journey, gv }) {
   const days = Number(result.opDays);
   const stopCount = Array.isArray(journey?.stops) ? journey.stops.filter(stop => stop?.place).length : 0;
   const metrics = [
-    ["Distance", hasTrustedUnit && Number.isFinite(passengerDistance) ? `${passengerDistance} ${unitLabel}` : "Calculated"],
     ["Duration", Number.isFinite(duration) ? `${duration}h` : "Calculated"],
     ["Stops", stopCount > 0 ? stopCount : "Direct"],
     ["Days", Number.isFinite(days) ? days : 1]
   ];
 
-  return <div className="grid grid-cols-4 gap-2 mt-3">
+  return <div className="grid grid-cols-3 gap-2 mt-3">
     {metrics.map(([label, value]) => (
       <div key={label} style={{ background:PX.gray50, border:`1px solid ${PX.gray200}`, borderRadius:8, padding:"8px", textAlign:"center" }}>
         <div style={{ fontSize:10, fontWeight:700, color:PX.gray400, textTransform:"uppercase", marginBottom:2 }}>{label}</div>
@@ -1890,7 +1889,25 @@ export default function App({ embed = false }) {
                                 </button>
                               </div>
                               <div className="grid grid-cols-3 gap-2 text-xs">
-                                <div className="rounded-xl bg-surface-container-low p-3"><span className="field-label">Journey</span><strong>{journey.journeyType === "return" ? "Return" : (journey.stops?.length ? "With stops" : "One-way")}</strong></div>
+                                <div className="rounded-xl bg-surface-container-low p-3 overflow-hidden">
+                                  <span className="field-label">Stops</span>
+                                  {journey.journeyType === "return" ? (
+                                    <strong className="block">Return</strong>
+                                  ) : journey.stops?.length && journey.stops.some(s => s?.place) ? (
+                                    <div className="flex flex-col mt-0.5 max-h-[60px] overflow-y-auto no-scrollbar">
+                                      {journey.stops.filter(s => s?.place).map((s, i) => {
+                                        const stopName = typeof s.place === 'string' ? s.place.split(',')[0] : (s.place?.name || s.place?.address?.split(',')[0] || "Stop");
+                                        return (
+                                          <strong key={i} className="truncate text-[11px] leading-tight block" title={stopName}>
+                                            {i + 1}. {stopName}
+                                          </strong>
+                                        );
+                                      })}
+                                    </div>
+                                  ) : (
+                                    <strong className="block">One-way</strong>
+                                  )}
+                                </div>
                                 <div className="rounded-xl bg-surface-container-low p-3"><span className="field-label">Luggage</span><strong>{journey.handbagCount} hand · {journey.suitcaseCount} cases</strong></div>
                                 <div className="rounded-xl bg-surface-container-low p-3 min-w-0"><span className="field-label">Contact</span><strong>{journey.name}</strong><br/><span className="text-[10px] break-all">{journey.email}</span></div>
                               </div>
