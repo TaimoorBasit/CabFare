@@ -1505,6 +1505,13 @@ export default function App({ embed = false }) {
         setBookingRef(persistedReference);
         setSubmitted(true);
         setBookingStep(4);
+        
+        fetch('/api/send-admin-alert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ booking: data.booking })
+        }).catch(console.error);
+        
       } else {
         throw new ApiRequestError('The server did not confirm that the booking was persisted.', { code: 'invalid-response', status });
       }
