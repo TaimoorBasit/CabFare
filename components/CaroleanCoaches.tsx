@@ -1811,8 +1811,8 @@ export default function App({ embed = false }) {
                               </div>
                             {/* Vehicle, Passengers & Luggage */}
                             <div className="flex gap-2 w-full">
-                              {/* Vehicle */}
-                              <div className="relative group min-w-[120px] flex-1">
+                              {/* Vehicle ~45% */}
+                              <div className="relative group" style={{flex:'0 0 45%'}}>
                                 <select className="w-full h-[56px] !appearance-none pl-4 pr-10 bg-white border border-outline-variant rounded-full focus:outline-none focus:border-deep-navy transition-all text-[12px] font-bold text-deep-navy cursor-pointer shadow-sm truncate"
                                   style={{ backgroundImage: 'none' }}
                                   value={journey.vehiclePreference || "minibus"} onChange={e=>{
@@ -1830,8 +1830,8 @@ export default function App({ embed = false }) {
                                 <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[18px]">expand_more</span>
                               </div>
 
-                              {/* Passengers */}
-                              <div className="w-[88px] shrink-0 relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden">
+                              {/* Passengers ~27.5% */}
+                              <div className="flex-1 relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden">
                                 <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.max(1, (j.passengers || 16) - 1)}))} className="absolute left-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none z-10"><span className="material-symbols-outlined text-[18px]">remove</span></button>
                                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                                   <span className="text-[17px] font-bold text-deep-navy leading-none">{journey.passengers || 16}</span>
@@ -1840,8 +1840,8 @@ export default function App({ embed = false }) {
                                 <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.min(100, (j.passengers || 16) + 1)}))} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4ADE80] rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none z-10"><span className="material-symbols-outlined text-[18px]">add</span></button>
                               </div>
 
-                              {/* Luggage */}
-                              <div className="w-[88px] shrink-0 relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden">
+                              {/* Luggage ~27.5% */}
+                              <div className="relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden" style={{flex: "0 0 27.5%"}}>
                                 <button
                                   type="button"
                                   aria-label={`Decrease ${luggageType === "handbag" ? "handbags" : "23kg suitcases"}`}
