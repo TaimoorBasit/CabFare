@@ -7,10 +7,13 @@ export async function POST(req: Request) {
 
     const smtpEmail = process.env.SMTP_EMAIL || process.env.SMTP_USER;
     const smtpPass = process.env.SMTP_PASS;
-    const smtpFrom = process.env.SMTP_FROM || smtpEmail;
+
+    console.log('[send-admin-alert] SMTP_EMAIL present:', !!smtpEmail);
+    console.log('[send-admin-alert] SMTP_PASS present:', !!smtpPass);
+    console.log('[send-admin-alert] Booking ID:', booking?.id);
 
     if (!smtpEmail || !smtpPass) {
-      console.error('SMTP credentials missing in environment variables.');
+      console.error('[send-admin-alert] SMTP credentials missing in environment variables.');
       return NextResponse.json({ error: 'Email configuration missing' }, { status: 500 });
     }
 
@@ -52,6 +55,7 @@ export async function POST(req: Request) {
       html,
     });
 
+    console.log('[send-admin-alert] Email sent successfully to:', adminEmail);
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Failed to send admin notification:', error);
