@@ -1813,6 +1813,7 @@ export default function App({ embed = false }) {
                                     if (v === 'bus') p = 33;
                                     if (v === 'coach') p = 49;
                                     setJ(j=>({...j, vehiclePreference: v, passengers: p, handbagCount: p, suitcaseCount: p}));
+                                    setSel(v);
                                   }}>
                                   <option value="minibus">Executive Minibus (16 Seats)</option>
                                   <option value="bus">Standard Bus (33 Seats)</option>
