@@ -1851,13 +1851,13 @@ export default function App({ embed = false }) {
                                   )}
                                   className="absolute left-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center z-10 focus:outline-none"
                                 ><span className="material-symbols-outlined text-[18px]">remove</span></button>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                                   <span className="text-[17px] font-bold text-deep-navy leading-none">
                                     {luggageType === "handbag" ? (journey.handbagCount ?? 0) : (journey.suitcaseCount ?? 0)}
                                   </span>
-                                  <div className="relative text-[9px] font-bold text-gray-500 uppercase tracking-tight leading-none mt-[2px] text-center whitespace-nowrap w-full pointer-events-auto flex items-center justify-center">
-                                    <div className="flex items-center justify-center gap-[1px] cursor-pointer">
-                                      {luggageType === "handbag" ? 'HANDBAGS' : 'SUITCASES'}<span className="material-symbols-outlined text-[12px] opacity-60">expand_more</span>
+                                  <div className="relative text-[9px] font-bold text-gray-500 uppercase tracking-tight leading-none mt-[2px] text-center whitespace-nowrap pointer-events-auto flex items-center justify-center">
+                                    <div className="flex items-center justify-center cursor-pointer relative pr-3">
+                                      {luggageType === "handbag" ? 'HANDBAGS' : 'SUITCASES'}<span className="material-symbols-outlined absolute right-[-2px] text-[14px] opacity-60 pointer-events-none">expand_more</span>
                                     </div>
                                     <select
                                       aria-label="Choose luggage type"
