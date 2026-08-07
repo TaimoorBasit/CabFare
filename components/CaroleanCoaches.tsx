@@ -1181,7 +1181,7 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcase
         <div style={{ textAlign:"right",flexShrink:0 }}>
           {result ? <>
             <div style={{ fontSize:22,fontWeight:800,color:PX.navy800,lineHeight:1 }}>
-              {result.upperBoundPrice && result.upperBoundPrice > result.finalPrice ? `Â£${fmt(result.finalPrice)} â€“ Â£${fmt(result.upperBoundPrice)}` : `Â£${fmt(result.finalPrice)}`}
+              {result.upperBoundPrice && result.upperBoundPrice > result.finalPrice ? `£${fmt(result.finalPrice)} – £${fmt(result.upperBoundPrice)}` : `£${fmt(result.finalPrice)}`}
             </div>
             <div style={{ fontSize:11,color:PX.gray400,fontWeight:600,marginTop:2,textTransform:"uppercase" }}>total fare</div>
             {result.belowMin && <div style={{ fontSize:10,color:PX.amber500,marginTop:2,fontWeight:600 }}>â–² Min. hire applied</div>}
@@ -1894,8 +1894,8 @@ export default function App({ embed = false }) {
                             <div className="space-y-3 fade-up">
                               <div className="rounded-2xl bg-primary text-white px-5 py-4 flex items-center justify-between gap-3">
                                 <div>
-                                  <div className="text-lg font-bold">{journey.origin.split(",")[0]} <span className="text-impact-red">â†’</span> {journey.destination.split(",")[0]}</div>
-                                  <div className="text-xs opacity-75 mt-1">{new Date(journey.departureDate).toLocaleString("en-GB")} Â· {journey.passengers} passengers</div>
+                                  <div className="text-lg font-bold">{journey.origin.split(",")[0]} <span className="text-impact-red">→</span> {journey.destination.split(",")[0]}</div>
+                                  <div className="text-xs opacity-75 mt-1">{new Date(journey.departureDate).toLocaleString("en-GB")} · {journey.passengers} passengers</div>
                                 </div>
                                 <button type="button" onClick={()=>setBookingStep(1)} aria-label="Edit journey details" title="Edit journey details" className="w-9 h-9 shrink-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
                                   <span className="material-symbols-outlined text-[18px]">edit</span>
@@ -1921,7 +1921,7 @@ export default function App({ embed = false }) {
                                     <strong className="block">One-way</strong>
                                   )}
                                 </div>
-                                <div className="rounded-xl bg-surface-container-low p-3"><span className="field-label">Luggage</span><strong>{journey.handbagCount} hand Â· {journey.suitcaseCount} cases</strong></div>
+                                <div className="rounded-xl bg-surface-container-low p-3"><span className="field-label">Luggage</span><strong>{journey.handbagCount} hand · {journey.suitcaseCount} cases</strong></div>
                                 <div className="rounded-xl bg-surface-container-low p-3 min-w-0"><span className="field-label">Contact</span><strong>{journey.name}</strong><br/><span className="text-[10px] break-all">{journey.email}</span></div>
                               </div>
                               {journey.specialRequests && <div className="rounded-xl border border-outline-variant p-4 text-sm"><span className="field-label">Special requests</span>{journey.specialRequests}</div>}
@@ -1929,13 +1929,13 @@ export default function App({ embed = false }) {
                                 <div className="flex items-start justify-between gap-4 mb-3">
                                   <div>
                                     <span className="field-label">Selected option</span>
-                                    <strong className="text-deep-navy">{selectedQuote ? `${selectedVehicleCount} Ã— ${selectedQuote.vehicle.name}` : "Verified option unavailable"}</strong>
-                                    <p className="text-xs text-on-surface-variant mt-1">{journey.passengers} passengers Â· {journey.suitcaseCount} suitcases Â· {journey.handbagCount} handbags</p>
+                                    <strong className="text-deep-navy">{selectedQuote ? `${selectedVehicleCount} × ${selectedQuote.vehicle.name}` : "Verified option unavailable"}</strong>
+                                    <p className="text-xs text-on-surface-variant mt-1">{journey.passengers} passengers · {journey.suitcaseCount} suitcases · {journey.handbagCount} handbags</p>
                                   </div>
                                   {selectedQuote && (
                                     <div className="text-right shrink-0">
                                       <span className="field-label">Estimated price</span>
-                                      <strong className="text-lg text-deep-navy">Â£{fmt(selectedQuote.result.finalPrice)}{Number(selectedQuote.result.upperBoundPrice) > Number(selectedQuote.result.finalPrice) ? `â€“Â£${fmt(selectedQuote.result.upperBoundPrice)}` : ""}</strong>
+                                      <strong className="text-lg text-deep-navy">£{fmt(selectedQuote.result.finalPrice)}{Number(selectedQuote.result.upperBoundPrice) > Number(selectedQuote.result.finalPrice) ? `–£${fmt(selectedQuote.result.upperBoundPrice)}` : ""}</strong>
                                     </div>
                                   )}
                                 </div>
@@ -2155,7 +2155,7 @@ export default function App({ embed = false }) {
                     </div>
                   </div>
                   <div className="max-w-container-max mx-auto px-gutter mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 px-6">
-                    <p className="text-label-sm font-label-sm opacity-60">Â© 2026 Carolean Coaches. Executive Precision in Motion.</p>
+                    <p className="text-label-sm font-label-sm opacity-60">© 2026 Carolean Coaches. Executive Precision in Motion.</p>
                     <div className="flex gap-8">
                       <span className="text-label-sm font-label-sm opacity-40">Site by Precision Agency</span>
                     </div>
@@ -2184,11 +2184,11 @@ export default function App({ embed = false }) {
                     <div>
                       <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: 18, display: "flex", alignItems: "center", gap: 8 }}>
                         <span>{journey.origin.split(',')[0]}</span>
-                        <span style={{ color: PX.brandRed }}>â†’</span>
+                        <span style={{ color: PX.brandRed }}>→</span>
                         <span>{journey.destination.split(',')[0]}</span>
                       </div>
                       <div style={{ fontSize: 12.5, color: "rgba(255,255,255,0.75)", marginTop: 4, fontWeight: 500 }}>
-                        {journey.departureDate ? new Date(journey.departureDate).toLocaleString("en-GB") : ""} Â· {journey.passengers} Passengers Â· {journey.journeyType === "one-way" ? "One-way" : journey.journeyType === "return" ? "Return" : "Multi-stop"}
+                        {journey.departureDate ? new Date(journey.departureDate).toLocaleString("en-GB") : ""} · {journey.passengers} Passengers · {journey.journeyType === "one-way" ? "One-way" : journey.journeyType === "return" ? "Return" : "Multi-stop"}
                       </div>
                     </div>
                     <Btn variant="ghost" size="sm" onClick={() => setShowQuotes(false)} style={{ color: "#fff", borderColor: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.06)", borderRadius: 30 }}>
@@ -2222,7 +2222,7 @@ export default function App({ embed = false }) {
                       {}
                       <div className="left-panel-options">
                         <Card style={{ padding: "2rem" }}>
-                          <SectionHead sub={`${journey.passengers} passengers Â· ${(journey.journeyType).replace("-"," ")}`}>
+                          <SectionHead sub={`${journey.passengers} passengers · ${(journey.journeyType).replace("-"," ")}`}>
                             Available Options
                           </SectionHead>
                           
@@ -2278,10 +2278,10 @@ export default function App({ embed = false }) {
           {showQuotes && <footer style={{ background: PX.offWhite, borderTop: `1px solid ${PX.gray200}`, padding: "2rem 1.5rem", textAlign: "center", fontSize: 12, color: PX.gray600 }}>
           <div style={{ maxWidth: 1140, margin: "0 auto", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
             <div>
-              <strong>{db.operatorDetails?.companyName || "Carolean Coaches Ltd"}</strong> Â· {db.globalVars?.yardAddress || "Unit 1, Bentley Lane, Walsall WS2 8TL"}
+              <strong>{db.operatorDetails?.companyName || "Carolean Coaches Ltd"}</strong> · {db.globalVars?.yardAddress || "Unit 1, Bentley Lane, Walsall WS2 8TL"}
             </div>
             <div>
-              PSV Operator License: {db.operatorDetails?.operatorLicence || "PM0003456"} Â· Fare Engine v3.0
+              PSV Operator License: {db.operatorDetails?.operatorLicence || "PM0003456"} · Fare Engine v3.0
             </div>
           </div>
         </footer>}
