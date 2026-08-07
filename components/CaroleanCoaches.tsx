@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 
 
 'use client';
@@ -168,7 +168,7 @@ function GlobalStyle() {
       }
       input, select, button, textarea { font-family: 'Figtree', sans-serif; }
 
-      /* ── Base inputs ── */
+      /* â”€â”€ Base inputs â”€â”€ */
       input[type=text], input[type=email], input[type=number],
       input[type=date], input[type=datetime-local], select {
         display: block;
@@ -328,7 +328,7 @@ function GlobalStyle() {
         margin: 0 auto !important;
       }
 
-      /* ── Animations ── */
+      /* â”€â”€ Animations â”€â”€ */
       @keyframes fadeUp {
         from { opacity: 0; transform: translateY(12px); }
         to   { opacity: 1; transform: translateY(0); }
@@ -338,7 +338,7 @@ function GlobalStyle() {
       .fade-up { animation: fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
       .spinning { animation: spin 1s linear infinite; display: inline-block; }
 
-      /* ── Google Places autocomplete ── */
+      /* â”€â”€ Google Places autocomplete â”€â”€ */
       .pac-container {
         border-radius: 12px !important;
         border: 1px solid #dde0e8 !important;
@@ -354,13 +354,13 @@ function GlobalStyle() {
       .pac-icon { display: none !important; }
       .pac-matched { color: ${PX.brandRed} !important; font-weight: 700 !important; }
 
-      /* ── Scrollbar ── */
+      /* â”€â”€ Scrollbar â”€â”€ */
       ::-webkit-scrollbar { width: 6px; height: 6px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
       ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-      /* ── Quotation results layout ── */
+      /* â”€â”€ Quotation results layout â”€â”€ */
       .results-layout {
         display: grid;
         grid-template-columns: 1fr;
@@ -384,11 +384,11 @@ function GlobalStyle() {
         text-transform: uppercase;
       }
 
-      /* ═══════════════════════════════════════════════════
+      /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
          PREMIUM ADMIN DASHBOARD DESIGN SYSTEM
-      ═══════════════════════════════════════════════════ */
+      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-      /* Root wrapper — used to scope all admin overrides */
+      /* Root wrapper â€” used to scope all admin overrides */
       .adm-root {
         display: flex;
         min-height: 100vh;
@@ -396,7 +396,7 @@ function GlobalStyle() {
         font-family: 'Figtree', sans-serif;
       }
 
-      /* ── Admin-scoped input overrides ── */
+      /* â”€â”€ Admin-scoped input overrides â”€â”€ */
       /* Reset the red focus ring for everything inside the admin panel */
       .adm-root input[type=text]:focus,
       .adm-root input[type=email]:focus,
@@ -441,7 +441,7 @@ function GlobalStyle() {
         margin-bottom: 0;
       }
 
-      /* Form panel inside a section — white background, proper padding */
+      /* Form panel inside a section â€” white background, proper padding */
       .adm-form-panel {
         padding: 14px 18px;
         background: #ffffff;
@@ -580,7 +580,7 @@ function GlobalStyle() {
         box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.18) !important;
       }
 
-      /* ── Admin table ── */
+      /* â”€â”€ Admin table â”€â”€ */
       .admin-table {
         width: 100%;
         border-collapse: separate !important;
@@ -715,14 +715,14 @@ function MapPickerModal({ isOpen, onClose, onConfirm, initialSearch }: { isOpen:
             if (status === "OK" && results[0]) {
               const isUK = results[0].address_components.some(c => c.short_name === "GB" || c.long_name === "United Kingdom");
               if (!isUK) {
-                setSelectedAddr("❌ Service is exclusively available in the UK");
+                setSelectedAddr("âŒ Service is exclusively available in the UK");
                 setSelectedGeo(null);
                 return;
               }
               setSelectedAddr(results[0].formatted_address);
               setSelectedGeo({ lat: latLng.lat(), lng: latLng.lng(), name: results[0].formatted_address });
             } else {
-              setSelectedAddr("❌ Unknown location");
+              setSelectedAddr("âŒ Unknown location");
               setSelectedGeo(null);
             }
           });
@@ -780,7 +780,7 @@ function MapPickerModal({ isOpen, onClose, onConfirm, initialSearch }: { isOpen:
         {}
         <div style={{ padding:"12px 20px", borderBottom:"1px solid #e2e8f0", background: "#f8fafc", flexShrink:0 }}>
           <div style={{ background:"#fff",padding:"10px 16px",borderRadius:8,border:`1.5px solid #fee2e2`,boxShadow:"0 2px 4px rgba(0,0,0,.02)",display:"flex",alignItems:"center",gap:8 }}>
-            {loading ? <span className="spinning" style={{color:PX.navy800}}>⟳</span> : <SvgMapPinRed />}
+            {loading ? <span className="spinning" style={{color:PX.navy800}}>âŸ³</span> : <SvgMapPinRed />}
             <input 
               ref={searchInputRef}
               type="text" 
@@ -1175,17 +1175,17 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcase
             <div style={{ fontSize:12,color:PX.gray900,marginTop:4,fontWeight:600 }}>
               Up to {usableCapacity} seats
             </div>
-            <div style={{ fontSize:12,color:PX.gray600,marginTop:2,fontWeight:500 }}>🧳 {lugLabel}</div>
+            <div style={{ fontSize:12,color:PX.gray600,marginTop:2,fontWeight:500 }}>ðŸ§³ {lugLabel}</div>
           </div>
         </div>
         <div style={{ textAlign:"right",flexShrink:0 }}>
           {result ? <>
             <div style={{ fontSize:22,fontWeight:800,color:PX.navy800,lineHeight:1 }}>
-              {result.upperBoundPrice && result.upperBoundPrice > result.finalPrice ? `£${fmt(result.finalPrice)} – £${fmt(result.upperBoundPrice)}` : `£${fmt(result.finalPrice)}`}
+              {result.upperBoundPrice && result.upperBoundPrice > result.finalPrice ? `Â£${fmt(result.finalPrice)} â€“ Â£${fmt(result.upperBoundPrice)}` : `Â£${fmt(result.finalPrice)}`}
             </div>
             <div style={{ fontSize:11,color:PX.gray400,fontWeight:600,marginTop:2,textTransform:"uppercase" }}>total fare</div>
-            {result.belowMin && <div style={{ fontSize:10,color:PX.amber500,marginTop:2,fontWeight:600 }}>▲ Min. hire applied</div>}
-          </> : <span style={{ fontSize:13,color:PX.gray400 }}>—</span>}
+            {result.belowMin && <div style={{ fontSize:10,color:PX.amber500,marginTop:2,fontWeight:600 }}>â–² Min. hire applied</div>}
+          </> : <span style={{ fontSize:13,color:PX.gray400 }}>â€”</span>}
         </div>
       </div>
       <div style={{ marginTop:12 }}>
@@ -1200,7 +1200,7 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcase
                const pax = i === requiredVehicles - 1 ? passengers - (usableCapacity * i) : usableCapacity;
                const vName = (vehicle.name || '').toLowerCase().includes('coach') ? 'Coach' : 'Vehicle';
                return `${vName} ${i+1}: ${pax} passengers`;
-             }).join(" • ")}
+             }).join(" â€¢ ")}
           </div>
         )}
       </div>
@@ -1208,7 +1208,7 @@ function VehicleCard({ vehicle, result, selected, onSelect, passengers, suitcase
         {isSel && <Badge color="green"><SvgCheck size={10} style={{ marginRight: 3 }} /> Selected</Badge>}
         {!paxOk && <Badge color="amber"><SvgAlert size={10} style={{ marginRight: 3 }} /> {requiredVehicles} Vehicles Required</Badge>}
         {!lugOk && <Badge color="amber">Limited luggage capacity</Badge>}
-        {result?.dualCrew && <Badge color="amber">⚡ Dual crew required (9h+)</Badge>}
+        {result?.dualCrew && <Badge color="amber">âš¡ Dual crew required (9h+)</Badge>}
         {result?.surchargeLines?.map(s=><Badge key={s.label} color="gray">{s.label}</Badge>)}
       </div>
     </div>
@@ -1251,7 +1251,7 @@ function quoteFailureMessage(error) {
   }
   const message = String(error.message || '').toLowerCase();
   if (/google maps|mileage|road route|depot|yard location/.test(message)) {
-    return 'Live route calculation is unavailable. No substitute mileage or price has been used.';
+    return 'Live route calculation is unavailable. (Error: ' + error.message + ')';
   }
   if (/pricing configuration|database|not initialized|missing|invalid/.test(message)) {
     return 'Online pricing is unavailable because its business configuration is incomplete. No price has been estimated.';
@@ -1466,7 +1466,7 @@ export default function App({ embed = false }) {
     }
 
     if (hasEmptyStops) {
-      setValidationError("❌ Please enter a location for all added stops, or remove any empty stops before continuing.");
+      setValidationError("âŒ Please enter a location for all added stops, or remove any empty stops before continuing.");
       return;
     }
 
@@ -1894,8 +1894,8 @@ export default function App({ embed = false }) {
                             <div className="space-y-3 fade-up">
                               <div className="rounded-2xl bg-primary text-white px-5 py-4 flex items-center justify-between gap-3">
                                 <div>
-                                  <div className="text-lg font-bold">{journey.origin.split(",")[0]} <span className="text-impact-red">→</span> {journey.destination.split(",")[0]}</div>
-                                  <div className="text-xs opacity-75 mt-1">{new Date(journey.departureDate).toLocaleString("en-GB")} · {journey.passengers} passengers</div>
+                                  <div className="text-lg font-bold">{journey.origin.split(",")[0]} <span className="text-impact-red">â†’</span> {journey.destination.split(",")[0]}</div>
+                                  <div className="text-xs opacity-75 mt-1">{new Date(journey.departureDate).toLocaleString("en-GB")} Â· {journey.passengers} passengers</div>
                                 </div>
                                 <button type="button" onClick={()=>setBookingStep(1)} aria-label="Edit journey details" title="Edit journey details" className="w-9 h-9 shrink-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
                                   <span className="material-symbols-outlined text-[18px]">edit</span>
@@ -1921,7 +1921,7 @@ export default function App({ embed = false }) {
                                     <strong className="block">One-way</strong>
                                   )}
                                 </div>
-                                <div className="rounded-xl bg-surface-container-low p-3"><span className="field-label">Luggage</span><strong>{journey.handbagCount} hand · {journey.suitcaseCount} cases</strong></div>
+                                <div className="rounded-xl bg-surface-container-low p-3"><span className="field-label">Luggage</span><strong>{journey.handbagCount} hand Â· {journey.suitcaseCount} cases</strong></div>
                                 <div className="rounded-xl bg-surface-container-low p-3 min-w-0"><span className="field-label">Contact</span><strong>{journey.name}</strong><br/><span className="text-[10px] break-all">{journey.email}</span></div>
                               </div>
                               {journey.specialRequests && <div className="rounded-xl border border-outline-variant p-4 text-sm"><span className="field-label">Special requests</span>{journey.specialRequests}</div>}
@@ -1929,13 +1929,13 @@ export default function App({ embed = false }) {
                                 <div className="flex items-start justify-between gap-4 mb-3">
                                   <div>
                                     <span className="field-label">Selected option</span>
-                                    <strong className="text-deep-navy">{selectedQuote ? `${selectedVehicleCount} × ${selectedQuote.vehicle.name}` : "Verified option unavailable"}</strong>
-                                    <p className="text-xs text-on-surface-variant mt-1">{journey.passengers} passengers · {journey.suitcaseCount} suitcases · {journey.handbagCount} handbags</p>
+                                    <strong className="text-deep-navy">{selectedQuote ? `${selectedVehicleCount} Ã— ${selectedQuote.vehicle.name}` : "Verified option unavailable"}</strong>
+                                    <p className="text-xs text-on-surface-variant mt-1">{journey.passengers} passengers Â· {journey.suitcaseCount} suitcases Â· {journey.handbagCount} handbags</p>
                                   </div>
                                   {selectedQuote && (
                                     <div className="text-right shrink-0">
                                       <span className="field-label">Estimated price</span>
-                                      <strong className="text-lg text-deep-navy">£{fmt(selectedQuote.result.finalPrice)}{Number(selectedQuote.result.upperBoundPrice) > Number(selectedQuote.result.finalPrice) ? `–£${fmt(selectedQuote.result.upperBoundPrice)}` : ""}</strong>
+                                      <strong className="text-lg text-deep-navy">Â£{fmt(selectedQuote.result.finalPrice)}{Number(selectedQuote.result.upperBoundPrice) > Number(selectedQuote.result.finalPrice) ? `â€“Â£${fmt(selectedQuote.result.upperBoundPrice)}` : ""}</strong>
                                     </div>
                                   )}
                                 </div>
@@ -2078,7 +2078,7 @@ export default function App({ embed = false }) {
                         </div>
                       </div>
                       <div>
-                        <span className="text-6xl font-headline-lg text-impact-red mb-6 block opacity-25" aria-hidden="true">“</span>
+                        <span className="text-6xl font-headline-lg text-impact-red mb-6 block opacity-25" aria-hidden="true">â€œ</span>
                         <h3 className="font-headline-lg text-headline-lg text-deep-navy mb-8">"Carolean Coaches has transformed how our executive team moves. Their punctuality and the sheer quality of the fleet are unmatched in the industry."</h3>
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-1 gap-1 bg-impact-red rounded-full"></div>
@@ -2155,7 +2155,7 @@ export default function App({ embed = false }) {
                     </div>
                   </div>
                   <div className="max-w-container-max mx-auto px-gutter mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 px-6">
-                    <p className="text-label-sm font-label-sm opacity-60">© 2026 Carolean Coaches. Executive Precision in Motion.</p>
+                    <p className="text-label-sm font-label-sm opacity-60">Â© 2026 Carolean Coaches. Executive Precision in Motion.</p>
                     <div className="flex gap-8">
                       <span className="text-label-sm font-label-sm opacity-40">Site by Precision Agency</span>
                     </div>
@@ -2184,15 +2184,15 @@ export default function App({ embed = false }) {
                     <div>
                       <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: 18, display: "flex", alignItems: "center", gap: 8 }}>
                         <span>{journey.origin.split(',')[0]}</span>
-                        <span style={{ color: PX.brandRed }}>→</span>
+                        <span style={{ color: PX.brandRed }}>â†’</span>
                         <span>{journey.destination.split(',')[0]}</span>
                       </div>
                       <div style={{ fontSize: 12.5, color: "rgba(255,255,255,0.75)", marginTop: 4, fontWeight: 500 }}>
-                        {journey.departureDate ? new Date(journey.departureDate).toLocaleString("en-GB") : ""} · {journey.passengers} Passengers · {journey.journeyType === "one-way" ? "One-way" : journey.journeyType === "return" ? "Return" : "Multi-stop"}
+                        {journey.departureDate ? new Date(journey.departureDate).toLocaleString("en-GB") : ""} Â· {journey.passengers} Passengers Â· {journey.journeyType === "one-way" ? "One-way" : journey.journeyType === "return" ? "Return" : "Multi-stop"}
                       </div>
                     </div>
                     <Btn variant="ghost" size="sm" onClick={() => setShowQuotes(false)} style={{ color: "#fff", borderColor: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.06)", borderRadius: 30 }}>
-                      ← Edit details
+                      â† Edit details
                     </Btn>
                   </div>
 
@@ -2222,13 +2222,13 @@ export default function App({ embed = false }) {
                       {}
                       <div className="left-panel-options">
                         <Card style={{ padding: "2rem" }}>
-                          <SectionHead sub={`${journey.passengers} passengers · ${(journey.journeyType).replace("-"," ")}`}>
+                          <SectionHead sub={`${journey.passengers} passengers Â· ${(journey.journeyType).replace("-"," ")}`}>
                             Available Options
                           </SectionHead>
                           
                           {loadingQuotes && quotes.length === 0 ? (
                             <div style={{ padding: "2.5rem", textAlign: "center", color: PX.gray600 }}>
-                              <span className="spinning" style={{ marginRight: 8 }}>⟳</span> Fetching live options...
+                              <span className="spinning" style={{ marginRight: 8 }}>âŸ³</span> Fetching live options...
                             </div>
                           ) : (
                             <>
@@ -2242,7 +2242,7 @@ export default function App({ embed = false }) {
                               {selected && (
                                 <div style={{ marginTop: "2rem", borderTop: "1px solid #e2e8f0", paddingTop: "1.5rem" }} className="fade-up">
                                   <Btn variant="teal" size="lg" full onClick={handleFinalBookingSubmit} disabled={submitting}>
-                                    {submitting ? <><span className="spinning" style={{ marginRight: 8 }}>⟳</span> Confirming...</> : "Confirm Booking"}
+                                    {submitting ? <><span className="spinning" style={{ marginRight: 8 }}>âŸ³</span> Confirming...</> : "Confirm Booking"}
                                   </Btn>
                                 </div>
                               )}
@@ -2278,10 +2278,10 @@ export default function App({ embed = false }) {
           {showQuotes && <footer style={{ background: PX.offWhite, borderTop: `1px solid ${PX.gray200}`, padding: "2rem 1.5rem", textAlign: "center", fontSize: 12, color: PX.gray600 }}>
           <div style={{ maxWidth: 1140, margin: "0 auto", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
             <div>
-              <strong>{db.operatorDetails?.companyName || "Carolean Coaches Ltd"}</strong> · {db.globalVars?.yardAddress || "Unit 1, Bentley Lane, Walsall WS2 8TL"}
+              <strong>{db.operatorDetails?.companyName || "Carolean Coaches Ltd"}</strong> Â· {db.globalVars?.yardAddress || "Unit 1, Bentley Lane, Walsall WS2 8TL"}
             </div>
             <div>
-              PSV Operator License: {db.operatorDetails?.operatorLicence || "PM0003456"} · Fare Engine v3.0
+              PSV Operator License: {db.operatorDetails?.operatorLicence || "PM0003456"} Â· Fare Engine v3.0
             </div>
           </div>
         </footer>}
@@ -2289,3 +2289,4 @@ export default function App({ embed = false }) {
     </>
   );
 }
+
