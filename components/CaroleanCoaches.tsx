@@ -1470,10 +1470,7 @@ export default function App({ embed = false }) {
       return;
     }
 
-    if (!hasOriginCoords || !hasDestCoords || !allStopsHaveCoords) {
-      setValidationError("❌ Our service is exclusively available within the UK. Please select a valid UK location from the dropdown suggestions or use the map pin icon.");
-      return;
-    }
+
 
     const verifiedQuotes = await buildQuotes();
     if (Array.isArray(verifiedQuotes) && verifiedQuotes.length > 0) {
