@@ -632,9 +632,14 @@ function useGoogleMaps(apiKey: string | undefined) {
       return;
     }
     setStatus('loading');
+    const loadTimeout = window.setTimeout(() => {
+      setLoaded(false);
+      setStatus('failed');
+    }, 10000);
     let existing = document.getElementById("gm-script") as HTMLScriptElement | null;
     const markReady = () => {
       if (window.google?.maps?.places) {
+        window.clearTimeout(loadTimeout);
         setLoaded(true);
         setStatus('ready');
       } else {
@@ -643,6 +648,7 @@ function useGoogleMaps(apiKey: string | undefined) {
       }
     };
     const markFailed = () => {
+      window.clearTimeout(loadTimeout);
       setLoaded(false);
       setStatus('failed');
     };
@@ -656,6 +662,7 @@ function useGoogleMaps(apiKey: string | undefined) {
       existing.addEventListener('load', markReady);
       existing.addEventListener('error', markFailed);
       return () => {
+        window.clearTimeout(loadTimeout);
         existing.removeEventListener('load', markReady);
         existing.removeEventListener('error', markFailed);
       };
@@ -663,11 +670,11 @@ function useGoogleMaps(apiKey: string | undefined) {
     const s = document.createElement("script");
     s.id = "gm-script";
     s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey.trim()}&libraries=places,geometry&callback=__gmCb`;
-    s.async = true; s.defer = true;
+    s.async = true;
     window.__gmCb = markReady;
     s.onerror = markFailed;
     document.head.appendChild(s);
-    return () => { delete window.__gmCb; };
+    return () => { window.clearTimeout(loadTimeout); delete window.__gmCb; };
   }, [apiKey]);
   return { loaded, status };
 }
@@ -877,7 +884,7 @@ function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded, mapsStatu
         onMouseOver={e=>e.currentTarget.style.background="#f1f5f9"} onMouseOut={e=>e.currentTarget.style.background="none"}>
         {icon}
       </button>
-      <input ref={inputRef} type="text" placeholder={mapsLoaded ? placeholder : mapsStatus === 'loading' ? "Loading map service..." : "Map service unavailable"} value={localVal} disabled={!mapsLoaded}
+      <input ref={inputRef} type="text" placeholder={mapsLoaded ? placeholder : `${placeholder} (type address)`} value={localVal}
         style={{ paddingLeft:38, paddingRight: 12 }} 
         onChange={e => handleTextChange(e.target.value)}
         onBlur={handleBlur}
@@ -981,22 +988,16 @@ function Badge({ children, color="blue" }) {
 
 function fmt(n)  { return Number(n).toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2}); }
 
-function RouteMetrics({ result, journey, gv }) {
+function RouteMetrics({ result, journey }) {
   if (!result) return null;
-  const configuredUnit = result.distanceUnit || gv?.distanceUnit;
-  const hasTrustedUnit = configuredUnit === 'km' || configuredUnit === 'miles';
-  const unitLabel = configuredUnit === 'miles' ? 'mi' : 'km';
-  const passengerDistance = Number(result.revenueKm);
-  const duration = Number(result.totalShiftHrs);
   const days = Number(result.opDays);
   const stopCount = Array.isArray(journey?.stops) ? journey.stops.filter(stop => stop?.place).length : 0;
   const metrics = [
-    ["Duration", Number.isFinite(duration) ? `${duration}h` : "Calculated"],
     ["Stops", stopCount > 0 ? stopCount : "Direct"],
     ["Days", Number.isFinite(days) ? days : 1]
   ];
 
-  return <div className="grid grid-cols-3 gap-2 mt-3">
+  return <div className="grid grid-cols-2 gap-3 mt-3">
     {metrics.map(([label, value]) => (
       <div key={label} style={{ background:PX.gray50, border:`1px solid ${PX.gray200}`, borderRadius:8, padding:"8px", textAlign:"center" }}>
         <div style={{ fontSize:10, fontWeight:700, color:PX.gray400, textTransform:"uppercase", marginBottom:2 }}>{label}</div>
@@ -1088,7 +1089,7 @@ function GoogleMapPreview({ result, journey, gv, compact = false }) {
     <div>
       <div ref={mapRef} style={{ width: '100%', height: compact ? 160 : 320, borderRadius: 12, border: `1.5px solid ${PX.gray200}` }}></div>
       {mapError && <div role="status" style={{ marginTop:8, padding:"8px 10px", borderRadius:8, background:"#fffbeb", color:"#92400e", fontSize:12 }}>{mapError}</div>}
-      <RouteMetrics result={result} journey={journey} gv={gv}/>
+      <RouteMetrics result={result} journey={journey}/>
     </div>
   );
 }
@@ -1109,7 +1110,7 @@ function RouteMap({ result, journey, gv, compact = false }) {
       <SvgMap size={36} color={PX.gray400} />
       <p style={{ fontSize:13, fontWeight:600, maxWidth:340 }}>{message}</p>
     </div>
-    <RouteMetrics result={result} journey={journey} gv={gv}/>
+    <RouteMetrics result={result} journey={journey}/>
   </div>;
 }
 
@@ -1335,8 +1336,11 @@ export default function App({ embed = false }) {
 
   const [mapsApiKey, setMapsApiKey] = useState(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "");
   useEffect(() => {
+    // Already have a build-time key, so the map/search box can start loading
+    // immediately without waiting on this round-trip. Still fetched in the
+    // background in case the server has a different (e.g. domain-restricted) key.
     let active = true;
-    fetch('/api/maps-config', { cache: 'no-store' })
+    fetch('/api/maps-config')
       .then(response => response.ok ? response.json() : null)
       .then(data => {
         if (active && typeof data?.key === 'string' && data.key.trim()) setMapsApiKey(data.key.trim());
@@ -1434,14 +1438,6 @@ export default function App({ embed = false }) {
   const handleCalculateClick = async () => {
     setValidationError("");
     setSubmissionError("");
-    if (mapsStatus !== 'ready') {
-      setValidationError(
-        mapsStatus === 'loading'
-          ? 'The map service is still loading. Please wait before requesting a quote.'
-          : 'The map service is unavailable, so a verified route and price cannot be calculated.'
-      );
-      return;
-    }
     if (!journey.origin || !journey.destination || !journey.departureDate) {
       setValidationError("Please enter pickup location, destination, and departure date.");
       return;

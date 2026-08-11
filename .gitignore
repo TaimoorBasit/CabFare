@@ -14,3 +14,4 @@ yarn-error.log*
 .env.local
 Secrets/
 Tokens/
+.vercel

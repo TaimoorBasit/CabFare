@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
-
 export async function GET() {
   const key = (
     process.env.GOOGLE_MAPS_BROWSER_KEY ||
@@ -11,6 +9,6 @@ export async function GET() {
 
   return NextResponse.json(
     { key },
-    { headers: { "Cache-Control": "no-store, max-age=0" } },
+    { headers: { "Cache-Control": "public, max-age=300, s-maxage=3600" } },
   );
 }
