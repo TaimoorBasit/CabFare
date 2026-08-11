@@ -149,7 +149,7 @@ function SvgClose({ size = 14, color = "currentColor" }) {
 
 
 function GlobalStyle() {
-  return <style>{`
+  return <style dangerouslySetInnerHTML={{ __html: `
       @import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Outfit:wght@100..900&display=swap');
 
       *, *::before, *::after {
@@ -603,7 +603,7 @@ function GlobalStyle() {
       }
       .admin-table tbody tr:hover { background: #f8fafc; }
       .admin-table tbody tr:last-child td { border-bottom: none; }
-    `}</style>;
+    ` }} />;
 }
 
 
