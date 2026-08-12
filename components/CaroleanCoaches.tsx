@@ -1389,7 +1389,7 @@ export default function App({ embed = false }) {
         return [];
       }
       const firstAvailable = preferredVehicle
-        || data.quotes.find(quote => Number(quote.vehicle.capacity) >= Number(currentJourney.passengers))
+        || data.quotes.find(quote => Number(quote?.vehicle?.capacity) >= Number(currentJourney.passengers))
         || data.quotes[0];
       setQ(data.quotes);
       setSel(firstAvailable.vehicle.id);
@@ -1468,7 +1468,7 @@ export default function App({ embed = false }) {
 
   const handleFinalBookingSubmit = async () => {
     if (submitting) return;
-    const quote = quotes.find(q => q.vehicle.id === selected);
+    const quote = quotes.find(q => q?.vehicle?.id === selected);
     if (!quote || !isTrustedQuote(quote)) {
       setSubmissionError('A current, verified quote is required before a booking can be submitted. Please recalculate the journey.');
       return;
@@ -1541,7 +1541,7 @@ export default function App({ embed = false }) {
     return { ...j, stops };
   });
   const filteredQuotes = quotes;
-  const selectedQuote = quotes.find(q => q.vehicle.id === selected) || null;
+  const selectedQuote = quotes.find(q => q?.vehicle?.id === selected) || null;
   const activeResult = selectedQuote?.result;
   const selectedVehicleCount = selectedQuote
     ? Math.max(1, Math.ceil(journey.passengers / Math.max(1, selectedQuote.vehicle.capacity || 1)))
