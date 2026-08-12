@@ -1295,6 +1295,10 @@ function nextDayAtSameTime(value) {
 
 
 export default function App({ embed = false }) {
+  // Customer is a public app; admin-only business data is not available here.
+  // Keep the existing public fallbacks so rendering never depends on an undefined db.
+  const db = { globalVars: {}, operatorDetails: {} };
+
   useEffect(() => {
     if (!embed) return;
     const previousBackground = document.body.style.background;
