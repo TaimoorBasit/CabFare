@@ -1,6 +1,8 @@
 const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+const productionApiUrl = 'https://cabfare-backend.mohammad-taimoor855.workers.dev';
+const defaultApiUrl = process.env.NODE_ENV === 'production' ? productionApiUrl : 'http://localhost:5000';
 
-export const API_BASE_URL = (configuredApiUrl || 'http://localhost:5000').replace(/\/+$/, '');
+export const API_BASE_URL = (configuredApiUrl || defaultApiUrl).replace(/\/+$/, '');
 
 export class ApiRequestError extends Error {
   status: number | null;
