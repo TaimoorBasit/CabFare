@@ -1886,7 +1886,7 @@ export default function App({ embed = false }) {
                             <div className="space-y-3 fade-up">
                               <div className="rounded-2xl bg-primary text-white px-5 py-4 flex items-center justify-between gap-3">
                                 <div>
-                                  <div className="text-lg font-bold">{journey.origin.split(",")[0]} <span className="text-impact-red">→</span> {journey.destination.split(",")[0]}</div>
+                                  <div className="text-lg font-bold">{String(journey.origin || "").split(",")[0]} <span className="text-impact-red">→</span> {String(journey.destination || "").split(",")[0]}</div>
                                   <div className="text-xs opacity-75 mt-1">{new Date(journey.departureDate).toLocaleString("en-GB")} · {journey.passengers} passengers</div>
                                 </div>
                                 <button type="button" onClick={()=>setBookingStep(1)} aria-label="Edit journey details" title="Edit journey details" className="w-9 h-9 shrink-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
@@ -2175,9 +2175,9 @@ export default function App({ embed = false }) {
                   }}>
                     <div>
                       <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: 18, display: "flex", alignItems: "center", gap: 8 }}>
-                        <span>{journey.origin.split(',')[0]}</span>
+                          <span>{String(journey.origin || '').split(',')[0]}</span>
                         <span style={{ color: PX.brandRed }}>→</span>
-                        <span>{journey.destination.split(',')[0]}</span>
+                          <span>{String(journey.destination || '').split(',')[0]}</span>
                       </div>
                       <div style={{ fontSize: 12.5, color: "rgba(255,255,255,0.75)", marginTop: 4, fontWeight: 500 }}>
                         {journey.departureDate ? new Date(journey.departureDate).toLocaleString("en-GB") : ""} · {journey.passengers} Passengers · {journey.journeyType === "one-way" ? "One-way" : journey.journeyType === "return" ? "Return" : "Multi-stop"}
