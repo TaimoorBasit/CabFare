@@ -1397,7 +1397,7 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
   for (let d = 1; cells.length < 42; d++) cells.push({ day: d, outside: true });
 
   return (
-    <div className="fade-up flex flex-col rounded-[1.75rem] shadow-2xl border border-outline-variant/60 overflow-hidden bg-white" style={{ height: "min(350px, 78vh)" }}>
+    <div className="fade-up flex flex-col rounded-[1.75rem] shadow-2xl border border-outline-variant/60 overflow-hidden bg-white" style={{ height: "min(322px, 78vh)" }}>
       <div className="bg-deep-navy text-white px-5 py-4 flex items-center gap-3 shrink-0">
         <button type="button" onClick={onBack} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center shrink-0"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
         <span className="font-bold text-[15px] flex-1">{MONTH_FULL[viewMo - 1]} {viewY}</span>
@@ -1425,7 +1425,7 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
               return (
                 <button key={i} type="button" disabled={disabled} onClick={() => setSelDay({ y: viewY, mo: viewMo, d })}
                   style={isToday && !isSelected ? { border: '1px solid #1D225C' } : undefined}
-                  className={`aspect-square rounded-full text-[13px] font-semibold flex items-center justify-center transition-all
+                  className={`aspect-square rounded-full text-[14px] font-semibold flex items-center justify-center transition-all
                     ${isSelected ? "bg-impact-red text-white" : isToday ? "text-deep-navy" : disabled ? "text-gray-300 cursor-not-allowed" : "text-on-surface hover:bg-surface-container"}`}>
                   {d}
                 </button>
@@ -1444,10 +1444,12 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
             <div style={{ border: '1px solid #c7c5d1' }} className="flex items-center justify-center gap-1 bg-white rounded-xl px-2 py-1 mb-1 w-full">
               <input type="text" inputMode="numeric" aria-label="Hour" value={pad2(hour)} onFocus={e => e.target.select()}
                 onChange={e => { const digits = e.target.value.replace(/\D/g, '').slice(-2); setHour(digits === '' ? 0 : Math.min(23, parseInt(digits, 10))); }}
+                onKeyDown={e => { if (e.key === 'ArrowUp') { e.preventDefault(); setHour(h => (h + 1) % 24); } else if (e.key === 'ArrowDown') { e.preventDefault(); setHour(h => (h + 23) % 24); } }}
                 style={{ fontSize: 14, lineHeight: 1, width: 24, padding: 0, margin: 0, border: 'none', background: 'transparent' }} className="font-bold text-deep-navy tabular-nums outline-none text-center" />
               <span style={{ fontSize: 14, lineHeight: 1 }} className="font-bold text-deep-navy">:</span>
               <input type="text" inputMode="numeric" aria-label="Minute" value={pad2(minute)} onFocus={e => e.target.select()}
                 onChange={e => { const digits = e.target.value.replace(/\D/g, '').slice(-2); setMinute(digits === '' ? 0 : Math.min(59, parseInt(digits, 10))); }}
+                onKeyDown={e => { if (e.key === 'ArrowUp') { e.preventDefault(); setMinute(m => (m + 1) % 60); } else if (e.key === 'ArrowDown') { e.preventDefault(); setMinute(m => (m + 59) % 60); } }}
                 style={{ fontSize: 14, lineHeight: 1, width: 24, padding: 0, margin: 0, border: 'none', background: 'transparent' }} className="font-bold text-deep-navy tabular-nums outline-none text-center" />
               <div className="flex flex-col ml-0.5">
                 <button type="button" aria-label="Later" onClick={() => bumpMinute(5)} style={{ height: 11, lineHeight: 1 }} className="text-gray-400 hover:text-deep-navy flex items-center"><span style={{ fontSize: 11, lineHeight: 1 }} className="material-symbols-outlined">keyboard_arrow_up</span></button>
