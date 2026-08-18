@@ -1344,36 +1344,33 @@ function timePresets(startMin, endMin) {
   return out;
 }
 
-function DateTimePicker({ value, onChange, minValue, accent = 'indigo', placeholder = 'Select date & time' }) {
-  const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [viewY, setViewY] = useState(null);
-  const [viewMo, setViewMo] = useState(null);
-  const [selDay, setSelDay] = useState(null);
-  const [hour, setHour] = useState(8);
-  const [minute, setMinute] = useState(0);
+function DateTimeField({ value, onOpen, accent = 'indigo', placeholder = 'Select date & time' }) {
+  const accentBg = accent === 'red' ? 'bg-red-50 text-impact-red' : 'bg-indigo-50 text-indigo-600';
+  return (
+    <button type="button" onClick={onOpen} className="capsule-input w-full flex items-center gap-3 pl-3 pr-4 py-2.5 bg-white border border-outline-variant hover:border-deep-navy transition-all text-left shadow-sm">
+      <span className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center ${accentBg}`}>
+        <span className="material-symbols-outlined text-[18px]">calendar_month</span>
+      </span>
+      <span className={`text-[13px] font-semibold truncate ${value ? "text-on-surface" : "text-gray-400"}`}>
+        {value ? formatShortDateTime(value) : placeholder}
+      </span>
+    </button>
+  );
+}
 
-  useEffect(() => { setMounted(true); }, []);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = e => { if (e.key === 'Escape') setOpen(false); };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [open]);
-
+// Renders in place of the normal form, inside the same #fast-quote card - not a popup/modal, matches the design where the card itself becomes the calendar.
+function DateTimePanel({ value, onChange, onBack, minValue }) {
   const minParts = dateTimeParts(minValue) || dateTimeParts(nowLocalDateTime());
-  const minDayTs = Date.UTC(minParts.y, minParts.mo - 1, minParts.d);
   const todayParts = dateTimeParts(nowLocalDateTime());
+  const minDayTs = Date.UTC(minParts.y, minParts.mo - 1, minParts.d);
+  const existing = dateTimeParts(value);
+  const initial = existing || minParts;
 
-  const openPicker = () => {
-    const existing = dateTimeParts(value);
-    const p = existing || minParts;
-    setViewY(p.y); setViewMo(p.mo);
-    setSelDay(existing ? { y: p.y, mo: p.mo, d: p.d } : null);
-    setHour(p.h); setMinute(p.mi);
-    setOpen(true);
-  };
+  const [viewY, setViewY] = useState(initial.y);
+  const [viewMo, setViewMo] = useState(initial.mo);
+  const [selDay, setSelDay] = useState(existing ? { y: initial.y, mo: initial.mo, d: initial.d } : null);
+  const [hour, setHour] = useState(initial.h);
+  const [minute, setMinute] = useState(initial.mi);
 
   const goMonth = delta => {
     let mo = viewMo + delta, y = viewY;
@@ -1395,111 +1392,92 @@ function DateTimePicker({ value, onChange, minValue, accent = 'indigo', placehol
     setMinute(total % 60);
   };
 
-  const accentBg = accent === 'red' ? 'bg-red-50 text-impact-red' : 'bg-indigo-50 text-indigo-600';
-
-  let cells = [];
-  if (open) {
-    const firstWeekday = weekdayOf(viewY, viewMo, 1);
-    const totalDays = daysInMonth(viewY, viewMo);
-    for (let i = 0; i < firstWeekday; i++) cells.push(null);
-    for (let d = 1; d <= totalDays; d++) cells.push(d);
-  }
+  const firstWeekday = weekdayOf(viewY, viewMo, 1);
+  const totalDays = daysInMonth(viewY, viewMo);
+  const cells = [];
+  for (let i = 0; i < firstWeekday; i++) cells.push(null);
+  for (let d = 1; d <= totalDays; d++) cells.push(d);
 
   return (
-    <>
-      <button type="button" onClick={openPicker} className="capsule-input w-full flex items-center gap-3 pl-3 pr-4 py-2.5 bg-white border border-outline-variant hover:border-deep-navy transition-all text-left shadow-sm">
-        <span className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center ${accentBg}`}>
-          <span className="material-symbols-outlined text-[18px]">calendar_month</span>
-        </span>
-        <span className={`text-[13px] font-semibold truncate ${value ? "text-on-surface" : "text-gray-400"}`}>
-          {value ? formatShortDateTime(value) : placeholder}
-        </span>
-      </button>
+    <div className="fade-up flex flex-col" style={{ maxHeight: "70vh" }}>
+      <div className="bg-deep-navy text-white px-5 sm:px-6 py-4 flex items-center gap-3 shrink-0 -mx-6 sm:-mx-7 mb-1">
+        <button type="button" onClick={onBack} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center shrink-0"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
+        <span className="font-bold text-[15px] flex-1">{MONTH_FULL[viewMo - 1]} {viewY}</span>
+        <div className="flex gap-2">
+          <button type="button" onClick={() => goMonth(-1)} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"><span className="material-symbols-outlined text-[18px]">chevron_left</span></button>
+          <button type="button" onClick={() => goMonth(1)} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"><span className="material-symbols-outlined text-[18px]">chevron_right</span></button>
+        </div>
+      </div>
 
-      {open && mounted && typeof document !== 'undefined' ? createPortal(
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(13,14,72,0.45)", backdropFilter: "blur(4px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onMouseDown={e => { if (e.target === e.currentTarget) setOpen(false); }}>
-          <div className="fade-up w-full max-w-[400px] bg-white rounded-[1.75rem] overflow-hidden shadow-2xl flex flex-col" style={{ maxHeight: "88vh" }}>
-            <div className="bg-deep-navy text-white px-5 py-4 flex items-center justify-between shrink-0">
-              <span className="font-bold text-[15px]">{MONTH_FULL[viewMo - 1]} {viewY}</span>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => goMonth(-1)} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"><span className="material-symbols-outlined text-[18px]">chevron_left</span></button>
-                <button type="button" onClick={() => goMonth(1)} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"><span className="material-symbols-outlined text-[18px]">chevron_right</span></button>
-              </div>
-            </div>
+      <div className="pt-5 overflow-y-auto">
+        <div className="grid grid-cols-7 gap-1 mb-1">
+          {WEEKDAY_LETTER.map((w, i) => <div key={i} className="text-center text-[11px] font-bold text-gray-400">{w}</div>)}
+        </div>
+        <div className="grid grid-cols-7 gap-1 mb-4">
+          {cells.map((d, i) => {
+            if (!d) return <div key={i} />;
+            const dayTs = Date.UTC(viewY, viewMo - 1, d);
+            const disabled = dayTs < minDayTs;
+            const isToday = todayParts && todayParts.y === viewY && todayParts.mo === viewMo && todayParts.d === d;
+            const isSelected = selDay && selDay.y === viewY && selDay.mo === viewMo && selDay.d === d;
+            return (
+              <button key={i} type="button" disabled={disabled} onClick={() => setSelDay({ y: viewY, mo: viewMo, d })}
+                className={`h-9 rounded-full text-[13px] font-semibold flex items-center justify-center transition-all
+                  ${isSelected ? "bg-impact-red text-white" : isToday ? "border border-deep-navy text-deep-navy" : disabled ? "text-gray-300 cursor-not-allowed" : "text-on-surface hover:bg-surface-container"}`}>
+                {d}
+              </button>
+            );
+          })}
+        </div>
 
-            <div className="p-5 overflow-y-auto">
-              <div className="grid grid-cols-7 gap-1 mb-1">
-                {WEEKDAY_LETTER.map((w, i) => <div key={i} className="text-center text-[11px] font-bold text-gray-400">{w}</div>)}
-              </div>
-              <div className="grid grid-cols-7 gap-1 mb-4">
-                {cells.map((d, i) => {
-                  if (!d) return <div key={i} />;
-                  const dayTs = Date.UTC(viewY, viewMo - 1, d);
-                  const disabled = dayTs < minDayTs;
-                  const isToday = todayParts && todayParts.y === viewY && todayParts.mo === viewMo && todayParts.d === d;
-                  const isSelected = selDay && selDay.y === viewY && selDay.mo === viewMo && selDay.d === d;
-                  return (
-                    <button key={i} type="button" disabled={disabled} onClick={() => setSelDay({ y: viewY, mo: viewMo, d })}
-                      className={`h-9 rounded-full text-[13px] font-semibold flex items-center justify-center transition-all
-                        ${isSelected ? "bg-impact-red text-white" : isToday ? "border border-deep-navy text-deep-navy" : disabled ? "text-gray-300 cursor-not-allowed" : "text-on-surface hover:bg-surface-container"}`}>
-                      {d}
-                    </button>
-                  );
-                })}
-              </div>
+        <div className="flex gap-2 mb-5">
+          <button type="button" onClick={() => pickPreset('today')} className="flex-1 h-9 rounded-full border border-outline-variant text-[12px] font-bold text-deep-navy hover:border-deep-navy">Today</button>
+          <button type="button" onClick={() => pickPreset('tomorrow')} className="flex-1 h-9 rounded-full border border-outline-variant text-[12px] font-bold text-deep-navy hover:border-deep-navy">Tomorrow</button>
+          <button type="button" onClick={() => pickPreset('week')} className="flex-1 h-9 rounded-full border border-outline-variant text-[12px] font-bold text-deep-navy hover:border-deep-navy">+1 week</button>
+        </div>
 
-              <div className="flex gap-2 mb-5">
-                <button type="button" onClick={() => pickPreset('today')} className="flex-1 h-9 rounded-full border border-outline-variant text-[12px] font-bold text-deep-navy hover:border-deep-navy">Today</button>
-                <button type="button" onClick={() => pickPreset('tomorrow')} className="flex-1 h-9 rounded-full border border-outline-variant text-[12px] font-bold text-deep-navy hover:border-deep-navy">Tomorrow</button>
-                <button type="button" onClick={() => pickPreset('week')} className="flex-1 h-9 rounded-full border border-outline-variant text-[12px] font-bold text-deep-navy hover:border-deep-navy">+1 week</button>
-              </div>
-
-              <div className="flex items-center gap-2 mb-2">
-                <span className="material-symbols-outlined text-[16px] text-gray-400">schedule</span>
-                <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Pick-up time</span>
-              </div>
-              <div className="flex items-center gap-1 mb-1">
-                <div className="flex items-center gap-2 bg-surface-container rounded-2xl px-4 py-2">
-                  <span className="text-[22px] font-bold text-deep-navy tabular-nums">{pad2(hour)}</span>
-                  <span className="text-[22px] font-bold text-deep-navy">:</span>
-                  <span className="text-[22px] font-bold text-deep-navy tabular-nums">{pad2(minute)}</span>
-                  <div className="flex flex-col ml-1">
-                    <button type="button" aria-label="Later" onClick={() => bumpMinute(5)} className="text-gray-400 hover:text-deep-navy leading-none"><span className="material-symbols-outlined text-[16px]">keyboard_arrow_up</span></button>
-                    <button type="button" aria-label="Earlier" onClick={() => bumpMinute(-5)} className="text-gray-400 hover:text-deep-navy leading-none"><span className="material-symbols-outlined text-[16px]">keyboard_arrow_down</span></button>
-                  </div>
-                </div>
-              </div>
-              <div className="text-[11px] text-gray-400 mb-4">Any minute &middot; 24h</div>
-
-              {TIME_PRESET_GROUPS.map(group => (
-                <div key={group.label} className="mb-4">
-                  <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">{group.label}</div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {timePresets(group.start, group.end).map(mins => {
-                      const h = Math.floor(mins / 60), mi = mins % 60;
-                      const active = hour === h && minute === mi;
-                      return (
-                        <button key={mins} type="button" onClick={() => { setHour(h); setMinute(mi); }}
-                          className={`h-9 rounded-full text-[12px] font-bold border transition-all ${active ? "bg-deep-navy text-white border-deep-navy" : "border-outline-variant text-deep-navy hover:border-deep-navy"}`}>
-                          {pad2(h)}:{pad2(mi)}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="px-5 py-4 border-t border-outline-variant flex items-center justify-between shrink-0 bg-white">
-              <button type="button" onClick={() => { onChange(''); setOpen(false); }} className="text-[13px] font-bold text-gray-400 hover:text-impact-red">Clear</button>
-              <button type="button" disabled={!selDay} onClick={() => { if (selDay) { onChange(dateTimeValue(selDay.y, selDay.mo, selDay.d, hour, minute)); setOpen(false); } }}
-                className="px-8 py-2.5 rounded-full bg-deep-navy text-white text-[13px] font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity">Done</button>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="material-symbols-outlined text-[16px] text-gray-400">schedule</span>
+          <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Pick-up time</span>
+        </div>
+        <div className="flex items-center gap-1 mb-1">
+          <div className="flex items-center gap-2 bg-surface-container rounded-2xl px-4 py-2">
+            <span className="text-[22px] font-bold text-deep-navy tabular-nums">{pad2(hour)}</span>
+            <span className="text-[22px] font-bold text-deep-navy">:</span>
+            <span className="text-[22px] font-bold text-deep-navy tabular-nums">{pad2(minute)}</span>
+            <div className="flex flex-col ml-1">
+              <button type="button" aria-label="Later" onClick={() => bumpMinute(5)} className="text-gray-400 hover:text-deep-navy leading-none"><span className="material-symbols-outlined text-[16px]">keyboard_arrow_up</span></button>
+              <button type="button" aria-label="Earlier" onClick={() => bumpMinute(-5)} className="text-gray-400 hover:text-deep-navy leading-none"><span className="material-symbols-outlined text-[16px]">keyboard_arrow_down</span></button>
             </div>
           </div>
-        </div>,
-        document.body
-      ) : null}
-    </>
+        </div>
+        <div className="text-[11px] text-gray-400 mb-4">Any minute &middot; 24h</div>
+
+        {TIME_PRESET_GROUPS.map(group => (
+          <div key={group.label} className="mb-4">
+            <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">{group.label}</div>
+            <div className="grid grid-cols-2 gap-2">
+              {timePresets(group.start, group.end).map(mins => {
+                const h = Math.floor(mins / 60), mi = mins % 60;
+                const active = hour === h && minute === mi;
+                return (
+                  <button key={mins} type="button" onClick={() => { setHour(h); setMinute(mi); }}
+                    className={`h-9 rounded-full text-[12px] font-bold border transition-all ${active ? "bg-deep-navy text-white border-deep-navy" : "border-outline-variant text-deep-navy hover:border-deep-navy"}`}>
+                    {pad2(h)}:{pad2(mi)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="pt-4 border-t border-outline-variant flex items-center justify-between shrink-0 bg-white">
+        <button type="button" onClick={() => { onChange(''); onBack(); }} className="text-[13px] font-bold text-gray-400 hover:text-impact-red">Clear</button>
+        <button type="button" disabled={!selDay} onClick={() => { if (selDay) onChange(dateTimeValue(selDay.y, selDay.mo, selDay.d, hour, minute)); }}
+          className="px-8 py-2.5 rounded-full bg-deep-navy text-white text-[13px] font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity">Done</button>
+      </div>
+    </div>
   );
 }
 
@@ -1544,6 +1522,7 @@ export default function App({ embed = false }) {
   const [bookingRef, setBookingRef] = useState("");
   const [submissionError, setSubmissionError] = useState("");
   const [bookingStep, setBookingStep] = useState(1);
+  const [activeDatePicker, setActiveDatePicker] = useState(null); // 'departure' | 'return' | null - which field's calendar is showing in place of the form
   const fetchIdRef = useRef(0);
   const [validationError, setValidationError] = useState("");
 
@@ -1848,7 +1827,25 @@ export default function App({ embed = false }) {
                               {[1,2,3,4].map(step => <span key={step} className={`rounded-full transition-all ${bookingStep === step ? "w-6 h-1.5 bg-impact-red" : "w-1.5 h-1.5 bg-deep-navy/20"}`}></span>)}
                             </div>
                           </div>
-                          {bookingStep === 1 && <>
+                          {bookingStep === 1 && (activeDatePicker ? (
+                          <DateTimePanel
+                            value={activeDatePicker === 'departure' ? journey.departureDate : (journey.returnDate || '')}
+                            minValue={activeDatePicker === 'departure' ? nowLocalDateTime() : journey.departureDate}
+                            onBack={() => setActiveDatePicker(null)}
+                            onChange={val => {
+                              if (activeDatePicker === 'departure') {
+                                setJ(j => ({
+                                  ...j,
+                                  departureDate: val,
+                                  returnDate: j.journeyType === 'return' && !isReturnAfterDeparture(val, j.returnDate) ? nextDayAtSameTime(val) : j.returnDate
+                                }));
+                              } else {
+                                setJ(j => ({ ...j, returnDate: val }));
+                              }
+                              setActiveDatePicker(null);
+                            }}
+                          />
+                          ) : <>
                           <div className="flex p-1.5 bg-surface-container rounded-full mb-8">
                             <button type="button" onClick={()=>setJ(j=>({...j, journeyType: "one-way"}))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType !== "return" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>One-Way</button>
                             <button type="button" onClick={()=>setJ(j=>({
@@ -1926,32 +1923,16 @@ export default function App({ embed = false }) {
                               </div>
                             </div>
 
-                            {/* Departure/Return - custom calendar+time picker (shared component), same trigger style for both fields */}
+                            {/* Departure/Return - trigger opens the calendar inline in this same card (see activeDatePicker below), not a popup */}
                             <div className={`grid grid-cols-1 ${journey.journeyType === "return" ? "sm:grid-cols-2" : ""} gap-4`}>
                               <div>
                                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1 ml-2">Departure</label>
-                                <DateTimePicker
-                                  accent="indigo"
-                                  minValue={nowLocalDateTime()}
-                                  value={journey.departureDate}
-                                  onChange={departureDate => setJ(j => ({
-                                    ...j,
-                                    departureDate,
-                                    returnDate: j.journeyType === 'return' && !isReturnAfterDeparture(departureDate, j.returnDate)
-                                      ? nextDayAtSameTime(departureDate)
-                                      : j.returnDate
-                                  }))}
-                                />
+                                <DateTimeField accent="indigo" value={journey.departureDate} onOpen={() => setActiveDatePicker('departure')} />
                               </div>
                               {journey.journeyType === 'return' && (
                               <div>
                                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1 ml-2">Return</label>
-                                <DateTimePicker
-                                  accent="red"
-                                  minValue={journey.departureDate}
-                                  value={journey.returnDate || ''}
-                                  onChange={returnDate => setJ(j => ({ ...j, returnDate }))}
-                                />
+                                <DateTimeField accent="red" value={journey.returnDate || ''} onOpen={() => setActiveDatePicker('return')} />
                               </div>
                               )}
                             </div>
@@ -1970,7 +1951,7 @@ export default function App({ embed = false }) {
                             </button>
                             <p className="text-center text-[11px] text-gray-400 mt-3">Live pricing &middot; No obligation &middot; Response in minutes</p>
                           </form>
-                          </>}
+                          </>)}
 
                           {bookingStep === 2 && (
                             <form className="customer-details-form space-y-4 fade-up" onSubmit={e => {
