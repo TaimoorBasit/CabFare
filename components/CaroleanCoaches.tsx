@@ -1399,7 +1399,7 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
   for (let d = 1; d <= totalDays; d++) cells.push(d);
 
   return (
-    <div className="fade-up flex flex-col rounded-[1.75rem] shadow-2xl border border-outline-variant/60 overflow-hidden bg-white" style={{ height: "min(560px, 78vh)" }}>
+    <div className="fade-up flex flex-col rounded-[1.75rem] shadow-2xl border border-outline-variant/60 overflow-hidden bg-white" style={{ height: "min(420px, 78vh)" }}>
       <div className="bg-deep-navy text-white px-5 py-4 flex items-center gap-3 shrink-0">
         <button type="button" onClick={onBack} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center shrink-0"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
         <span className="font-bold text-[15px] flex-1">{MONTH_FULL[viewMo - 1]} {viewY}</span>
