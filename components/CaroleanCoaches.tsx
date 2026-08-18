@@ -1466,10 +1466,8 @@ export default function App({ embed = false }) {
 
 
 
-    const verifiedQuotes = await buildQuotes();
-    if (Array.isArray(verifiedQuotes) && verifiedQuotes.length > 0) {
-      setBookingStep(2);
-    }
+    setBookingStep(2);
+    void buildQuotes();
   };
 
   const handleFinalBookingSubmit = async () => {
