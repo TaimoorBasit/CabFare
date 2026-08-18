@@ -1333,9 +1333,11 @@ function formatShortDateTime(value) {
 }
 
 const TIME_PRESET_GROUPS = [
+  { label: 'Early morning presets', start: 0, end: 5 * 60 },
   { label: 'Morning presets', start: 5 * 60, end: 12 * 60 },
   { label: 'Afternoon presets', start: 12 * 60, end: 17 * 60 },
   { label: 'Evening presets', start: 17 * 60, end: 22 * 60 },
+  { label: 'Night presets', start: 22 * 60, end: 24 * 60 },
 ];
 
 function timePresets(startMin, endMin) {
@@ -1440,9 +1442,13 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pick-up time</span>
             </div>
             <div style={{ border: '1px solid #c7c5d1' }} className="flex items-center justify-center gap-1 bg-white rounded-xl px-2 py-1 mb-1 w-full">
-              <span style={{ fontSize: 14, lineHeight: 1 }} className="font-bold text-deep-navy tabular-nums">{pad2(hour)}</span>
+              <input type="text" inputMode="numeric" aria-label="Hour" value={pad2(hour)} onFocus={e => e.target.select()}
+                onChange={e => { const digits = e.target.value.replace(/\D/g, '').slice(-2); setHour(digits === '' ? 0 : Math.min(23, parseInt(digits, 10))); }}
+                style={{ fontSize: 14, lineHeight: 1, width: 24, padding: 0, margin: 0, border: 'none', background: 'transparent' }} className="font-bold text-deep-navy tabular-nums outline-none text-center" />
               <span style={{ fontSize: 14, lineHeight: 1 }} className="font-bold text-deep-navy">:</span>
-              <span style={{ fontSize: 14, lineHeight: 1 }} className="font-bold text-deep-navy tabular-nums">{pad2(minute)}</span>
+              <input type="text" inputMode="numeric" aria-label="Minute" value={pad2(minute)} onFocus={e => e.target.select()}
+                onChange={e => { const digits = e.target.value.replace(/\D/g, '').slice(-2); setMinute(digits === '' ? 0 : Math.min(59, parseInt(digits, 10))); }}
+                style={{ fontSize: 14, lineHeight: 1, width: 24, padding: 0, margin: 0, border: 'none', background: 'transparent' }} className="font-bold text-deep-navy tabular-nums outline-none text-center" />
               <div className="flex flex-col ml-0.5">
                 <button type="button" aria-label="Later" onClick={() => bumpMinute(5)} style={{ height: 11, lineHeight: 1 }} className="text-gray-400 hover:text-deep-navy flex items-center"><span style={{ fontSize: 11, lineHeight: 1 }} className="material-symbols-outlined">keyboard_arrow_up</span></button>
                 <button type="button" aria-label="Earlier" onClick={() => bumpMinute(-5)} style={{ height: 11, lineHeight: 1 }} className="text-gray-400 hover:text-deep-navy flex items-center"><span style={{ fontSize: 11, lineHeight: 1 }} className="material-symbols-outlined">keyboard_arrow_down</span></button>
