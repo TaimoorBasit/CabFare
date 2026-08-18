@@ -1397,7 +1397,7 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
   for (let d = 1; cells.length < 42; d++) cells.push({ day: d, outside: true });
 
   return (
-    <div className="fade-up h-full flex flex-col rounded-[1.75rem] shadow-2xl border border-outline-variant/60 overflow-hidden bg-white">
+    <div className="fade-up flex flex-col rounded-[1.75rem] shadow-2xl border border-outline-variant/60 overflow-hidden bg-white" style={{ height: "min(380px, 78vh)" }}>
       <div className="bg-deep-navy text-white px-5 py-4 flex items-center gap-3 shrink-0">
         <button type="button" onClick={onBack} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center shrink-0"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
         <span className="font-bold text-[15px] flex-1">{MONTH_FULL[viewMo - 1]} {viewY}</span>
@@ -1413,7 +1413,7 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
           <div className="grid grid-cols-7 gap-0.5 mb-2">
             {WEEKDAY_LETTER.map((w, i) => <div key={i} className="text-center text-[11px] font-bold text-gray-400">{w}</div>)}
           </div>
-          <div className="grid grid-cols-7 gap-0.5">
+          <div className="grid grid-cols-7 gap-x-0.5 gap-y-3.5">
             {cells.map(({ day: d, outside }, i) => {
               if (outside) {
                 return <div key={i} className="aspect-square text-[13px] font-semibold flex items-center justify-center text-gray-300">{d}</div>;
@@ -1837,10 +1837,10 @@ export default function App({ embed = false }) {
                               {[1,2,3,4].map(step => <span key={step} className={`rounded-full transition-all ${bookingStep === step ? "w-6 h-1.5 bg-impact-red" : "w-1.5 h-1.5 bg-deep-navy/20"}`}></span>)}
                             </div>
                           </div>
-                          {bookingStep === 1 && <div className="relative">
+                          {bookingStep === 1 && <div className="relative" style={activeDatePicker ? { height: 380, overflow: 'hidden' } : undefined}>
                           {/* Calendar overlays the still-mounted form below (absolute, out of flow) - the card's height never changes when this opens, and the toggle peeks through under the rounded corners like the reference */}
                           {activeDatePicker && (
-                            <div className="absolute inset-0 z-20">
+                            <div className="absolute inset-x-0 top-0 z-20">
                               <DateTimePanel
                                 value={activeDatePicker === 'departure' ? journey.departureDate : (journey.returnDate || '')}
                                 minValue={activeDatePicker === 'departure' ? nowLocalDateTime() : journey.departureDate}
