@@ -1446,13 +1446,13 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
             <span className="material-symbols-outlined text-[14px] text-gray-400">schedule</span>
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pick-up time</span>
           </div>
-          <div className="flex items-center gap-1.5 bg-surface-container rounded-2xl px-3 py-2 mb-1 w-fit">
-            <span className="text-[18px] font-bold text-deep-navy tabular-nums">{pad2(hour)}</span>
-            <span className="text-[18px] font-bold text-deep-navy">:</span>
-            <span className="text-[18px] font-bold text-deep-navy tabular-nums">{pad2(minute)}</span>
+          <div style={{ border: '1px solid #c7c5d1' }} className="flex items-center gap-1 bg-white rounded-xl px-2 py-1 mb-1 w-fit">
+            <span className="text-[15px] font-bold text-deep-navy tabular-nums">{pad2(hour)}</span>
+            <span className="text-[15px] font-bold text-deep-navy">:</span>
+            <span className="text-[15px] font-bold text-deep-navy tabular-nums">{pad2(minute)}</span>
             <div className="flex flex-col ml-0.5">
-              <button type="button" aria-label="Later" onClick={() => bumpMinute(5)} className="text-gray-400 hover:text-deep-navy leading-none"><span className="material-symbols-outlined text-[14px]">keyboard_arrow_up</span></button>
-              <button type="button" aria-label="Earlier" onClick={() => bumpMinute(-5)} className="text-gray-400 hover:text-deep-navy leading-none"><span className="material-symbols-outlined text-[14px]">keyboard_arrow_down</span></button>
+              <button type="button" aria-label="Later" onClick={() => bumpMinute(5)} className="text-gray-400 hover:text-deep-navy leading-none"><span className="material-symbols-outlined text-[13px]">keyboard_arrow_up</span></button>
+              <button type="button" aria-label="Earlier" onClick={() => bumpMinute(-5)} className="text-gray-400 hover:text-deep-navy leading-none"><span className="material-symbols-outlined text-[13px]">keyboard_arrow_down</span></button>
             </div>
           </div>
           <div className="text-[10px] text-gray-400 mb-3">Any minute &middot; 24h</div>
