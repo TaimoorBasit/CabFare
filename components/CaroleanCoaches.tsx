@@ -1890,7 +1890,7 @@ export default function App({ embed = false }) {
                               </div>
                               <div className="h-6 flex items-center justify-between px-1">
                                 <span className="text-[11px] text-gray-400">
-                                  {(journey.stops || []).length > 0 ? `${journey.stops.length} stop${journey.stops.length > 1 ? "s" : ""}` : "Optional via points"}
+                                  {(journey.stops || []).length > 0 ? `${journey.stops.length} stop${journey.stops.length > 1 ? "s" : ""}` : ""}
                                 </span>
                                 <button type="button" onClick={addStop} className="h-7 px-3 rounded-full bg-white border border-outline-variant text-deep-navy text-[11px] font-bold flex items-center gap-1.5 hover:border-deep-navy hover:shadow-sm transition-all">
                                   <span className="material-symbols-outlined text-[16px]">add</span>
