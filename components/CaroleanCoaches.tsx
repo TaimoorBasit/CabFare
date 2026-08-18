@@ -1800,11 +1800,11 @@ export default function App({ embed = false }) {
                                 <label className="field-label">Special requests <span className="normal-case font-normal">(optional)</span></label>
                                 <textarea className="quote-details-field !text-left" value={journey.specialRequests} onChange={e=>setJ(j=>({...j,specialRequests:e.target.value}))} placeholder="Wheelchair access, mobility assistance, child seats, additional stops, or other instructions"/>
                               </div>
-                            {/* Vehicle, Passengers & Luggage */}
-                            <div className="flex gap-2 w-full">
-                              {/* Vehicle ~45% */}
-                              <div className="relative group" style={{flex:'0 0 45%'}}>
-                                <select className="w-full h-[56px] !appearance-none pl-4 pr-8 bg-white border border-outline-variant rounded-full focus:outline-none focus:border-deep-navy transition-all text-[12px] font-bold text-deep-navy cursor-pointer shadow-sm"
+                            {/* Vehicle, Passengers & Luggage - stacked on narrow viewports, row once there's room */}
+                            <div className="flex flex-col sm:flex-row gap-2 w-full">
+                              {/* Vehicle */}
+                              <div className="relative group w-full sm:flex-[0_0_45%] min-w-0">
+                                <select className="w-full h-[56px] !appearance-none pl-4 pr-8 bg-white border border-outline-variant rounded-full focus:outline-none focus:border-deep-navy transition-all text-[13px] font-bold text-deep-navy cursor-pointer shadow-sm overflow-hidden text-ellipsis whitespace-nowrap"
                                   style={{ backgroundImage: 'none' }}
                                   value={journey.vehiclePreference || "minibus"} onChange={e=>{
                                     const v = e.target.value;
@@ -1821,25 +1821,25 @@ export default function App({ embed = false }) {
                                 <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[18px]">expand_more</span>
                               </div>
 
-                              {/* Passengers ~27.5% */}
-                              <div className="flex-1 relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden">
+                              {/* Passengers */}
+                              <div className="w-full sm:flex-1 relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden min-w-0">
                                 <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.max(1, (j.passengers || 16) - 1)}))} className="absolute left-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none z-10"><span className="material-symbols-outlined text-[18px]">remove</span></button>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-8">
                                   <span className="text-[17px] font-bold text-deep-navy leading-none">{journey.passengers || 16}</span>
-                                  <div className="text-[9px] font-bold text-gray-500 uppercase tracking-tight leading-none mt-[2px]">Passengers</div>
+                                  <div className="text-[9px] font-bold text-gray-500 uppercase tracking-tight leading-none mt-[2px] whitespace-nowrap">Passengers</div>
                                 </div>
                                 <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.min(100, (j.passengers || 16) + 1)}))} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4ADE80] rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none z-10"><span className="material-symbols-outlined text-[18px]">add</span></button>
                               </div>
 
-                              {/* Luggage ~27.5% */}
-                              <div className="relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden" style={{flex: "0 0 27.5%"}}>
+                              {/* Luggage */}
+                              <div className="w-full sm:flex-[0_0_27.5%] relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden min-w-0">
                                 <button
                                   type="button"
                                   aria-label="Decrease 23kg suitcases"
                                   onClick={()=>setJ(j => ({...j, suitcaseCount: Math.max(0, (j.suitcaseCount ?? 0) - 1)}))}
                                   className="absolute left-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center z-10 focus:outline-none"
                                 ><span className="material-symbols-outlined text-[18px]">remove</span></button>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-8">
                                   <span className="text-[17px] font-bold text-deep-navy leading-none">
                                     {journey.suitcaseCount ?? 0}
                                   </span>
