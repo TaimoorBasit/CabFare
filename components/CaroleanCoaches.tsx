@@ -1329,7 +1329,6 @@ export default function App({ embed = false }) {
   const [submitted, setSubmitted]   = useState(false);
   const [bookingRef, setBookingRef] = useState("");
   const [submissionError, setSubmissionError] = useState("");
-  const [luggageType, setLuggageType] = useState("handbag");
   const [bookingStep, setBookingStep] = useState(1);
   const fetchIdRef = useRef(0);
   const [validationError, setValidationError] = useState("");
@@ -1836,39 +1835,20 @@ export default function App({ embed = false }) {
                               <div className="relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden" style={{flex: "0 0 27.5%"}}>
                                 <button
                                   type="button"
-                                  aria-label={`Decrease ${luggageType === "handbag" ? "handbags" : "23kg suitcases"}`}
-                                  onClick={()=>setJ(j => luggageType === "handbag"
-                                    ? {...j, handbagCount: Math.max(0, (j.handbagCount ?? 0) - 1)}
-                                    : {...j, suitcaseCount: Math.max(0, (j.suitcaseCount ?? 0) - 1)}
-                                  )}
+                                  aria-label="Decrease 23kg suitcases"
+                                  onClick={()=>setJ(j => ({...j, suitcaseCount: Math.max(0, (j.suitcaseCount ?? 0) - 1)}))}
                                   className="absolute left-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center z-10 focus:outline-none"
                                 ><span className="material-symbols-outlined text-[18px]">remove</span></button>
                                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                                   <span className="text-[17px] font-bold text-deep-navy leading-none">
-                                    {luggageType === "handbag" ? (journey.handbagCount ?? 0) : (journey.suitcaseCount ?? 0)}
+                                    {journey.suitcaseCount ?? 0}
                                   </span>
-                                  <div className="relative text-[9px] font-bold text-gray-500 uppercase tracking-tight leading-none mt-[2px] text-center whitespace-nowrap pointer-events-auto flex items-center justify-center">
-                                    <div className="flex items-center justify-center cursor-pointer relative pr-3">
-                                      {luggageType === "handbag" ? 'HANDBAGS' : 'SUITCASES'}<span className="material-symbols-outlined absolute right-[-2px] text-[14px] opacity-60 pointer-events-none">expand_more</span>
-                                    </div>
-                                    <select
-                                      aria-label="Choose luggage type"
-                                      value={luggageType}
-                                      onChange={e=>setLuggageType(e.target.value)}
-                                      className="absolute inset-0 !w-full !h-full !min-h-0 !m-0 !p-0 opacity-0 cursor-pointer"
-                                    >
-                                      <option value="handbag">Handbags</option>
-                                      <option value="suitcase">Suitcase 23kg</option>
-                                    </select>
-                                  </div>
+                                  <div className="text-[9px] font-bold text-gray-500 uppercase tracking-tight leading-none mt-[2px] text-center whitespace-nowrap">SUITCASES 23KG+</div>
                                 </div>
                                 <button
                                   type="button"
-                                  aria-label={`Increase ${luggageType === "handbag" ? "handbags" : "23kg suitcases"}`}
-                                  onClick={()=>setJ(j => luggageType === "handbag"
-                                    ? {...j, handbagCount: (j.handbagCount ?? 0) + 1}
-                                    : {...j, suitcaseCount: (j.suitcaseCount ?? 0) + 1}
-                                  )}
+                                  aria-label="Increase 23kg suitcases"
+                                  onClick={()=>setJ(j => ({...j, suitcaseCount: (j.suitcaseCount ?? 0) + 1}))}
                                   className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4ADE80] rounded-full transition-all w-7 h-7 flex items-center justify-center z-10 focus:outline-none"
                                 ><span className="material-symbols-outlined text-[18px]">add</span></button>
                               </div>
@@ -1896,7 +1876,7 @@ export default function App({ embed = false }) {
                                   <span className="material-symbols-outlined text-[18px]">edit</span>
                                 </button>
                               </div>
-                              <div className="grid grid-cols-3 gap-2 text-xs">
+                              <div className="grid grid-cols-2 gap-2 text-xs">
                                 <div className="rounded-xl bg-surface-container-low p-3 overflow-hidden">
                                   <span className="field-label">Stops</span>
                                   {journey.journeyType === "return" ? (
@@ -1916,7 +1896,6 @@ export default function App({ embed = false }) {
                                     <strong className="block">One-way</strong>
                                   )}
                                 </div>
-                                <div className="rounded-xl bg-surface-container-low p-3"><span className="field-label">Luggage</span><strong>{journey.handbagCount} hand · {journey.suitcaseCount} cases</strong></div>
                                 <div className="rounded-xl bg-surface-container-low p-3 min-w-0"><span className="field-label">Contact</span><strong>{journey.name}</strong><br/><span className="text-[10px] break-all">{journey.email}</span></div>
                               </div>
                               {journey.specialRequests && <div className="rounded-xl border border-outline-variant p-4 text-sm"><span className="field-label">Special requests</span>{journey.specialRequests}</div>}
@@ -1925,7 +1904,7 @@ export default function App({ embed = false }) {
                                   <div>
                                     <span className="field-label">Selected option</span>
                                     <strong className="text-deep-navy">{selectedQuote ? `${selectedVehicleCount} × ${selectedQuote.vehicle.name}` : "Verified option unavailable"}</strong>
-                                    <p className="text-xs text-on-surface-variant mt-1">{journey.passengers} passengers · {journey.suitcaseCount} suitcases · {journey.handbagCount} handbags</p>
+                                    <p className="text-xs text-on-surface-variant mt-1">{journey.passengers} passengers</p>
                                   </div>
                                   {selectedQuote && (
                                     <div className="text-right shrink-0">
