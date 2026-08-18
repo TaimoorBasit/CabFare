@@ -1347,7 +1347,7 @@ function timePresets(startMin, endMin) {
 function DateTimeField({ value, onOpen, accent = 'indigo', placeholder = 'Select date & time' }) {
   const accentBg = accent === 'red' ? 'bg-red-50 text-impact-red' : 'bg-indigo-50 text-indigo-600';
   return (
-    <button type="button" onClick={onOpen} className="capsule-input w-full flex items-center gap-3 pl-3 pr-4 py-2.5 bg-white border border-outline-variant hover:border-deep-navy transition-all text-left shadow-sm">
+    <button type="button" onClick={onOpen} style={{ border: '1px solid #c7c5d1' }} className="capsule-input w-full flex items-center gap-3 pl-3 pr-4 py-2.5 bg-white hover:bg-surface-container/30 transition-all text-left shadow-sm">
       <span className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center ${accentBg}`}>
         <span className="material-symbols-outlined text-[18px]">calendar_month</span>
       </span>
@@ -1399,8 +1399,8 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
   for (let d = 1; d <= totalDays; d++) cells.push(d);
 
   return (
-    <div className="fade-up flex flex-col" style={{ maxHeight: "70vh" }}>
-      <div className="bg-deep-navy text-white px-5 sm:px-6 py-4 flex items-center gap-3 shrink-0 -mx-6 sm:-mx-7 mb-1">
+    <div className="fade-up flex flex-col rounded-[1.75rem] shadow-2xl border border-outline-variant/60 overflow-hidden bg-white" style={{ maxHeight: "78vh" }}>
+      <div className="bg-deep-navy text-white px-5 py-4 flex items-center gap-3 shrink-0">
         <button type="button" onClick={onBack} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center shrink-0"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
         <span className="font-bold text-[15px] flex-1">{MONTH_FULL[viewMo - 1]} {viewY}</span>
         <div className="flex gap-2">
@@ -1409,70 +1409,76 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
         </div>
       </div>
 
-      <div className="pt-5 overflow-y-auto">
-        <div className="grid grid-cols-7 gap-1 mb-1">
-          {WEEKDAY_LETTER.map((w, i) => <div key={i} className="text-center text-[11px] font-bold text-gray-400">{w}</div>)}
-        </div>
-        <div className="grid grid-cols-7 gap-1 mb-4">
-          {cells.map((d, i) => {
-            if (!d) return <div key={i} />;
-            const dayTs = Date.UTC(viewY, viewMo - 1, d);
-            const disabled = dayTs < minDayTs;
-            const isToday = todayParts && todayParts.y === viewY && todayParts.mo === viewMo && todayParts.d === d;
-            const isSelected = selDay && selDay.y === viewY && selDay.mo === viewMo && selDay.d === d;
-            return (
-              <button key={i} type="button" disabled={disabled} onClick={() => setSelDay({ y: viewY, mo: viewMo, d })}
-                className={`h-9 rounded-full text-[13px] font-semibold flex items-center justify-center transition-all
-                  ${isSelected ? "bg-impact-red text-white" : isToday ? "border border-deep-navy text-deep-navy" : disabled ? "text-gray-300 cursor-not-allowed" : "text-on-surface hover:bg-surface-container"}`}>
-                {d}
-              </button>
-            );
-          })}
-        </div>
+      <div className="p-4 overflow-y-auto grid grid-cols-2 gap-4">
+        {/* Left column: calendar + quick date presets */}
+        <div className="min-w-0">
+          <div className="grid grid-cols-7 gap-0.5 mb-1">
+            {WEEKDAY_LETTER.map((w, i) => <div key={i} className="text-center text-[10px] font-bold text-gray-400">{w}</div>)}
+          </div>
+          <div className="grid grid-cols-7 gap-0.5 mb-3">
+            {cells.map((d, i) => {
+              if (!d) return <div key={i} />;
+              const dayTs = Date.UTC(viewY, viewMo - 1, d);
+              const disabled = dayTs < minDayTs;
+              const isToday = todayParts && todayParts.y === viewY && todayParts.mo === viewMo && todayParts.d === d;
+              const isSelected = selDay && selDay.y === viewY && selDay.mo === viewMo && selDay.d === d;
+              return (
+                <button key={i} type="button" disabled={disabled} onClick={() => setSelDay({ y: viewY, mo: viewMo, d })}
+                  style={isToday && !isSelected ? { border: '1px solid #1D225C' } : undefined}
+                  className={`aspect-square rounded-full text-[11px] font-semibold flex items-center justify-center transition-all
+                    ${isSelected ? "bg-impact-red text-white" : isToday ? "text-deep-navy" : disabled ? "text-gray-300 cursor-not-allowed" : "text-on-surface hover:bg-surface-container"}`}>
+                  {d}
+                </button>
+              );
+            })}
+          </div>
 
-        <div className="flex gap-2 mb-5">
-          <button type="button" onClick={() => pickPreset('today')} className="flex-1 h-9 rounded-full border border-outline-variant text-[12px] font-bold text-deep-navy hover:border-deep-navy">Today</button>
-          <button type="button" onClick={() => pickPreset('tomorrow')} className="flex-1 h-9 rounded-full border border-outline-variant text-[12px] font-bold text-deep-navy hover:border-deep-navy">Tomorrow</button>
-          <button type="button" onClick={() => pickPreset('week')} className="flex-1 h-9 rounded-full border border-outline-variant text-[12px] font-bold text-deep-navy hover:border-deep-navy">+1 week</button>
-        </div>
-
-        <div className="flex items-center gap-2 mb-2">
-          <span className="material-symbols-outlined text-[16px] text-gray-400">schedule</span>
-          <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Pick-up time</span>
-        </div>
-        <div className="flex items-center gap-1 mb-1">
-          <div className="flex items-center gap-2 bg-surface-container rounded-2xl px-4 py-2">
-            <span className="text-[22px] font-bold text-deep-navy tabular-nums">{pad2(hour)}</span>
-            <span className="text-[22px] font-bold text-deep-navy">:</span>
-            <span className="text-[22px] font-bold text-deep-navy tabular-nums">{pad2(minute)}</span>
-            <div className="flex flex-col ml-1">
-              <button type="button" aria-label="Later" onClick={() => bumpMinute(5)} className="text-gray-400 hover:text-deep-navy leading-none"><span className="material-symbols-outlined text-[16px]">keyboard_arrow_up</span></button>
-              <button type="button" aria-label="Earlier" onClick={() => bumpMinute(-5)} className="text-gray-400 hover:text-deep-navy leading-none"><span className="material-symbols-outlined text-[16px]">keyboard_arrow_down</span></button>
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <button type="button" onClick={() => pickPreset('today')} style={{ border: '1px solid #c7c5d1' }} className="h-7 px-2 rounded-full text-[10px] font-bold text-deep-navy hover:bg-surface-container/40">Today</button>
+            <button type="button" onClick={() => pickPreset('tomorrow')} style={{ border: '1px solid #c7c5d1' }} className="h-7 px-2 rounded-full text-[10px] font-bold text-deep-navy hover:bg-surface-container/40">Tomorrow</button>
+            <button type="button" onClick={() => pickPreset('week')} style={{ border: '1px solid #c7c5d1' }} className="h-7 px-2 rounded-full text-[10px] font-bold text-deep-navy hover:bg-surface-container/40">+1 week</button>
           </div>
         </div>
-        <div className="text-[11px] text-gray-400 mb-4">Any minute &middot; 24h</div>
 
-        {TIME_PRESET_GROUPS.map(group => (
-          <div key={group.label} className="mb-4">
-            <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">{group.label}</div>
-            <div className="grid grid-cols-2 gap-2">
-              {timePresets(group.start, group.end).map(mins => {
-                const h = Math.floor(mins / 60), mi = mins % 60;
-                const active = hour === h && minute === mi;
-                return (
-                  <button key={mins} type="button" onClick={() => { setHour(h); setMinute(mi); }}
-                    className={`h-9 rounded-full text-[12px] font-bold border transition-all ${active ? "bg-deep-navy text-white border-deep-navy" : "border-outline-variant text-deep-navy hover:border-deep-navy"}`}>
-                    {pad2(h)}:{pad2(mi)}
-                  </button>
-                );
-              })}
+        {/* Right column: time */}
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5 mb-2">
+            <span className="material-symbols-outlined text-[14px] text-gray-400">schedule</span>
+            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pick-up time</span>
+          </div>
+          <div className="flex items-center gap-1.5 bg-surface-container rounded-2xl px-3 py-2 mb-1 w-fit">
+            <span className="text-[18px] font-bold text-deep-navy tabular-nums">{pad2(hour)}</span>
+            <span className="text-[18px] font-bold text-deep-navy">:</span>
+            <span className="text-[18px] font-bold text-deep-navy tabular-nums">{pad2(minute)}</span>
+            <div className="flex flex-col ml-0.5">
+              <button type="button" aria-label="Later" onClick={() => bumpMinute(5)} className="text-gray-400 hover:text-deep-navy leading-none"><span className="material-symbols-outlined text-[14px]">keyboard_arrow_up</span></button>
+              <button type="button" aria-label="Earlier" onClick={() => bumpMinute(-5)} className="text-gray-400 hover:text-deep-navy leading-none"><span className="material-symbols-outlined text-[14px]">keyboard_arrow_down</span></button>
             </div>
           </div>
-        ))}
+          <div className="text-[10px] text-gray-400 mb-3">Any minute &middot; 24h</div>
+
+          {TIME_PRESET_GROUPS.map(group => (
+            <div key={group.label} className="mb-3">
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">{group.label}</div>
+              <div className="grid grid-cols-2 gap-1.5">
+                {timePresets(group.start, group.end).map(mins => {
+                  const h = Math.floor(mins / 60), mi = mins % 60;
+                  const active = hour === h && minute === mi;
+                  return (
+                    <button key={mins} type="button" onClick={() => { setHour(h); setMinute(mi); }}
+                      style={{ border: active ? '1px solid #D2232A' : '1px solid #c7c5d1' }}
+                      className={`h-7 rounded-full text-[10px] font-bold transition-all ${active ? "bg-impact-red text-white" : "text-deep-navy hover:bg-surface-container/40"}`}>
+                      {pad2(h)}:{pad2(mi)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="pt-4 border-t border-outline-variant flex items-center justify-between shrink-0 bg-white">
+      <div className="px-5 py-4 border-t border-outline-variant flex items-center justify-between shrink-0 bg-white">
         <button type="button" onClick={() => { onChange(''); onBack(); }} className="text-[13px] font-bold text-gray-400 hover:text-impact-red">Clear</button>
         <button type="button" disabled={!selDay} onClick={() => { if (selDay) onChange(dateTimeValue(selDay.y, selDay.mo, selDay.d, hour, minute)); }}
           className="px-8 py-2.5 rounded-full bg-deep-navy text-white text-[13px] font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity">Done</button>
