@@ -1397,7 +1397,7 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
   for (let d = 1; cells.length < 42; d++) cells.push({ day: d, outside: true });
 
   return (
-    <div className="fade-up flex flex-col rounded-[1.75rem] shadow-2xl border border-outline-variant/60 overflow-hidden bg-white" style={{ height: "min(322px, 78vh)" }}>
+    <div className="fade-up h-full flex flex-col rounded-[1.75rem] shadow-2xl border border-outline-variant/60 overflow-hidden bg-white">
       <div className="bg-deep-navy text-white px-5 py-4 flex items-center gap-3 shrink-0">
         <button type="button" onClick={onBack} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center shrink-0"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
         <span className="font-bold text-[15px] flex-1">{MONTH_FULL[viewMo - 1]} {viewY}</span>
@@ -1840,7 +1840,7 @@ export default function App({ embed = false }) {
                           {bookingStep === 1 && <div className="relative">
                           {/* Calendar overlays the still-mounted form below (absolute, out of flow) - the card's height never changes when this opens, and the toggle peeks through under the rounded corners like the reference */}
                           {activeDatePicker && (
-                            <div className="absolute inset-x-0 top-0 z-20">
+                            <div className="absolute inset-0 z-20">
                               <DateTimePanel
                                 value={activeDatePicker === 'departure' ? journey.departureDate : (journey.returnDate || '')}
                                 minValue={activeDatePicker === 'departure' ? nowLocalDateTime() : journey.departureDate}
