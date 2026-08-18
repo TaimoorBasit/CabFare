@@ -88,7 +88,7 @@ const config: Config = {
       },
       "fontSize": {
           "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
-          "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+          "label-lg": ["16px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
           "headline-xl-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "800"}],
           "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
           "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
