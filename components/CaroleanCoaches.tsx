@@ -1413,7 +1413,7 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
           <div className="grid grid-cols-7 gap-0.5 mb-2">
             {WEEKDAY_LETTER.map((w, i) => <div key={i} className="text-center text-[11px] font-bold text-gray-400">{w}</div>)}
           </div>
-          <div className="grid grid-cols-7 gap-x-0.5 gap-y-3.5">
+          <div className="grid grid-cols-7 gap-x-0.5 gap-y-[18px]">
             {cells.map(({ day: d, outside }, i) => {
               if (outside) {
                 return <div key={i} className="aspect-square text-[13px] font-semibold flex items-center justify-center text-gray-300">{d}</div>;
@@ -1482,10 +1482,10 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
         </div>
       </div>
 
-      <div className="px-5 py-4 border-t border-outline-variant flex items-center justify-between shrink-0 bg-white">
+      <div className="px-5 py-2 border-t border-outline-variant flex items-center justify-between shrink-0 bg-white">
         <button type="button" onClick={() => { onChange(''); onBack(); }} className="text-[13px] font-bold text-gray-400 hover:text-impact-red">Clear</button>
         <button type="button" disabled={!selDay} onClick={() => { if (selDay) onChange(dateTimeValue(selDay.y, selDay.mo, selDay.d, hour, minute)); }}
-          className="px-8 py-2.5 rounded-full bg-deep-navy text-white text-[13px] font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity">Done</button>
+          className="px-6 py-1.5 rounded-full bg-deep-navy text-white text-[13px] font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity">Done</button>
       </div>
     </div>
   );
