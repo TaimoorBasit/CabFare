@@ -1815,56 +1815,54 @@ export default function App({ embed = false }) {
                                 <label className="field-label">Special requests <span className="normal-case font-normal">(optional)</span></label>
                                 <textarea className="quote-details-field !text-left" value={journey.specialRequests} onChange={e=>setJ(j=>({...j,specialRequests:e.target.value}))} placeholder="Wheelchair access, mobility assistance, child seats, additional stops, or other instructions"/>
                               </div>
-                            {/* Vehicle & Capacity - vehicle full-width on its own row, passengers/luggage as two columns below with room for their labels */}
-                            <div className="rounded-2xl border border-outline-variant bg-surface-container-low/50 p-4 space-y-3">
-                              <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-bold text-deep-navy uppercase tracking-wide">Vehicle &amp; Capacity</span>
+                            {/* Vehicle class - plain field matching the other inputs, "Up to N seats" on the same label row */}
+                            <div>
+                              <div className="flex items-center justify-between ml-2 mb-1">
+                                <label className="field-label !mb-0">Vehicle class</label>
                                 <span className="text-[11px] font-semibold text-gray-500">Up to {vehicleCapacity(journey.vehiclePreference)} seats</span>
+                              </div>
+                              <div className="relative group">
+                                <select className="w-full h-[52px] !appearance-none pl-[18px] pr-10 border border-[#c7c5d1] rounded-[14px] bg-white focus:outline-none focus:border-deep-navy transition-all text-[15px] font-bold text-deep-navy cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap"
+                                  style={{ backgroundImage: 'none', textAlign: 'left' }}
+                                  value={journey.vehiclePreference || "minibus"} onChange={e=>{
+                                    const v = e.target.value;
+                                    let p = 16;
+                                    if (v === 'bus') p = 33;
+                                    if (v === 'coach') p = 49;
+                                    setJ(j=>({...j, vehiclePreference: v, passengers: p, handbagCount: 0, suitcaseCount: p}));
+                                    setSel(v);
+                                  }}>
+                                  <option value="minibus">Executive Minibus (16 Seats)</option>
+                                  <option value="bus">Standard Bus (33 Seats)</option>
+                                  <option value="coach">Premium Coach (49 Seats)</option>
+                                </select>
+                                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[18px]">expand_more</span>
+                              </div>
+                            </div>
+
+                            {/* Passengers & Luggage - same plain field style as vehicle class, two columns */}
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="field-label">Passengers</label>
+                                <div className="h-[52px] px-2 flex items-center justify-between border border-[#c7c5d1] rounded-[14px] bg-white">
+                                  <button type="button" aria-label="Decrease passengers" onClick={()=>setJ(j=>({...j, passengers: Math.max(1, (j.passengers || 16) - 1)}))} className="shrink-0 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none"><span className="material-symbols-outlined text-[18px]">remove</span></button>
+                                  <span className="text-[15px] font-bold text-deep-navy leading-none">{journey.passengers || 16}</span>
+                                  <button type="button" aria-label="Increase passengers" onClick={()=>setJ(j=>({...j, passengers: Math.min(100, (j.passengers || 16) + 1)}))} className="shrink-0 text-gray-400 hover:text-[#4ADE80] rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none"><span className="material-symbols-outlined text-[18px]">add</span></button>
+                                </div>
                               </div>
 
                               <div>
-                                <label className="field-label !mb-1">Vehicle class</label>
-                                <div className="relative group">
-                                  <select className="w-full h-[48px] !appearance-none pl-4 pr-8 bg-white border border-outline-variant rounded-xl focus:outline-none focus:border-deep-navy transition-all text-[13px] font-bold text-deep-navy cursor-pointer shadow-sm overflow-hidden text-ellipsis whitespace-nowrap"
-                                    style={{ backgroundImage: 'none' }}
-                                    value={journey.vehiclePreference || "minibus"} onChange={e=>{
-                                      const v = e.target.value;
-                                      let p = 16;
-                                      if (v === 'bus') p = 33;
-                                      if (v === 'coach') p = 49;
-                                      setJ(j=>({...j, vehiclePreference: v, passengers: p, handbagCount: 0, suitcaseCount: p}));
-                                      setSel(v);
-                                    }}>
-                                    <option value="minibus">Executive Minibus (16 Seats)</option>
-                                    <option value="bus">Standard Bus (33 Seats)</option>
-                                    <option value="coach">Premium Coach (49 Seats)</option>
-                                  </select>
-                                  <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[18px]">expand_more</span>
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                  <label className="field-label !mb-1">Passengers</label>
-                                  <div className="h-12 px-2 flex items-center justify-between bg-white border border-outline-variant rounded-xl shadow-sm">
-                                    <button type="button" aria-label="Decrease passengers" onClick={()=>setJ(j=>({...j, passengers: Math.max(1, (j.passengers || 16) - 1)}))} className="shrink-0 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none"><span className="material-symbols-outlined text-[18px]">remove</span></button>
-                                    <span className="text-[15px] font-bold text-deep-navy leading-none">{journey.passengers || 16}</span>
-                                    <button type="button" aria-label="Increase passengers" onClick={()=>setJ(j=>({...j, passengers: Math.min(100, (j.passengers || 16) + 1)}))} className="shrink-0 text-gray-400 hover:text-[#4ADE80] rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none"><span className="material-symbols-outlined text-[18px]">add</span></button>
-                                  </div>
-                                </div>
-
-                                <div>
-                                  <label className="field-label !mb-1 whitespace-nowrap">Suitcases &middot; 23kg+</label>
-                                  <div className="h-12 px-2 flex items-center justify-between bg-white border border-outline-variant rounded-xl shadow-sm">
-                                    <button
-                                      type="button"
-                                      aria-label="Decrease 23kg suitcases"
-                                      onClick={()=>setJ(j => ({...j, suitcaseCount: Math.max(0, (j.suitcaseCount ?? 0) - 1)}))}
-                                      className="shrink-0 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none"
-                                    ><span className="material-symbols-outlined text-[18px]">remove</span></button>
-                                    <span className="text-[15px] font-bold text-deep-navy leading-none">{journey.suitcaseCount ?? 0}</span>
-                                    <button
-                                      type="button"
+                                <label className="field-label whitespace-nowrap">Suitcases 23kg+</label>
+                                <div className="h-[52px] px-2 flex items-center justify-between border border-[#c7c5d1] rounded-[14px] bg-white">
+                                  <button
+                                    type="button"
+                                    aria-label="Decrease 23kg suitcases"
+                                    onClick={()=>setJ(j => ({...j, suitcaseCount: Math.max(0, (j.suitcaseCount ?? 0) - 1)}))}
+                                    className="shrink-0 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none"
+                                  ><span className="material-symbols-outlined text-[18px]">remove</span></button>
+                                  <span className="text-[15px] font-bold text-deep-navy leading-none">{journey.suitcaseCount ?? 0}</span>
+                                  <button
+                                    type="button"
                                       aria-label="Increase 23kg suitcases"
                                       onClick={()=>setJ(j => ({...j, suitcaseCount: (j.suitcaseCount ?? 0) + 1}))}
                                       className="shrink-0 text-gray-400 hover:text-[#4ADE80] rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none"
@@ -1872,8 +1870,7 @@ export default function App({ embed = false }) {
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                              {validationError && <div className="p-3 bg-red-50 text-red-700 rounded-xl text-sm">{validationError}</div>}
+                            {validationError && <div className="p-3 bg-red-50 text-red-700 rounded-xl text-sm">{validationError}</div>}
                               <div className="flex gap-3 pt-2">
                                 <button type="button" onClick={()=>setBookingStep(1)} className="h-14 px-6 rounded-full border border-outline-variant text-deep-navy font-bold flex items-center justify-center gap-2">
                                   <span className="material-symbols-outlined text-[18px]">arrow_back</span> Back
