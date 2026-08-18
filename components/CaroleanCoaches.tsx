@@ -1876,8 +1876,6 @@ export default function App({ embed = false }) {
                               </div>
                             )}
                             <div className="relative space-y-3">
-                              {/* Route connector: sits behind the fields (first in DOM, default stacking), visible only in the gaps since each field's input has an opaque background */}
-                              <div className="absolute left-[26px] top-8 bottom-8 border-l-2 border-dashed border-outline-variant"></div>
                               <div className="relative group quote-location">
                                 <PlacesInput
                                   value={journey.origin}
