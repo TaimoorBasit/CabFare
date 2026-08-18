@@ -1833,25 +1833,29 @@ export default function App({ embed = false }) {
                               {[1,2,3,4].map(step => <span key={step} className={`rounded-full transition-all ${bookingStep === step ? "w-6 h-1.5 bg-impact-red" : "w-1.5 h-1.5 bg-deep-navy/20"}`}></span>)}
                             </div>
                           </div>
-                          {bookingStep === 1 && (activeDatePicker ? (
-                          <DateTimePanel
-                            value={activeDatePicker === 'departure' ? journey.departureDate : (journey.returnDate || '')}
-                            minValue={activeDatePicker === 'departure' ? nowLocalDateTime() : journey.departureDate}
-                            onBack={() => setActiveDatePicker(null)}
-                            onChange={val => {
-                              if (activeDatePicker === 'departure') {
-                                setJ(j => ({
-                                  ...j,
-                                  departureDate: val,
-                                  returnDate: j.journeyType === 'return' && !isReturnAfterDeparture(val, j.returnDate) ? nextDayAtSameTime(val) : j.returnDate
-                                }));
-                              } else {
-                                setJ(j => ({ ...j, returnDate: val }));
-                              }
-                              setActiveDatePicker(null);
-                            }}
-                          />
-                          ) : <>
+                          {bookingStep === 1 && <div className="relative">
+                          {/* Calendar overlays the still-mounted form below (absolute, out of flow) - the card's height never changes when this opens, and the toggle peeks through under the rounded corners like the reference */}
+                          {activeDatePicker && (
+                            <div className="absolute inset-x-0 top-0 z-20">
+                              <DateTimePanel
+                                value={activeDatePicker === 'departure' ? journey.departureDate : (journey.returnDate || '')}
+                                minValue={activeDatePicker === 'departure' ? nowLocalDateTime() : journey.departureDate}
+                                onBack={() => setActiveDatePicker(null)}
+                                onChange={val => {
+                                  if (activeDatePicker === 'departure') {
+                                    setJ(j => ({
+                                      ...j,
+                                      departureDate: val,
+                                      returnDate: j.journeyType === 'return' && !isReturnAfterDeparture(val, j.returnDate) ? nextDayAtSameTime(val) : j.returnDate
+                                    }));
+                                  } else {
+                                    setJ(j => ({ ...j, returnDate: val }));
+                                  }
+                                  setActiveDatePicker(null);
+                                }}
+                              />
+                            </div>
+                          )}
                           <div className="flex p-1.5 bg-surface-container rounded-full mb-8">
                             <button type="button" onClick={()=>setJ(j=>({...j, journeyType: "one-way"}))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType !== "return" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>One-Way</button>
                             <button type="button" onClick={()=>setJ(j=>({
@@ -1957,7 +1961,7 @@ export default function App({ embed = false }) {
                             </button>
                             <p className="text-center text-[11px] text-gray-400 mt-3">Live pricing &middot; No obligation &middot; Response in minutes</p>
                           </form>
-                          </>)}
+                          </div>}
 
                           {bookingStep === 2 && (
                             <form className="customer-details-form space-y-4 fade-up" onSubmit={e => {
