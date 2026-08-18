@@ -1585,13 +1585,13 @@ export default function App({ embed = false }) {
                       <img alt="Carolean Coaches" className="h-14 w-auto object-contain" src="/carolean%20image.png"/>
                     </div>
                     <nav className="hidden md:flex items-center gap-8">
-                      <a className="font-label-lg text-label-lg !text-[16px] text-secondary border-b-2 border-secondary pb-1 transition-colors duration-200" href="#">Our Fleet</a>
-                      <a className="font-label-lg text-label-lg !text-[16px] text-on-surface-variant hover:text-secondary transition-colors duration-200" href="#">Services</a>
-                      <a className="font-label-lg text-label-lg !text-[16px] text-on-surface-variant hover:text-secondary transition-colors duration-200" href="#">About Us</a>
-                      <a className="font-label-lg text-label-lg !text-[16px] text-on-surface-variant hover:text-secondary transition-colors duration-200" href="#">Contact</a>
+                      <a className="font-label-lg text-label-lg text-secondary border-b-2 border-secondary pb-1 transition-colors duration-200" href="#">Our Fleet</a>
+                      <a className="font-label-lg text-label-lg text-on-surface-variant hover:text-secondary transition-colors duration-200" href="#">Services</a>
+                      <a className="font-label-lg text-label-lg text-on-surface-variant hover:text-secondary transition-colors duration-200" href="#">About Us</a>
+                      <a className="font-label-lg text-label-lg text-on-surface-variant hover:text-secondary transition-colors duration-200" href="#">Contact</a>
                     </nav>
                     <div className="flex items-center gap-4">
-                      <a className="hidden lg:block font-label-lg text-label-lg !text-[16px] text-on-surface-variant hover:text-secondary transition-colors" href="#">Login</a>
+                      <a className="hidden lg:block font-label-lg text-label-lg text-on-surface-variant hover:text-secondary transition-colors" href="#">Login</a>
                       <button onClick={() => document.getElementById("fast-quote")?.scrollIntoView({behavior: "smooth", block: "center"})} className="bg-impact-red text-white font-label-lg px-5 sm:px-8 py-3 rounded-full hover:bg-secondary transition-all transform active:scale-95 shadow-lg shadow-impact-red/20">
                         Get a Quote
                       </button>
