@@ -367,6 +367,8 @@ function GlobalStyle() {
       }
       .results-layout > * { min-width: 0; }
       .results-layout-empty { grid-template-columns: minmax(0, 1fr); }
+      .customer-details-form { width: 100%; min-width: 0; }
+      .customer-details-form > div { min-width: 0; }
       @media (min-width: 1024px) {
         .results-layout { grid-template-columns: 1.25fr 1fr; gap: 1.75rem; }
       }
@@ -1752,7 +1754,7 @@ export default function App({ embed = false }) {
                           </>}
 
                           {bookingStep === 2 && (
-                            <form className="space-y-4 fade-up" onSubmit={e => {
+                            <form className="customer-details-form space-y-4 fade-up" onSubmit={e => {
                               e.preventDefault();
                               setValidationError("");
 
@@ -1779,6 +1781,7 @@ export default function App({ embed = false }) {
                               
                               setBookingStep(3);
                             }}>
+                              {loadingQuotes && <div role="status" className="rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-800">Verifying your live quote…</div>}
                               <div>
                                 <label className="field-label">Full name</label>
                                 <input className="quote-details-field !text-left" style={{ textAlign: 'left' }} type="text" value={journey.name} onChange={e=>setJ(j=>({...j,name:e.target.value.trimStart()}))} placeholder="Your full name" required minLength={2}/>
