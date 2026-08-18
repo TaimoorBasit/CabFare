@@ -1315,7 +1315,7 @@ export default function App({ embed = false }) {
   const [journey, setJ]     = useState({
     journeyType:"one-way", origin:"", destination:"",
     departureDate:"", returnDate:"",
-    passengers:16, suitcaseCount:16, handbagCount:16, waitingMins:0,
+    passengers:16, suitcaseCount:16, handbagCount:0, waitingMins:0,
     vehiclePreference: "",
     waypoints:[], wpCoords:[], stops:[],
     name: "", phone: "", email: "", company: "", specialRequests: ""
@@ -1811,7 +1811,7 @@ export default function App({ embed = false }) {
                                     let p = 16;
                                     if (v === 'bus') p = 33;
                                     if (v === 'coach') p = 49;
-                                    setJ(j=>({...j, vehiclePreference: v, passengers: p, handbagCount: p, suitcaseCount: p}));
+                                    setJ(j=>({...j, vehiclePreference: v, passengers: p, handbagCount: 0, suitcaseCount: p}));
                                     setSel(v);
                                   }}>
                                   <option value="minibus">Executive Minibus (16 Seats)</option>
