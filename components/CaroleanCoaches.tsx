@@ -365,6 +365,8 @@ function GlobalStyle() {
         gap: 1.25rem;
         align-items: start;
       }
+      .results-layout > * { min-width: 0; }
+      .results-layout-empty { grid-template-columns: minmax(0, 1fr); }
       @media (min-width: 1024px) {
         .results-layout { grid-template-columns: 1.25fr 1fr; gap: 1.75rem; }
       }
@@ -2209,7 +2211,7 @@ export default function App({ embed = false }) {
                       </div>
                     </Card>
                   ) : (
-                    <div className="results-layout">
+                    <div className={`results-layout${!loadingQuotes && filteredQuotes.length === 0 ? " results-layout-empty" : ""}`}>
                       
                       {}
                       <div className="left-panel-options">
@@ -2221,6 +2223,11 @@ export default function App({ embed = false }) {
                           {loadingQuotes && quotes.length === 0 ? (
                             <div style={{ padding: "2.5rem", textAlign: "center", color: PX.gray600 }}>
                               <span className="spinning" style={{ marginRight: 8 }}>âŸ³</span> Fetching live options...
+                            </div>
+                          ) : filteredQuotes.length === 0 ? (
+                            <div role="status" style={{ padding: "2rem 1rem", textAlign: "center", color: PX.gray600 }}>
+                              <div style={{ fontSize: 16, fontWeight: 800, color: PX.navy800, marginBottom: 6 }}>Live options unavailable</div>
+                              <div style={{ fontSize: 13, lineHeight: 1.5 }}>{validationError || "No verified vehicle options are available for this journey."}</div>
                             </div>
                           ) : (
                             <>
@@ -2244,7 +2251,7 @@ export default function App({ embed = false }) {
                       </div>
 
                       {}
-                      <div className="right-panel-map" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                      {(loadingQuotes || filteredQuotes.length > 0) && <div className="right-panel-map" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                         
                         {}
                         <Card style={{ padding: "1.5rem" }}>
@@ -2260,7 +2267,7 @@ export default function App({ embed = false }) {
                           <strong>Thank you for your inquiry.</strong> Our dedicated team will reach out to you shortly to discuss your requirements and provide the best possible quotation for your journey.
                         </div>
 
-                      </div>
+                      </div>}
 
                     </div>
                   )}
