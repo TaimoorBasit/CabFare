@@ -1295,6 +1295,12 @@ function nextDayAtSameTime(value) {
   return new Date(timestamp + 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
 }
 
+function nowLocalDateTime() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+
 
 
 
@@ -1439,6 +1445,10 @@ export default function App({ embed = false }) {
     setSubmissionError("");
     if (!journey.origin || !journey.destination || !journey.departureDate) {
       setValidationError("Please enter pickup location, destination, and departure date.");
+      return;
+    }
+    if (localDateTimeTimestamp(journey.departureDate) < localDateTimeTimestamp(nowLocalDateTime())) {
+      setValidationError('Please choose a departure date and time in the future.');
       return;
     }
     if (journey.journeyType === 'return' && !isReturnAfterDeparture(journey.departureDate, journey.returnDate)) {
@@ -1714,7 +1724,7 @@ export default function App({ embed = false }) {
                                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1 ml-2">Departure Date & Time</label>
                                 <div className="relative group">
                                   <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant z-10" style={{pointerEvents: "none"}}>calendar_month</span>
-                                  <input name="departureDate" className="w-full pl-12 pr-3 py-4 bg-white border border-outline-variant capsule-input focus:outline-none focus:border-deep-navy transition-all text-[13px] font-semibold text-on-surface shadow-sm cursor-pointer" type="datetime-local" value={journey.departureDate} onClick={e=>e.currentTarget.showPicker?.()} onChange={e=>setJ(j=>{
+                                  <input name="departureDate" className="w-full pl-12 pr-3 py-4 bg-white border border-outline-variant capsule-input focus:outline-none focus:border-deep-navy transition-all text-[13px] font-semibold text-on-surface shadow-sm cursor-pointer" type="datetime-local" min={nowLocalDateTime()} value={journey.departureDate} onClick={e=>e.currentTarget.showPicker?.()} onChange={e=>setJ(j=>{
                                     const departureDate = e.target.value;
                                     return {
                                       ...j,
@@ -1780,7 +1790,6 @@ export default function App({ embed = false }) {
                               
                               setBookingStep(3);
                             }}>
-                              {loadingQuotes && <div role="status" className="rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-800">Verifying your live quote…</div>}
                               <div>
                                 <label className="field-label">Full name</label>
                                 <input className="quote-details-field !text-left" style={{ textAlign: 'left' }} type="text" value={journey.name} onChange={e=>setJ(j=>({...j,name:e.target.value.trimStart()}))} placeholder="Your full name" required minLength={2}/>
@@ -1800,10 +1809,10 @@ export default function App({ embed = false }) {
                                 <label className="field-label">Special requests <span className="normal-case font-normal">(optional)</span></label>
                                 <textarea className="quote-details-field !text-left" value={journey.specialRequests} onChange={e=>setJ(j=>({...j,specialRequests:e.target.value}))} placeholder="Wheelchair access, mobility assistance, child seats, additional stops, or other instructions"/>
                               </div>
-                            {/* Vehicle, Passengers & Luggage - stacked on narrow viewports, row once there's room */}
-                            <div className="flex flex-col sm:flex-row gap-2 w-full">
+                            {/* Vehicle, Passengers & Luggage - each on its own line, card is never wide enough for a legible row */}
+                            <div className="flex flex-col gap-2 w-full">
                               {/* Vehicle */}
-                              <div className="relative group w-full sm:flex-[0_0_45%] min-w-0">
+                              <div className="relative group w-full min-w-0">
                                 <select className="w-full h-[56px] !appearance-none pl-4 pr-8 bg-white border border-outline-variant rounded-full focus:outline-none focus:border-deep-navy transition-all text-[13px] font-bold text-deep-navy cursor-pointer shadow-sm overflow-hidden text-ellipsis whitespace-nowrap"
                                   style={{ backgroundImage: 'none' }}
                                   value={journey.vehiclePreference || "minibus"} onChange={e=>{
@@ -1822,7 +1831,7 @@ export default function App({ embed = false }) {
                               </div>
 
                               {/* Passengers */}
-                              <div className="w-full sm:flex-1 relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden min-w-0">
+                              <div className="w-full relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden min-w-0">
                                 <button type="button" onClick={()=>setJ(j=>({...j, passengers: Math.max(1, (j.passengers || 16) - 1)}))} className="absolute left-1.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none z-10"><span className="material-symbols-outlined text-[18px]">remove</span></button>
                                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-8">
                                   <span className="text-[17px] font-bold text-deep-navy leading-none">{journey.passengers || 16}</span>
@@ -1832,7 +1841,7 @@ export default function App({ embed = false }) {
                               </div>
 
                               {/* Luggage */}
-                              <div className="w-full sm:flex-[0_0_27.5%] relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden min-w-0">
+                              <div className="w-full relative h-[56px] bg-white border border-outline-variant rounded-full shadow-sm overflow-hidden min-w-0">
                                 <button
                                   type="button"
                                   aria-label="Decrease 23kg suitcases"
