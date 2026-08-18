@@ -1407,13 +1407,13 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
         </div>
       </div>
 
-      <div className="p-4 grid grid-cols-2 gap-4 flex-1 min-h-0">
+      <div className="px-4 pt-4 pb-6 grid grid-cols-2 gap-4 flex-1 min-h-0">
         {/* Left column: calendar + quick date presets - fixed, never scrolls */}
         <div className="min-w-0">
           <div className="grid grid-cols-7 gap-0.5 mb-2">
             {WEEKDAY_LETTER.map((w, i) => <div key={i} className="text-center text-[11px] font-bold text-gray-400">{w}</div>)}
           </div>
-          <div className="grid grid-cols-7 gap-x-0.5 gap-y-[18px]">
+          <div className="grid grid-cols-7 gap-x-0.5 gap-y-4">
             {cells.map(({ day: d, outside }, i) => {
               if (outside) {
                 return <div key={i} className="aspect-square text-[13px] font-semibold flex items-center justify-center text-gray-300">{d}</div>;
