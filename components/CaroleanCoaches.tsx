@@ -1379,13 +1379,6 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
     setViewY(y); setViewMo(mo);
   };
 
-  const pickPreset = kind => {
-    const offset = kind === 'tomorrow' ? 1 : kind === 'week' ? 7 : 0;
-    const d = new Date(minDayTs + offset * 86400000);
-    setViewY(d.getUTCFullYear()); setViewMo(d.getUTCMonth() + 1);
-    setSelDay({ y: d.getUTCFullYear(), mo: d.getUTCMonth() + 1, d: d.getUTCDate() });
-  };
-
   const bumpMinute = delta => {
     const total = (((hour * 60 + minute + delta) % 1440) + 1440) % 1440;
     setHour(Math.floor(total / 60));
@@ -1399,7 +1392,7 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
   for (let d = 1; d <= totalDays; d++) cells.push(d);
 
   return (
-    <div className="fade-up flex flex-col rounded-[1.75rem] shadow-2xl border border-outline-variant/60 overflow-hidden bg-white" style={{ height: "min(420px, 78vh)" }}>
+    <div className="fade-up flex flex-col rounded-[1.75rem] shadow-2xl border border-outline-variant/60 overflow-hidden bg-white" style={{ height: "min(350px, 78vh)" }}>
       <div className="bg-deep-navy text-white px-5 py-4 flex items-center gap-3 shrink-0">
         <button type="button" onClick={onBack} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center shrink-0"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
         <span className="font-bold text-[15px] flex-1">{MONTH_FULL[viewMo - 1]} {viewY}</span>
@@ -1412,10 +1405,10 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
       <div className="p-4 grid grid-cols-2 gap-4 flex-1 min-h-0">
         {/* Left column: calendar + quick date presets - fixed, never scrolls */}
         <div className="min-w-0">
-          <div className="grid grid-cols-7 gap-0.5 mb-1">
-            {WEEKDAY_LETTER.map((w, i) => <div key={i} className="text-center text-[10px] font-bold text-gray-400">{w}</div>)}
+          <div className="grid grid-cols-7 gap-0.5 mb-2">
+            {WEEKDAY_LETTER.map((w, i) => <div key={i} className="text-center text-[11px] font-bold text-gray-400">{w}</div>)}
           </div>
-          <div className="grid grid-cols-7 gap-0.5 mb-3">
+          <div className="grid grid-cols-7 gap-0.5">
             {cells.map((d, i) => {
               if (!d) return <div key={i} />;
               const dayTs = Date.UTC(viewY, viewMo - 1, d);
@@ -1425,18 +1418,12 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
               return (
                 <button key={i} type="button" disabled={disabled} onClick={() => setSelDay({ y: viewY, mo: viewMo, d })}
                   style={isToday && !isSelected ? { border: '1px solid #1D225C' } : undefined}
-                  className={`aspect-square rounded-full text-[11px] font-semibold flex items-center justify-center transition-all
+                  className={`aspect-square rounded-full text-[13px] font-semibold flex items-center justify-center transition-all
                     ${isSelected ? "bg-impact-red text-white" : isToday ? "text-deep-navy" : disabled ? "text-gray-300 cursor-not-allowed" : "text-on-surface hover:bg-surface-container"}`}>
                   {d}
                 </button>
               );
             })}
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <button type="button" onClick={() => pickPreset('today')} style={{ border: '1px solid #c7c5d1' }} className="h-7 px-2 rounded-full text-[10px] font-bold text-deep-navy hover:bg-surface-container/40">Today</button>
-            <button type="button" onClick={() => pickPreset('tomorrow')} style={{ border: '1px solid #c7c5d1' }} className="h-7 px-2 rounded-full text-[10px] font-bold text-deep-navy hover:bg-surface-container/40">Tomorrow</button>
-            <button type="button" onClick={() => pickPreset('week')} style={{ border: '1px solid #c7c5d1' }} className="h-7 px-2 rounded-full text-[10px] font-bold text-deep-navy hover:bg-surface-container/40">+1 week</button>
           </div>
         </div>
 
@@ -1446,7 +1433,7 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
             <span className="material-symbols-outlined text-[14px] text-gray-400">schedule</span>
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pick-up time</span>
           </div>
-          <div style={{ border: '1px solid #c7c5d1' }} className="flex items-center gap-1 bg-white rounded-xl px-2 py-1 mb-1 w-fit">
+          <div style={{ border: '1px solid #c7c5d1' }} className="flex items-center justify-center gap-1 bg-white rounded-xl px-2 py-1 mb-1 w-full">
             <span style={{ fontSize: 14, lineHeight: 1 }} className="font-bold text-deep-navy tabular-nums">{pad2(hour)}</span>
             <span style={{ fontSize: 14, lineHeight: 1 }} className="font-bold text-deep-navy">:</span>
             <span style={{ fontSize: 14, lineHeight: 1 }} className="font-bold text-deep-navy tabular-nums">{pad2(minute)}</span>
