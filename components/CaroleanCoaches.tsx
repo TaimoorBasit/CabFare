@@ -1301,18 +1301,6 @@ function nowLocalDateTime() {
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
 }
 
-const SHORT_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-function formatCompactDateTime(value) {
-  const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
-  if (!match) return '';
-  const [, year, month, day, hour, minute] = match;
-  const h = parseInt(hour, 10);
-  const h12 = String((h % 12) || 12).padStart(2, '0');
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  return `${parseInt(day, 10)} ${SHORT_MONTHS[parseInt(month, 10) - 1]} ${year} | ${h12}:${minute} ${ampm}`;
-}
-
 function vehicleCapacity(vehiclePreference) {
   if (vehiclePreference === 'bus') return 33;
   if (vehiclePreference === 'coach') return 49;
@@ -1736,18 +1724,13 @@ export default function App({ embed = false }) {
                               </div>
                             </div>
 
-                            {/* Departure/Return - a real datetime-local input sits invisibly on top (keeps the native picker + validation) over a compact custom-formatted label, so the two fields can sit side by side without the browser's own mm/dd/yyyy rendering getting clipped */}
+                            {}
                             <div className={`grid grid-cols-1 ${journey.journeyType === "return" ? "sm:grid-cols-2" : ""} gap-4`}>
                               <div>
-                                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1 ml-2">Departure</label>
+                                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1 ml-2">Departure Date & Time</label>
                                 <div className="relative group">
-                                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[18px]">calendar_month</span>
-                                  <div className="pointer-events-none flex items-center pl-8 pr-2 py-4 bg-white border border-outline-variant capsule-input text-[12px] font-semibold shadow-sm truncate">
-                                    <span className={journey.departureDate ? "text-on-surface" : "text-gray-400"}>
-                                      {journey.departureDate ? formatCompactDateTime(journey.departureDate) : "Select date & time"}
-                                    </span>
-                                  </div>
-                                  <input name="departureDate" aria-label="Departure date and time" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" type="datetime-local" min={nowLocalDateTime()} value={journey.departureDate} onClick={e=>e.currentTarget.showPicker?.()} onChange={e=>setJ(j=>{
+                                  <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant z-10" style={{pointerEvents: "none"}}>calendar_month</span>
+                                  <input name="departureDate" className="w-full pl-12 pr-3 py-4 bg-white border border-outline-variant capsule-input focus:outline-none focus:border-deep-navy transition-all text-[13px] font-semibold text-on-surface shadow-sm cursor-pointer" type="datetime-local" min={nowLocalDateTime()} value={journey.departureDate} onClick={e=>e.currentTarget.showPicker?.()} onChange={e=>setJ(j=>{
                                     const departureDate = e.target.value;
                                     return {
                                       ...j,
@@ -1761,15 +1744,10 @@ export default function App({ embed = false }) {
                               </div>
                               {journey.journeyType === 'return' && (
                               <div>
-                                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1 ml-2">Return</label>
+                                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1 ml-2">Return Date & Time</label>
                                 <div className="relative group">
-                                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[18px]">calendar_month</span>
-                                  <div className="pointer-events-none flex items-center pl-8 pr-2 py-4 bg-white border border-outline-variant capsule-input text-[12px] font-semibold shadow-sm truncate">
-                                    <span className={journey.returnDate ? "text-on-surface" : "text-gray-400"}>
-                                      {journey.returnDate ? formatCompactDateTime(journey.returnDate) : "Select date & time"}
-                                    </span>
-                                  </div>
-                                  <input name="returnDate" aria-label="Return date and time" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" type="datetime-local" min={journey.departureDate || undefined} value={journey.returnDate || ''} onClick={e=>e.currentTarget.showPicker?.()} onChange={e=>setJ(j=>({...j, returnDate: e.target.value}))} required />
+                                  <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant z-10" style={{pointerEvents: "none"}}>calendar_month</span>
+                                  <input name="returnDate" className="w-full pl-12 pr-3 py-4 bg-white border border-outline-variant capsule-input focus:outline-none focus:border-deep-navy transition-all text-[13px] font-semibold text-on-surface shadow-sm cursor-pointer" type="datetime-local" min={journey.departureDate || undefined} value={journey.returnDate || ''} onClick={e=>e.currentTarget.showPicker?.()} onChange={e=>setJ(j=>({...j, returnDate: e.target.value}))} required />
                                 </div>
                               </div>
                               )}
