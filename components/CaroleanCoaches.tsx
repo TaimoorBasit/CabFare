@@ -1409,8 +1409,8 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
         </div>
       </div>
 
-      <div className="p-4 overflow-y-auto grid grid-cols-2 gap-4 flex-1 min-h-0">
-        {/* Left column: calendar + quick date presets */}
+      <div className="p-4 grid grid-cols-2 gap-4 flex-1 min-h-0">
+        {/* Left column: calendar + quick date presets - fixed, never scrolls */}
         <div className="min-w-0">
           <div className="grid grid-cols-7 gap-0.5 mb-1">
             {WEEKDAY_LETTER.map((w, i) => <div key={i} className="text-center text-[10px] font-bold text-gray-400">{w}</div>)}
@@ -1440,8 +1440,8 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
           </div>
         </div>
 
-        {/* Right column: time */}
-        <div className="min-w-0">
+        {/* Right column: time - the only part that scrolls */}
+        <div className="min-w-0 overflow-y-auto min-h-0 pr-1">
           <div className="flex items-center gap-1.5 mb-2">
             <span className="material-symbols-outlined text-[14px] text-gray-400">schedule</span>
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pick-up time</span>
