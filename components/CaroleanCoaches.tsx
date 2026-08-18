@@ -191,7 +191,7 @@ function GlobalStyle() {
       select { cursor: pointer; }
 
       /* Customer fast-quote fields are scoped so admin inputs stay compact. */
-      #fast-quote input[type="text"],
+      #fast-quote .quote-location input[type="text"],
       #fast-quote input[type="datetime-local"] {
         width: 100% !important;
         height: 58px !important;
@@ -205,11 +205,11 @@ function GlobalStyle() {
         line-height: 58px !important;
         box-shadow: 0 1px 2px rgba(29, 34, 92, 0.06) !important;
       }
-      #fast-quote input[type="text"]::placeholder {
+      #fast-quote .quote-location input[type="text"]::placeholder {
         color: #b8b7bd !important;
         opacity: 1;
       }
-      #fast-quote input[type="text"]:focus,
+      #fast-quote .quote-location input[type="text"]:focus,
       #fast-quote input[type="datetime-local"]:focus {
         border-color: #1d225c !important;
         box-shadow: 0 0 0 4px rgba(29, 34, 92, 0.08) !important;
