@@ -1427,41 +1427,45 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
           </div>
         </div>
 
-        {/* Right column: time - the only part that scrolls */}
-        <div className="min-w-0 overflow-y-auto min-h-0 pr-1">
-          <div className="flex items-center gap-1.5 mb-2">
-            <span className="material-symbols-outlined text-[14px] text-gray-400">schedule</span>
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pick-up time</span>
-          </div>
-          <div style={{ border: '1px solid #c7c5d1' }} className="flex items-center justify-center gap-1 bg-white rounded-xl px-2 py-1 mb-1 w-full">
-            <span style={{ fontSize: 14, lineHeight: 1 }} className="font-bold text-deep-navy tabular-nums">{pad2(hour)}</span>
-            <span style={{ fontSize: 14, lineHeight: 1 }} className="font-bold text-deep-navy">:</span>
-            <span style={{ fontSize: 14, lineHeight: 1 }} className="font-bold text-deep-navy tabular-nums">{pad2(minute)}</span>
-            <div className="flex flex-col ml-0.5">
-              <button type="button" aria-label="Later" onClick={() => bumpMinute(5)} style={{ height: 11, lineHeight: 1 }} className="text-gray-400 hover:text-deep-navy flex items-center"><span style={{ fontSize: 11, lineHeight: 1 }} className="material-symbols-outlined">keyboard_arrow_up</span></button>
-              <button type="button" aria-label="Earlier" onClick={() => bumpMinute(-5)} style={{ height: 11, lineHeight: 1 }} className="text-gray-400 hover:text-deep-navy flex items-center"><span style={{ fontSize: 11, lineHeight: 1 }} className="material-symbols-outlined">keyboard_arrow_down</span></button>
+        {/* Right column: label/stepper stay fixed, only the preset list below scrolls */}
+        <div className="min-w-0 flex flex-col min-h-0">
+          <div className="shrink-0">
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="material-symbols-outlined text-[14px] text-gray-400">schedule</span>
+              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pick-up time</span>
             </div>
-          </div>
-          <div className="text-[10px] text-gray-400 mb-3">Any minute &middot; 24h</div>
-
-          {TIME_PRESET_GROUPS.map(group => (
-            <div key={group.label} className="mb-3">
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">{group.label}</div>
-              <div className="grid grid-cols-2 gap-1.5">
-                {timePresets(group.start, group.end).map(mins => {
-                  const h = Math.floor(mins / 60), mi = mins % 60;
-                  const active = hour === h && minute === mi;
-                  return (
-                    <button key={mins} type="button" onClick={() => { setHour(h); setMinute(mi); }}
-                      style={{ border: active ? '1px solid #D2232A' : '1px solid #c7c5d1' }}
-                      className={`h-7 rounded-full text-[10px] font-bold transition-all ${active ? "bg-impact-red text-white" : "text-deep-navy hover:bg-surface-container/40"}`}>
-                      {pad2(h)}:{pad2(mi)}
-                    </button>
-                  );
-                })}
+            <div style={{ border: '1px solid #c7c5d1' }} className="flex items-center justify-center gap-1 bg-white rounded-xl px-2 py-1 mb-1 w-full">
+              <span style={{ fontSize: 14, lineHeight: 1 }} className="font-bold text-deep-navy tabular-nums">{pad2(hour)}</span>
+              <span style={{ fontSize: 14, lineHeight: 1 }} className="font-bold text-deep-navy">:</span>
+              <span style={{ fontSize: 14, lineHeight: 1 }} className="font-bold text-deep-navy tabular-nums">{pad2(minute)}</span>
+              <div className="flex flex-col ml-0.5">
+                <button type="button" aria-label="Later" onClick={() => bumpMinute(5)} style={{ height: 11, lineHeight: 1 }} className="text-gray-400 hover:text-deep-navy flex items-center"><span style={{ fontSize: 11, lineHeight: 1 }} className="material-symbols-outlined">keyboard_arrow_up</span></button>
+                <button type="button" aria-label="Earlier" onClick={() => bumpMinute(-5)} style={{ height: 11, lineHeight: 1 }} className="text-gray-400 hover:text-deep-navy flex items-center"><span style={{ fontSize: 11, lineHeight: 1 }} className="material-symbols-outlined">keyboard_arrow_down</span></button>
               </div>
             </div>
-          ))}
+            <div className="text-[10px] text-gray-400 mb-3">Any minute &middot; 24h</div>
+          </div>
+
+          <div className="overflow-y-auto min-h-0 pr-1 flex-1">
+            {TIME_PRESET_GROUPS.map(group => (
+              <div key={group.label} className="mb-3">
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">{group.label}</div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {timePresets(group.start, group.end).map(mins => {
+                    const h = Math.floor(mins / 60), mi = mins % 60;
+                    const active = hour === h && minute === mi;
+                    return (
+                      <button key={mins} type="button" onClick={() => { setHour(h); setMinute(mi); }}
+                        style={{ border: active ? '1px solid #D2232A' : '1px solid #c7c5d1' }}
+                        className={`h-7 rounded-full text-[10px] font-bold transition-all ${active ? "bg-impact-red text-white" : "text-deep-navy hover:bg-surface-container/40"}`}>
+                        {pad2(h)}:{pad2(mi)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
