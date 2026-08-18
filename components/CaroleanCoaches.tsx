@@ -1387,9 +1387,12 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
 
   const firstWeekday = weekdayOf(viewY, viewMo, 1);
   const totalDays = daysInMonth(viewY, viewMo);
+  const prevMonthDays = daysInMonth(viewMo === 1 ? viewY - 1 : viewY, viewMo === 1 ? 12 : viewMo - 1);
+  // Always 42 cells (6 full weeks) so every row is complete and the grid is the same height every month.
   const cells = [];
-  for (let i = 0; i < firstWeekday; i++) cells.push(null);
-  for (let d = 1; d <= totalDays; d++) cells.push(d);
+  for (let i = firstWeekday - 1; i >= 0; i--) cells.push({ day: prevMonthDays - i, outside: true });
+  for (let d = 1; d <= totalDays; d++) cells.push({ day: d, outside: false });
+  for (let d = 1; cells.length < 42; d++) cells.push({ day: d, outside: true });
 
   return (
     <div className="fade-up flex flex-col rounded-[1.75rem] shadow-2xl border border-outline-variant/60 overflow-hidden bg-white" style={{ height: "min(350px, 78vh)" }}>
@@ -1409,8 +1412,10 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
             {WEEKDAY_LETTER.map((w, i) => <div key={i} className="text-center text-[11px] font-bold text-gray-400">{w}</div>)}
           </div>
           <div className="grid grid-cols-7 gap-0.5">
-            {cells.map((d, i) => {
-              if (!d) return <div key={i} />;
+            {cells.map(({ day: d, outside }, i) => {
+              if (outside) {
+                return <div key={i} className="aspect-square text-[13px] font-semibold flex items-center justify-center text-gray-300">{d}</div>;
+              }
               const dayTs = Date.UTC(viewY, viewMo - 1, d);
               const disabled = dayTs < minDayTs;
               const isToday = todayParts && todayParts.y === viewY && todayParts.mo === viewMo && todayParts.d === d;
