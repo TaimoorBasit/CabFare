@@ -1289,10 +1289,12 @@ function isReturnAfterDeparture(departureValue, returnValue) {
   return Number.isFinite(departure) && Number.isFinite(returning) && returning > departure;
 }
 
-function nextDayAtSameTime(value) {
-  const timestamp = localDateTimeTimestamp(value);
-  if (!Number.isFinite(timestamp)) return '';
-  return new Date(timestamp + 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
+function sameDayAfterDeparture(value) {
+  const p = dateTimeParts(value);
+  if (!p) return '';
+  const minutes = p.h * 60 + p.mi + 30;
+  if (minutes > 1439) return new Date(localDateTimeTimestamp(value) + 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
+  return dateTimeValue(p.y, p.mo, p.d, Math.floor(minutes / 60), minutes % 60);
 }
 
 function nowLocalDateTime() {
@@ -1851,7 +1853,7 @@ export default function App({ embed = false }) {
                                     setJ(j => ({
                                       ...j,
                                       departureDate: val,
-                                      returnDate: j.journeyType === 'return' && !isReturnAfterDeparture(val, j.returnDate) ? nextDayAtSameTime(val) : j.returnDate
+                                      returnDate: j.journeyType === 'return' && !isReturnAfterDeparture(val, j.returnDate) ? sameDayAfterDeparture(val) : j.returnDate
                                     }));
                                   } else {
                                     setJ(j => ({ ...j, returnDate: val }));
@@ -1866,7 +1868,7 @@ export default function App({ embed = false }) {
                             <button type="button" onClick={()=>setJ(j=>({
                               ...j,
                               journeyType: "return",
-                              returnDate: isReturnAfterDeparture(j.departureDate, j.returnDate) ? j.returnDate : nextDayAtSameTime(j.departureDate)
+                              returnDate: isReturnAfterDeparture(j.departureDate, j.returnDate) ? j.returnDate : sameDayAfterDeparture(j.departureDate)
                             }))} className={`flex-1 py-3 px-4 text-label-sm font-bold rounded-full transition-all ${journey.journeyType === "return" ? "bg-impact-red text-white shadow-lg" : "text-on-surface-variant hover:bg-white/50"}`}>Return</button>
                           </div>
                           
