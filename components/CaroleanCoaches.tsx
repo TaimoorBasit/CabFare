@@ -1727,8 +1727,8 @@ export default function App({ embed = false }) {
     }
   };
 
-  const setOrigin = (val,coords) => setJ(j=>({ ...j, origin:val, wpCoords: setAt(j.wpCoords, 0, coords, 2) }));
-  const setDest   = (val,coords) => setJ(j=>({ ...j, destination:val, wpCoords: setAt(j.wpCoords, (j.stops||[]).length ? 1+(j.stops||[]).length : 1, coords, (j.stops||[]).length ? 2+(j.stops||[]).length : 2) }));
+  const setOrigin = (val,coords) => { setValidationError(""); setJ(j=>({ ...j, origin:val, wpCoords: setAt(j.wpCoords, 0, coords, 2) })); };
+  const setDest   = (val,coords) => { setValidationError(""); setJ(j=>({ ...j, destination:val, wpCoords: setAt(j.wpCoords, (j.stops||[]).length ? 1+(j.stops||[]).length : 1, coords, (j.stops||[]).length ? 2+(j.stops||[]).length : 2) })); };
   
   const setAt = (arr, idx, val, len) => {
     const a = arr ? [...arr] : Array(len).fill(null);
@@ -1846,6 +1846,7 @@ export default function App({ embed = false }) {
                                 minValue={activeDatePicker === 'departure' ? nowLocalDateTime() : journey.departureDate}
                                 onBack={() => setActiveDatePicker(null)}
                                 onChange={val => {
+                                  setValidationError("");
                                   if (activeDatePicker === 'departure') {
                                     setJ(j => ({
                                       ...j,
