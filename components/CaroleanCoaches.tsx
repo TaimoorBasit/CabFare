@@ -1347,7 +1347,7 @@ function timePresets(startMin, endMin) {
 }
 
 function DateTimeField({ value, onOpen, accent = 'indigo', placeholder = 'Select date & time' }) {
-  const accentBg = accent === 'red' ? 'bg-red-50 text-impact-red' : 'bg-indigo-50 text-indigo-600';
+  const accentBg = 'bg-gray-100 text-gray-500';
   return (
     <button type="button" onClick={onOpen} style={{ border: '1px solid #c7c5d1' }} className="capsule-input w-full flex items-center gap-3 pl-3 pr-4 py-2.5 bg-white hover:bg-surface-container/30 transition-all text-left shadow-sm">
       <span className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center ${accentBg}`}>
