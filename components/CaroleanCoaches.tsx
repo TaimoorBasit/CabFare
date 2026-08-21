@@ -881,9 +881,10 @@ function PlacesInput({ value, onChange, placeholder, icon, mapsLoaded, mapsStatu
         {icon}
       </button>
       <input ref={inputRef} type="text" placeholder={mapsLoaded ? placeholder : `${placeholder} (type address)`} value={localVal}
-        style={{ paddingLeft:38, paddingRight: 12 }} 
+        style={{ paddingLeft:38, paddingRight: 12 }}
         onChange={e => handleTextChange(e.target.value)}
         onBlur={handleBlur}
+        onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
       />
       {mounted && typeof document !== 'undefined' ? createPortal(
         <MapPickerModal isOpen={pickerOpen} onClose={()=>setPickerOpen(false)} 
