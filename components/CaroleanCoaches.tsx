@@ -1012,7 +1012,7 @@ function ProgressBar({ pct, color }) {
 }
 
 
-function GoogleMapPreview({ result, journey, gv, compact = false }) {
+function GoogleMapPreview({ result, journey, gv, compact = false, showMetrics = true }) {
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
   const [directionsRenderer, setDirectionsRenderer] = useState(null);
@@ -1084,17 +1084,17 @@ function GoogleMapPreview({ result, journey, gv, compact = false }) {
 
   return (
     <div>
-      <div ref={mapRef} style={{ width: '100%', height: compact ? 160 : 320, borderRadius: 12, border: `1.5px solid ${PX.gray200}` }}></div>
+      <div ref={mapRef} style={{ width: '100%', height: compact ? 160 : 280, borderRadius: 12, border: `1.5px solid ${PX.gray200}` }}></div>
       {mapError && <div role="status" style={{ marginTop:8, padding:"8px 10px", borderRadius:8, background:"#fffbeb", color:"#92400e", fontSize:12 }}>{mapError}</div>}
-      <RouteMetrics result={result} journey={journey}/>
+      {showMetrics && <RouteMetrics result={result} journey={journey}/>} 
     </div>
   );
 }
 
-function RouteMap({ result, journey, gv, compact = false }) {
+function RouteMap({ result, journey, gv, compact = false, showMetrics = true }) {
   const mapsReady = typeof window !== 'undefined' && Boolean(window.google?.maps);
   if (mapsReady && (result?.pts?.length >= 2 || journey?.origin)) {
-    return <GoogleMapPreview result={result} journey={journey} gv={gv} compact={compact} />;
+    return <GoogleMapPreview result={result} journey={journey} gv={gv} compact={compact} showMetrics={showMetrics} />;
   }
 
   const message = result
@@ -1102,12 +1102,12 @@ function RouteMap({ result, journey, gv, compact = false }) {
     : "Select verified pickup and drop-off locations to calculate a route.";
   return <div>
     <div role="status" style={{ display:"flex", flexDirection:"column", alignItems:"center",
-      justifyContent:"center", height:compact ? 160 : 320, gap:10, color:PX.gray600, textAlign:"center", padding:20,
+      justifyContent:"center", height:compact ? 160 : 280, gap:10, color:PX.gray600, textAlign:"center", padding:20,
       border:`1.5px dashed ${PX.gray200}`, borderRadius:12, background:PX.gray50 }}>
       <SvgMap size={36} color={PX.gray400} />
       <p style={{ fontSize:13, fontWeight:600, maxWidth:340 }}>{message}</p>
     </div>
-    <RouteMetrics result={result} journey={journey}/>
+    {showMetrics && <RouteMetrics result={result} journey={journey}/>} 
   </div>;
 }
 
@@ -1840,7 +1840,7 @@ export default function App({ embed = false }) {
                               {[1,2,3,4].map(step => <span key={step} className={`rounded-full transition-all ${bookingStep === step ? "w-6 h-1.5 bg-impact-red" : "w-1.5 h-1.5 bg-deep-navy/20"}`}></span>)}
                             </div>
                           </div>
-                          {bookingStep === 1 && <div className="relative" style={activeDatePicker ? { height: 380, overflow: 'hidden' } : undefined}>
+                          {bookingStep === 1 && <div className="relative">
                           {/* Calendar overlays the still-mounted form below (absolute, out of flow) - the card's height never changes when this opens, and the toggle peeks through under the rounded corners like the reference */}
                           {activeDatePicker && (
                             <div className="absolute inset-x-0 top-0 z-20">
@@ -2088,7 +2088,11 @@ export default function App({ embed = false }) {
                               <div className="rounded-2xl bg-primary text-white px-5 py-4 flex items-center justify-between gap-3">
                                 <div>
                                   <div className="text-lg font-bold">{String(journey.origin || "").split(",")[0]} <span className="text-impact-red">→</span> {String(journey.destination || "").split(",")[0]}</div>
-                                  <div className="text-xs opacity-75 mt-1">{new Date(journey.departureDate).toLocaleString("en-GB")} · {journey.passengers} passengers</div>
+                                  <div className="text-xs opacity-75 mt-1">
+                                    <div>Departure: {new Date(journey.departureDate).toLocaleString("en-GB")}</div>
+                                    {journey.journeyType === "return" && journey.returnDate ? <div>Return: {new Date(journey.returnDate).toLocaleString("en-GB")}</div> : null}
+                                    <div>{journey.passengers} passengers</div>
+                                  </div>
                                 </div>
                                 <button type="button" onClick={()=>setBookingStep(1)} aria-label="Edit journey details" title="Edit journey details" className="w-9 h-9 shrink-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
                                   <span className="material-symbols-outlined text-[18px]">edit</span>
@@ -2096,20 +2100,20 @@ export default function App({ embed = false }) {
                               </div>
                               <div className="grid grid-cols-2 gap-2 text-xs">
                                 <div className="rounded-xl bg-surface-container-low p-3 overflow-hidden">
-                                  <span className="field-label">Stops</span>
-                                  {journey.journeyType === "return" ? (
-                                    <strong className="block">Return</strong>
-                                  ) : journey.stops?.length && journey.stops.some(s => s?.place) ? (
+                                  <span className="field-label">Journey</span>
+                                  {journey.stops?.length && journey.stops.some(s => s?.place) ? (
                                     <div className="flex flex-col mt-0.5 max-h-[60px] overflow-y-auto no-scrollbar">
                                       {journey.stops.filter(s => s?.place).map((s, i) => {
                                         const stopName = typeof s.place === 'string' ? s.place.split(',')[0] : (s.place?.name || s.place?.address?.split(',')[0] || "Stop");
                                         return (
                                           <strong key={i} className="truncate text-[11px] leading-tight block" title={stopName}>
-                                            {i + 1}. {stopName}
+                                            {i + 1}) {stopName}
                                           </strong>
                                         );
                                       })}
                                     </div>
+                                  ) : journey.journeyType === "return" ? (
+                                    <strong className="block">Return</strong>
                                   ) : (
                                     <strong className="block">One-way</strong>
                                   )}
@@ -2135,8 +2139,8 @@ export default function App({ embed = false }) {
                                   <SvgMap size={18}/> Route planning & mileage
                                 </div>
                                 {loadingQuotes
-                                  ? <div className="h-[160px] rounded-xl bg-surface-container-low flex items-center justify-center text-sm text-on-surface-variant">Calculating route and pricing...</div>
-                                  : <RouteMap result={activeResult} journey={journey} compact/>
+                                  ? <div className="h-[280px] rounded-xl bg-surface-container-low flex items-center justify-center text-sm text-on-surface-variant">Calculating route and pricing...</div>
+                                  : <RouteMap result={activeResult} journey={journey} showMetrics={false}/>
                                 }
                               </div>
                               {submissionError && <div role="alert" className="p-3 bg-red-50 text-red-700 rounded-xl text-sm font-semibold">{submissionError}</div>}
