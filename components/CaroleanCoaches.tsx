@@ -1896,7 +1896,7 @@ export default function App({ embed = false }) {
                               </div>
                               <div className="grid grid-cols-2 gap-2 text-xs">
                                 <div className="rounded-xl bg-surface-container-low p-3 overflow-hidden">
-                                  <span className="field-label">Journey</span>
+                                  <span className="field-label">STOPS</span>
                                   {journey.stops?.length && journey.stops.some(s => s?.place) ? (
                                     <div className="flex flex-col mt-0.5 max-h-[60px] overflow-y-auto no-scrollbar">
                                       {journey.stops.filter(s => s?.place).map((s, i) => {
