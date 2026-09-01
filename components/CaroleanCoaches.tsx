@@ -1477,8 +1477,8 @@ export default function App({ embed = false }) {
 
 
 
-    setBookingStep(2);
-    void buildQuotes();
+    const calculatedQuotes = await buildQuotes();
+    if (calculatedQuotes?.length) setBookingStep(2);
   };
 
   const handleFinalBookingSubmit = async () => {
