@@ -1477,8 +1477,8 @@ export default function App({ embed = false }) {
 
 
 
-    const calculatedQuotes = await buildQuotes();
-    if (calculatedQuotes?.length) setBookingStep(2);
+    setBookingStep(2);
+    void buildQuotes();
   };
 
   const handleFinalBookingSubmit = async () => {
@@ -1791,6 +1791,10 @@ export default function App({ embed = false }) {
                                 return;
                               }
                               if (!selectedQuote || !isTrustedQuote(selectedQuote)) {
+                                if (loadingQuotes) {
+                                  setValidationError('Refreshing your verified quote. Please wait a moment and continue again.');
+                                  return;
+                                }
                                 setValidationError('The verified quote is no longer available. Please return to the journey step and calculate it again.');
                                 return;
                               }
