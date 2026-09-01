@@ -1433,6 +1433,10 @@ export default function App({ embed = false }) {
     journey.journeyType,
     journey.departureDate,
     journey.returnDate,
+    journey.origin,
+    journey.destination,
+    journey.stops,
+    journey.wpCoords,
     showQuotes
   ]);
 
