@@ -667,12 +667,12 @@ function useGoogleMaps(apiKey: string | undefined) {
     }
     const s = document.createElement("script");
     s.id = "gm-script";
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey.trim()}&libraries=places,geometry&callback=__gmCb`;
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey.trim()}&libraries=places,geometry`;
     s.async = true;
-    window.__gmCb = markReady;
+    s.onload = markReady;
     s.onerror = markFailed;
     document.head.appendChild(s);
-    return () => { window.clearTimeout(loadTimeout); delete window.__gmCb; };
+    return () => { window.clearTimeout(loadTimeout); };
   }, [apiKey]);
   return { loaded, status };
 }
@@ -861,7 +861,7 @@ function RouteMetrics({ result, journey }) {
   const days = Number(result.opDays);
   const stopCount = Array.isArray(journey?.stops) ? journey.stops.filter(stop => stop?.place).length : 0;
   const metrics = [
-    ["Stops", stopCount > 0 ? stopCount : "Direct"],
+["Journey", stopCount > 0 ? stopCount : "Direct"],
     ["Days", Number.isFinite(days) ? days : 1]
   ];
 
@@ -1292,7 +1292,7 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
 
 function vehicleCapacity(vehiclePreference) {
   if (vehiclePreference === 'bus') return 33;
-  if (vehiclePreference === 'coach') return 49;
+  if (vehiclePreference === 'coach') return 50;
   return 16;
 }
 
@@ -1316,8 +1316,8 @@ export default function App({ embed = false }) {
   const [journey, setJ]     = useState({
     journeyType:"one-way", origin:"", destination:"",
     departureDate:"", returnDate:"",
-    passengers:16, suitcaseCount:16, handbagCount:0, waitingMins:0,
-    vehiclePreference: "",
+    passengers:1, suitcaseCount:0, handbagCount:0, waitingMins:0,
+    vehiclePreference: "minibus",
     waypoints:[], wpCoords:[], stops:[],
     name: "", phone: "", email: "", company: "", specialRequests: ""
   });
@@ -1831,15 +1831,13 @@ export default function App({ embed = false }) {
                                   style={{ backgroundImage: 'none', textAlign: 'left' }}
                                   value={journey.vehiclePreference || "minibus"} onChange={e=>{
                                     const v = e.target.value;
-                                    let p = 16;
-                                    if (v === 'bus') p = 33;
-                                    if (v === 'coach') p = 49;
-                                    setJ(j=>({...j, vehiclePreference: v, passengers: p, handbagCount: 0, suitcaseCount: p}));
+                                    const capacity = vehicleCapacity(v);
+                                    setJ(j=>({...j, vehiclePreference: v, passengers: Math.min(j.passengers || 1, capacity), handbagCount: 0, suitcaseCount: 0}));
                                     setSel(v);
                                   }}>
                                   <option value="minibus">Executive Minibus (16 Seats)</option>
                                   <option value="bus">Standard Bus (33 Seats)</option>
-                                  <option value="coach">Premium Coach (49 Seats)</option>
+                                  <option value="coach">Premium Coach (50 Seats)</option>
                                 </select>
                                 <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[18px]">expand_more</span>
                               </div>
@@ -1850,9 +1848,7 @@ export default function App({ embed = false }) {
                               <div>
                                 <label className="field-label">Passengers</label>
                                 <div className="h-[52px] px-2 flex items-center justify-between border border-[#c7c5d1] rounded-[14px] bg-white">
-                                  <button type="button" aria-label="Decrease passengers" onClick={()=>setJ(j=>({...j, passengers: Math.max(1, (j.passengers || 16) - 1)}))} className="shrink-0 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none"><span className="material-symbols-outlined text-[18px]">remove</span></button>
-                                  <span className="text-[15px] font-bold text-deep-navy leading-none">{journey.passengers || 16}</span>
-                                  <button type="button" aria-label="Increase passengers" onClick={()=>setJ(j=>({...j, passengers: Math.min(100, (j.passengers || 16) + 1)}))} className="shrink-0 text-gray-400 hover:text-[#4ADE80] rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none"><span className="material-symbols-outlined text-[18px]">add</span></button>
+                                  <input aria-label="Passengers" type="number" min="1" max={vehicleCapacity(journey.vehiclePreference)} value={journey.passengers} onChange={e=>setJ(j=>({...j, passengers: Math.min(vehicleCapacity(j.vehiclePreference), Math.max(1, Number(e.target.value) || 1))}))} className="w-full bg-transparent text-center text-[15px] font-bold text-deep-navy outline-none" />
                                 </div>
                               </div>
 
@@ -1865,7 +1861,7 @@ export default function App({ embed = false }) {
                                     onClick={()=>setJ(j => ({...j, suitcaseCount: Math.max(0, (j.suitcaseCount ?? 0) - 1)}))}
                                     className="shrink-0 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none"
                                   ><span className="material-symbols-outlined text-[18px]">remove</span></button>
-                                  <span className="text-[15px] font-bold text-deep-navy leading-none">{journey.suitcaseCount ?? 0}</span>
+                                  <input aria-label="Suitcases 23kg or more" type="number" min="0" value={journey.suitcaseCount ?? 0} onChange={e=>setJ(j=>({...j, suitcaseCount: Math.max(0, Number(e.target.value) || 0)}))} className="w-full bg-transparent text-center text-[15px] font-bold text-deep-navy outline-none" />
                                   <button
                                     type="button"
                                       aria-label="Increase 23kg suitcases"
