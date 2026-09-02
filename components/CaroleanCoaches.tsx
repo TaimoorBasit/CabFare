@@ -1388,7 +1388,7 @@ export default function App({ embed = false }) {
       }
       // Keep the vehicle the customer explicitly selected. Previously this always
       // replaced their choice with the first vehicle large enough for the group,
-      // so selecting a coach could incorrectly show an Executive Minibus here.
+      // so selecting a coach could incorrectly show a Minibus here.
       const preferredVehicle = data.quotes.find(
         quote => quote.vehicle?.id === currentJourney.vehiclePreference
       );
@@ -1837,7 +1837,7 @@ export default function App({ embed = false }) {
                                     setJ(j=>({...j, vehiclePreference: v, passengers: Math.min(j.passengers || 1, capacity), handbagCount: 0, suitcaseCount: 0}));
                                     setSel(v);
                                   }}>
-                                  <option value="minibus">Executive Minibus (16 Seats)</option>
+                                  <option value="minibus">Minibus (16 Seats)</option>
                                   <option value="bus">Standard Bus (33 Seats)</option>
                                   <option value="coach">Premium Coach (50 Seats)</option>
                                 </select>
@@ -1851,7 +1851,7 @@ export default function App({ embed = false }) {
                               <div>
                                 <label className="field-label">Passengers</label>
                                 <div className="relative h-[52px] px-2 flex items-center border border-[#c7c5d1] rounded-[14px] bg-white">
-                                  <button type="button" aria-label="Decrease passengers" onClick={()=>setJ(j=>({...j, passengers: Math.max(1, Number(j.passengers) - 1)}))} className="absolute left-3 z-10 w-7 h-7 text-gray-400">−</button><input aria-label="Passengers" type="number" min="1" max="50" value={journey.passengers} onBlur={()=>setJ(j=>({...j, passengers: Math.max(1, Number(j.passengers) || 1)}))} onChange={e=>setJ(j=>{ if (e.target.value === '') return {...j, passengers: ''}; const requested = Math.max(1, Number(e.target.value) || 1); const passengers = Math.min(50, requested); const currentCapacity = vehicleCapacity(j.vehiclePreference); const suitable = passengers <= 16 ? 'Executive Minibus' : passengers <= 33 ? 'Standard Bus' : 'Premium Coach'; setVehicleSuggestion(requested > 50 ? 'For groups over 50 passengers, our team will contact you to arrange the best vehicle option. Please continue with your booking request.' : passengers > currentCapacity ? `For ${passengers} passengers, ${suitable} is recommended.` : ''); return {...j, passengers}; })} className="number-input-no-spinner w-full bg-transparent text-center text-[15px] font-bold text-deep-navy outline-none" /><button type="button" aria-label="Increase passengers" onClick={()=>setJ(j=>({...j, passengers: Math.min(50, Number(j.passengers) + 1)}))} className="absolute right-3 z-10 w-7 h-7 text-gray-400">+</button>
+                                  <button type="button" aria-label="Decrease passengers" onClick={()=>setJ(j=>({...j, passengers: Math.max(1, Number(j.passengers) - 1)}))} className="absolute left-3 z-10 w-7 h-7 text-gray-400">−</button><input aria-label="Passengers" type="number" min="1" max="50" value={journey.passengers} onBlur={()=>setJ(j=>({...j, passengers: Math.max(1, Number(j.passengers) || 1)}))} onChange={e=>setJ(j=>{ if (e.target.value === '') return {...j, passengers: ''}; const requested = Math.max(1, Number(e.target.value) || 1); const passengers = Math.min(50, requested); const currentCapacity = vehicleCapacity(j.vehiclePreference); const suitable = passengers <= 16 ? 'Minibus' : passengers <= 33 ? 'Standard Bus' : 'Premium Coach'; setVehicleSuggestion(requested > 50 ? 'For groups over 50 passengers, our team will contact you to arrange the best vehicle option. Please continue with your booking request.' : passengers > currentCapacity ? `For ${passengers} passengers, ${suitable} is recommended.` : ''); return {...j, passengers}; })} className="number-input-no-spinner w-full bg-transparent text-center text-[15px] font-bold text-deep-navy outline-none" /><button type="button" aria-label="Increase passengers" onClick={()=>setJ(j=>({...j, passengers: Math.min(50, Number(j.passengers) + 1)}))} className="absolute right-3 z-10 w-7 h-7 text-gray-400">+</button>
                                 </div>
                               </div>
 
