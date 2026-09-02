@@ -1864,7 +1864,7 @@ export default function App({ embed = false }) {
                                     onClick={()=>setJ(j => ({...j, suitcaseCount: Math.max(0, (j.suitcaseCount ?? 0) - 1)}))}
                                     className="shrink-0 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none"
                                   ><span className="material-symbols-outlined text-[18px]">remove</span></button>
-                                  <input aria-label="Suitcases 23kg or more" type="number" min="0" value={journey.suitcaseCount ?? 0} onChange={e=>setJ(j=>({...j, suitcaseCount: Math.max(0, Number(e.target.value) || 0)}))} className="w-full bg-transparent text-center text-[15px] font-bold text-deep-navy outline-none" />
+                                  <input aria-label="Suitcases 23kg or more" type="number" min="0" value={journey.suitcaseCount ?? 0} onChange={e=>setJ(j=>({...j, suitcaseCount: Math.max(0, Number(e.target.value) || 0)}))} className="w-full h-[44px] rounded-[14px] border border-[#c7c5d1] bg-white text-center text-[15px] font-bold text-deep-navy outline-none" />
                                   <button
                                     type="button"
                                       aria-label="Increase 23kg suitcases"
