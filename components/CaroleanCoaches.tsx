@@ -1482,8 +1482,15 @@ export default function App({ embed = false }) {
 
 
 
+    const selectedCapacity = vehicleCapacity(journey.vehiclePreference);
+    const cappedJourney = {
+      ...journey,
+      passengers: Math.min(selectedCapacity, Math.max(1, Number(journey.passengers) || 1)),
+      suitcaseCount: Math.min(selectedCapacity, Math.max(0, Number(journey.suitcaseCount) || 0))
+    };
+    setJ(cappedJourney);
     setBookingStep(2);
-    void buildQuotes();
+    void buildQuotes(cappedJourney);
   };
 
   const handleFinalBookingSubmit = async () => {
