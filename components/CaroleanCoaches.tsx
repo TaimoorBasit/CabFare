@@ -1851,7 +1851,7 @@ export default function App({ embed = false }) {
                               <div>
                                 <label className="field-label">Passengers</label>
                                 <div className="h-[52px] px-2 flex items-center justify-between border border-[#c7c5d1] rounded-[14px] bg-white">
-                                  <input aria-label="Passengers" type="number" min="1" max="50" value={journey.passengers} onChange={e=>setJ(j=>{ const requested = Math.max(1, Number(e.target.value) || 1); const passengers = Math.min(50, requested); const currentCapacity = vehicleCapacity(j.vehiclePreference); const suitable = passengers <= 16 ? 'Executive Minibus' : passengers <= 33 ? 'Standard Bus' : 'Premium Coach'; setVehicleSuggestion(passengers > currentCapacity ? `For ${passengers} passengers, ${suitable} is recommended.` : ''); return {...j, passengers}; })} className="w-full bg-transparent text-center text-[15px] font-bold text-deep-navy outline-none" />
+                                  <input aria-label="Passengers" type="number" min="1" max="50" value={journey.passengers} onChange={e=>setJ(j=>{ const requested = Math.max(1, Number(e.target.value) || 1); const passengers = Math.min(50, requested); const currentCapacity = vehicleCapacity(j.vehiclePreference); const suitable = passengers <= 16 ? 'Executive Minibus' : passengers <= 33 ? 'Standard Bus' : 'Premium Coach'; setVehicleSuggestion(requested > 50 ? 'For groups over 50 passengers, our team will contact you to arrange the best vehicle option. Please continue with your booking request.' : passengers > currentCapacity ? `For ${passengers} passengers, ${suitable} is recommended.` : ''); return {...j, passengers}; })} className="w-full bg-transparent text-center text-[15px] font-bold text-deep-navy outline-none" />
                                 </div>
                               </div>
 
@@ -1864,11 +1864,11 @@ export default function App({ embed = false }) {
                                     onClick={()=>setJ(j => ({...j, suitcaseCount: Math.max(0, (j.suitcaseCount ?? 0) - 1)}))}
                                     className="shrink-0 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none"
                                   ><span className="material-symbols-outlined text-[18px]">remove</span></button>
-                                  <input aria-label="Suitcases 23kg or more" type="number" min="0" value={journey.suitcaseCount ?? 0} onChange={e=>setJ(j=>({...j, suitcaseCount: Math.max(0, Number(e.target.value) || 0)}))} className="w-full h-[44px] rounded-[14px] border border-[#c7c5d1] bg-white text-center text-[15px] font-bold text-deep-navy outline-none" />
+                                  <input aria-label="Suitcases 23kg or more" type="number" min="0" max={vehicleCapacity(journey.vehiclePreference)} value={journey.suitcaseCount ?? 0} onChange={e=>setJ(j=>({...j, suitcaseCount: Math.min(vehicleCapacity(j.vehiclePreference), Math.max(0, Number(e.target.value) || 0))}))} className="w-full h-[44px] rounded-[14px] border border-[#c7c5d1] bg-white text-center text-[15px] font-bold text-deep-navy outline-none" />
                                   <button
                                     type="button"
                                       aria-label="Increase 23kg suitcases"
-                                      onClick={()=>setJ(j => ({...j, suitcaseCount: (j.suitcaseCount ?? 0) + 1}))}
+                                      onClick={()=>setJ(j => ({...j, suitcaseCount: Math.min(vehicleCapacity(j.vehiclePreference), (j.suitcaseCount ?? 0) + 1)}))}
                                       className="shrink-0 text-gray-400 hover:text-[#4ADE80] rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none"
                                     ><span className="material-symbols-outlined text-[18px]">add</span></button>
                                   </div>
