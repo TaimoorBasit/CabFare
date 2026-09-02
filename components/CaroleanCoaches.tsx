@@ -1324,6 +1324,7 @@ export default function App({ embed = false }) {
   
   const [quotes, setQ]             = useState([]);
   const [selected, setSel]         = useState(null);
+  const [vehicleSuggestion, setVehicleSuggestion] = useState("");
   const [showQuotes, setShowQuotes] = useState(false);
   const [loadingQuotes, setLoadingQuotes] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -1832,6 +1833,7 @@ export default function App({ embed = false }) {
                                   value={journey.vehiclePreference || "minibus"} onChange={e=>{
                                     const v = e.target.value;
                                     const capacity = vehicleCapacity(v);
+                                    setVehicleSuggestion("");
                                     setJ(j=>({...j, vehiclePreference: v, passengers: Math.min(j.passengers || 1, capacity), handbagCount: 0, suitcaseCount: 0}));
                                     setSel(v);
                                   }}>
@@ -1841,6 +1843,7 @@ export default function App({ embed = false }) {
                                 </select>
                                 <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[18px]">expand_more</span>
                               </div>
+                              {vehicleSuggestion && <p className="mt-1 ml-2 text-[11px] font-semibold text-impact-red">{vehicleSuggestion}</p>}
                             </div>
 
                             {/* Passengers & Luggage - same plain field style as vehicle class, two columns */}
@@ -1848,7 +1851,7 @@ export default function App({ embed = false }) {
                               <div>
                                 <label className="field-label">Passengers</label>
                                 <div className="h-[52px] px-2 flex items-center justify-between border border-[#c7c5d1] rounded-[14px] bg-white">
-                                  <input aria-label="Passengers" type="number" min="1" max={vehicleCapacity(journey.vehiclePreference)} value={journey.passengers} onChange={e=>setJ(j=>({...j, passengers: Math.min(vehicleCapacity(j.vehiclePreference), Math.max(1, Number(e.target.value) || 1))}))} className="w-full bg-transparent text-center text-[15px] font-bold text-deep-navy outline-none" />
+                                  <input aria-label="Passengers" type="number" min="1" max={vehicleCapacity(journey.vehiclePreference)} value={journey.passengers} onChange={e=>setJ(j=>{ const requested = Math.max(1, Number(e.target.value) || 1); const currentCapacity = vehicleCapacity(j.vehiclePreference); const suitable = requested <= 16 ? 'Executive Minibus' : requested <= 33 ? 'Standard Bus' : requested <= 50 ? 'Premium Coach' : ''; setVehicleSuggestion(requested > currentCapacity && suitable ? `For ${requested} passengers, ${suitable} is recommended.` : ''); return {...j, passengers: Math.min(currentCapacity, requested)}; })} className="w-full bg-transparent text-center text-[15px] font-bold text-deep-navy outline-none" />
                                 </div>
                               </div>
 
