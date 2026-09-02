@@ -1564,11 +1564,10 @@ export default function App({ embed = false }) {
     if (e.target.value === '') return { ...j, passengers: '' };
     const requested = Math.max(1, Number(e.target.value) || 1);
     const passengers = Math.min(50, requested);
-    const vehiclePreference = passengers <= 16 ? 'minibus' : passengers <= 33 ? 'bus' : 'coach';
     const suitable = passengers <= 16 ? 'Minibus' : passengers <= 33 ? 'Standard Bus' : 'Premium Coach';
-    setSel(vehiclePreference);
-    setVehicleSuggestion(requested > 50 ? 'For groups over 50 passengers, our team will contact you to arrange the best vehicle option. Please continue with your booking request.' : `For ${passengers} passengers, ${suitable} is recommended.`);
-    return { ...j, passengers, vehiclePreference };
+    const currentCapacity = vehicleCapacity(j.vehiclePreference);
+    setVehicleSuggestion(requested > 50 ? 'For groups over 50 passengers, our team will contact you to arrange the best vehicle option. Please continue with your booking request.' : passengers > currentCapacity ? `For ${passengers} passengers, ${suitable} is recommended.` : '');
+    return { ...j, passengers };
   });
   const filteredQuotes = quotes;
   const selectedQuote = quotes.find(q => q?.vehicle?.id === selected) || null;
