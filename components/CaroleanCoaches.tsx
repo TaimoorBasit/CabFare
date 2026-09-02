@@ -1440,6 +1440,7 @@ export default function App({ embed = false }) {
     journey.returnDate,
     journey.origin,
     journey.destination,
+    journey.vehiclePreference,
     journey.stops,
     journey.wpCoords,
     showQuotes
@@ -1510,7 +1511,7 @@ export default function App({ embed = false }) {
           email: journey.email,
           company: journey.company
         },
-        journey: journey,
+        journey: { ...journey, passengers: selectedPassengerCount },
         quote: quote
       };
       
@@ -1579,9 +1580,9 @@ export default function App({ embed = false }) {
   const filteredQuotes = quotes;
   const selectedQuote = quotes.find(q => q?.vehicle?.id === selected) || null;
   const activeResult = selectedQuote?.result;
-  const selectedVehicleCount = selectedQuote
-    ? Math.max(1, Math.ceil(journey.passengers / Math.max(1, selectedQuote.vehicle.capacity || 1)))
-    : 1;
+  const selectedPassengerCount = selectedQuote
+    ? Math.min(Number(journey.passengers) || 1, Number(selectedQuote.vehicle.capacity) || 1)
+    : Number(journey.passengers) || 1;
 
   const showReturnDate = journey.journeyType === "return";
   const showLuggageCount = journey.largeLuggage !== "none";
@@ -1914,7 +1915,7 @@ export default function App({ embed = false }) {
                                   <div className="text-xs opacity-75 mt-1">
                                     <div>Departure: {new Date(journey.departureDate).toLocaleString("en-GB")}</div>
                                     {journey.journeyType === "return" && journey.returnDate ? <div>Return: {new Date(journey.returnDate).toLocaleString("en-GB")}</div> : null}
-                                    <div>{journey.passengers} passengers</div>
+                                    <div>{selectedPassengerCount} passengers</div>
                                   </div>
                                 </div>
                                 <button type="button" onClick={()=>setBookingStep(1)} aria-label="Edit journey details" title="Edit journey details" className="w-9 h-9 shrink-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
@@ -1948,8 +1949,8 @@ export default function App({ embed = false }) {
                                 <div className="flex items-start justify-between gap-4 mb-3">
                                   <div>
                                     <span className="field-label">Selected option</span>
-                                    <strong className="text-deep-navy">{selectedQuote ? `${selectedVehicleCount} × ${selectedQuote.vehicle.name}` : "Verified option unavailable"}</strong>
-                                    <p className="text-xs text-on-surface-variant mt-1">{journey.passengers} passengers</p>
+                                    <strong className="text-deep-navy">{selectedQuote ? selectedQuote.vehicle.name : "Verified option unavailable"}</strong>
+                                    <p className="text-xs text-on-surface-variant mt-1">{selectedPassengerCount} passengers</p>
                                   </div>
                                   {selectedQuote && (
                                     <div className="text-right shrink-0">
