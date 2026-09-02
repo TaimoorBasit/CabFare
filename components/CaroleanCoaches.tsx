@@ -1378,10 +1378,14 @@ export default function App({ embed = false }) {
       if (!data || !Array.isArray(data.quotes)) {
         throw new ApiRequestError('The quote response is missing its quote list.', { code: 'invalid-response' });
       }
-      if (data.quotes.some(quote => !isTrustedQuote(quote))) {
+      const normalizedQuotes = data.quotes.map(quote => {
+        if (!/premium coach/i.test(String(quote.vehicle?.name || ''))) return quote;
+        return { ...quote, vehicle: { ...quote.vehicle, name: 'Premium Coach (50 Seats)', capacity: 50 } };
+      });
+      if (normalizedQuotes.some(quote => !isTrustedQuote(quote))) {
         throw new ApiRequestError('The quote response contains invalid mileage or pricing data.', { code: 'invalid-response' });
       }
-      if (data.quotes.length === 0) {
+      if (normalizedQuotes.length === 0) {
         setQ([]);
         setValidationError('No configured vehicle is available for this journey. No price has been estimated.');
         return [];
@@ -1389,19 +1393,19 @@ export default function App({ embed = false }) {
       // Keep the vehicle the customer explicitly selected. Previously this always
       // replaced their choice with the first vehicle large enough for the group,
       // so selecting a coach could incorrectly show a Minibus here.
-      const preferredVehicle = data.quotes.find(
+      const preferredVehicle = normalizedQuotes.find(
         quote => quote.vehicle?.id === currentJourney.vehiclePreference
       );
       if (currentJourney.vehiclePreference && !preferredVehicle) {
-        setQ(data.quotes);
+        setQ(normalizedQuotes);
         setSel(null);
         setValidationError('The selected vehicle is not available for these dates. Please choose another vehicle or change the journey dates.');
         return [];
       }
       const firstAvailable = preferredVehicle
-        || data.quotes.find(quote => Number(quote?.vehicle?.capacity) >= Number(currentJourney.passengers))
-        || data.quotes[0];
-      setQ(data.quotes);
+        || normalizedQuotes.find(quote => Number(quote?.vehicle?.capacity) >= Number(currentJourney.passengers))
+        || normalizedQuotes[0];
+      setQ(normalizedQuotes);
       setSel(firstAvailable.vehicle.id);
       return data.quotes;
     } catch(err) {
