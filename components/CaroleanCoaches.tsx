@@ -1425,7 +1425,7 @@ export default function App({ embed = false }) {
 
   // Reactive updates for parameters once calculation layout is shown
   useEffect(() => {
-    if (showQuotes && journey.origin && journey.destination) {
+    if (bookingStep === 1 && showQuotes && journey.origin && journey.destination) {
       const delayDebounce = setTimeout(() => {
         buildQuotes();
       }, 400);
@@ -1444,7 +1444,8 @@ export default function App({ embed = false }) {
     journey.vehiclePreference,
     journey.stops,
     journey.wpCoords,
-    showQuotes
+    showQuotes,
+    bookingStep
   ]);
 
   const handleCalculateClick = async () => {
