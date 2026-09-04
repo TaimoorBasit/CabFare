@@ -1332,6 +1332,7 @@ export default function App({ embed = false }) {
   const [bookingRef, setBookingRef] = useState("");
   const [submissionError, setSubmissionError] = useState("");
   const [bookingStep, setBookingStep] = useState(1);
+  const quoteRequestRef = useRef(null);
   const [activeDatePicker, setActiveDatePicker] = useState(null); // 'departure' | 'return' | null - which field's calendar is showing in place of the form
   const fetchIdRef = useRef(0);
   const [validationError, setValidationError] = useState("");
@@ -1408,7 +1409,7 @@ export default function App({ embed = false }) {
         || normalizedQuotes[0];
       setQ(normalizedQuotes);
       setSel(firstAvailable.vehicle.id);
-      return data.quotes;
+      return normalizedQuotes;
     } catch(err) {
       if (currentFetchId !== fetchIdRef.current) return;
       console.error(err);
@@ -1493,12 +1494,20 @@ export default function App({ embed = false }) {
     };
     setJ(cappedJourney);
     setBookingStep(2);
-    void buildQuotes(cappedJourney);
+    quoteRequestRef.current = buildQuotes(cappedJourney);
   };
 
   const handleFinalBookingSubmit = async () => {
     if (submitting) return;
-    const quote = quotes.find(q => q?.vehicle?.id === selected);
+    let currentQuotes = quotes;
+    let currentSelected = selected;
+    if (loadingQuotes && quoteRequestRef.current) {
+      setValidationError('Finishing your verified quote…');
+      currentQuotes = await quoteRequestRef.current;
+      currentSelected = currentSelected || currentQuotes?.[0]?.vehicle?.id;
+      setValidationError('');
+    }
+    const quote = currentQuotes.find(q => q?.vehicle?.id === currentSelected);
     if (!quote || !isTrustedQuote(quote)) {
       setSubmissionError('A current, verified quote is required before a booking can be submitted. Please recalculate the journey.');
       return;
@@ -1821,7 +1830,10 @@ export default function App({ embed = false }) {
                               }
                               if (!selectedQuote || !isTrustedQuote(selectedQuote)) {
                                 if (loadingQuotes) {
-                                  setValidationError('Refreshing your verified quote. Please wait a moment and continue again.');
+                                  setValidationError('Finishing your verified quote…');
+                                  if (quoteRequestRef.current) await quoteRequestRef.current;
+                                  setValidationError('');
+                                  setBookingStep(3);
                                   return;
                                 }
                                 setValidationError('The verified quote is no longer available. Please return to the journey step and calculate it again.');
