@@ -1531,6 +1531,11 @@ export default function App({ embed = false }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ booking: data.booking })
         }).catch(console.error);
+        fetch('/api/send-customer-quote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ booking: data.booking })
+        }).catch(console.error);
         
       } else {
         throw new ApiRequestError('The server did not confirm that the booking was persisted.', { code: 'invalid-response', status });
