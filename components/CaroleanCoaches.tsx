@@ -1490,8 +1490,8 @@ export default function App({ embed = false }) {
       suitcaseCount: Math.min(selectedCapacity, Math.max(0, Number(journey.suitcaseCount) || 0))
     };
     setJ(cappedJourney);
+    await buildQuotes(cappedJourney);
     setBookingStep(2);
-    void buildQuotes(cappedJourney);
   };
 
   const handleFinalBookingSubmit = async () => {
