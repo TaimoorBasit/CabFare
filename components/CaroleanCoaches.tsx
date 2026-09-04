@@ -1808,7 +1808,7 @@ export default function App({ embed = false }) {
                           </div>}
 
                           {bookingStep === 2 && (
-                            <form className="customer-details-form space-y-4 fade-up" onSubmit={e => {
+                            <form className="customer-details-form space-y-4 fade-up" onSubmit={async e => {
                               e.preventDefault();
                               setValidationError("");
 
