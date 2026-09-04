@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     const toEmail = booking?.customer?.email;
     if (!smtpEmail || !smtpPass) return NextResponse.json({ error: 'Email configuration missing' }, { status: 500 });
     if (!toEmail) return NextResponse.json({ error: 'Customer email is missing' }, { status: 400 });
-    const esc = (value: unknown) => String(value ?? '—').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
+    const esc = (value: unknown) => String(value ?? '—').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character] || character));
     const transporter = nodemailer.createTransport({ host: 'smtp.gmail.com', port: 587, secure: false, auth: { user: smtpEmail.replace(/"/g, ''), pass: smtpPass.replace(/"/g, '') } });
     const fare = booking.quote?.result?.finalPrice || booking.quote?.result?.finalFare || 0;
     const rows = [['Pickup', booking.journey?.origin], ['Drop-off', booking.journey?.destination], ['Date', booking.journey?.departureDate], ['Passengers', booking.journey?.passengers]].map(([label, value]) => `<tr><td style="padding:13px 16px;color:#68778a;border-top:1px solid #edf0f3;width:32%">${label}</td><td style="padding:13px 16px;font-weight:700;border-top:1px solid #edf0f3">${esc(value)}</td></tr>`).join('');
