@@ -1283,7 +1283,7 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
 
       <div className="px-5 py-2 border-t border-outline-variant flex items-center justify-between shrink-0 bg-white">
         <button type="button" onClick={() => { onChange(''); onBack(); }} className="text-[13px] font-bold text-gray-400 hover:text-impact-red">Clear</button>
-        <button type="button" disabled={!selDay} onClick={() => { if (selDay) onChange(dateTimeValue(selDay.y, selDay.mo, selDay.d, hour, minute)); }}
+        <button type="button" disabled={!selDay} onClick={() => { if (selDay) { const selected = dateTimeValue(selDay.y, selDay.mo, selDay.d, hour, minute); onChange(selected < minValue ? minValue : selected); } }}
           className="px-6 py-1.5 rounded-full bg-deep-navy text-white text-[13px] font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity">Done</button>
       </div>
     </div>
@@ -1373,7 +1373,7 @@ export default function App({ embed = false }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({...currentJourney, waypoints: wp, wpCoords: wc})
-      });
+      }, 90000);
       if (currentFetchId !== fetchIdRef.current) return;
       if (!data || !Array.isArray(data.quotes)) {
         throw new ApiRequestError('The quote response is missing its quote list.', { code: 'invalid-response' });
