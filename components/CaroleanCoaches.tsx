@@ -1338,6 +1338,7 @@ export default function App({ embed = false }) {
 
   const [mapsApiKey, setMapsApiKey] = useState(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "");
   useEffect(() => {
+    requestJson('/health', {}, 5000).catch(() => {});
     // Already have a build-time key, so the map/search box can start loading
     // immediately without waiting on this round-trip. Still fetched in the
     // background in case the server has a different (e.g. domain-restricted) key.
