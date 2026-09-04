@@ -1520,7 +1520,7 @@ export default function App({ embed = false }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-      });
+      }, 60000);
       const persistedReference = String(data?.booking?.id || '').trim();
       if ((status === 201 || status === 200) && data?.success === true && persistedReference) {
         setBookingRef(persistedReference);
