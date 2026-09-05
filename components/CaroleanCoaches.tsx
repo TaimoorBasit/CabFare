@@ -1393,7 +1393,12 @@ export default function App({ embed = false }) {
       // replaced their choice with the first vehicle large enough for the group,
       // so selecting a coach could incorrectly show a Minibus here.
       const preferredVehicle = normalizedQuotes.find(
-        quote => quote.vehicle?.id === currentJourney.vehiclePreference
+        quote => {
+          const preference = String(currentJourney.vehiclePreference || '').toLowerCase();
+          const id = String(quote.vehicle?.id || '').toLowerCase();
+          const name = String(quote.vehicle?.name || '').toLowerCase();
+          return id === preference || name === preference || name.includes(preference);
+        }
       );
       if (currentJourney.vehiclePreference && !preferredVehicle) {
         setQ(normalizedQuotes);
@@ -1502,7 +1507,12 @@ export default function App({ embed = false }) {
       currentQuotes = await quoteRequestRef.current;
       setValidationError('');
     }
-    const quote = currentQuotes.find(q => q?.vehicle?.id === journey.vehiclePreference);
+    const quote = currentQuotes.find(q => {
+      const preference = String(journey.vehiclePreference || '').toLowerCase();
+      const id = String(q?.vehicle?.id || '').toLowerCase();
+      const name = String(q?.vehicle?.name || '').toLowerCase();
+      return id === preference || name === preference || name.includes(preference);
+    });
     if (!quote || !isTrustedQuote(quote)) {
       setSubmissionError('A current, verified quote is required before a booking can be submitted. Please recalculate the journey.');
       return;
@@ -1589,7 +1599,12 @@ export default function App({ embed = false }) {
     return { ...j, passengers };
   });
   const filteredQuotes = quotes;
-  const selectedQuote = quotes.find(q => q?.vehicle?.id === journey.vehiclePreference) || null;
+  const selectedQuote = quotes.find(q => {
+    const preference = String(journey.vehiclePreference || '').toLowerCase();
+    const id = String(q?.vehicle?.id || '').toLowerCase();
+    const name = String(q?.vehicle?.name || '').toLowerCase();
+    return id === preference || name === preference || name.includes(preference);
+  }) || null;
   const activeResult = selectedQuote?.result;
   const selectedPassengerCount = selectedQuote
     ? Math.min(Number(journey.passengers) || 1, Number(selectedQuote.vehicle.capacity) || 1)
@@ -1825,7 +1840,12 @@ export default function App({ embed = false }) {
                               }
                               setValidationError('Finishing your verified quote…');
                               const verifiedQuotes = await buildQuotes(journey);
-                              const verifiedQuote = verifiedQuotes?.find(quote => quote?.vehicle?.id === journey.vehiclePreference);
+                              const verifiedQuote = verifiedQuotes?.find(quote => {
+                                const preference = String(journey.vehiclePreference || '').toLowerCase();
+                                const id = String(quote?.vehicle?.id || '').toLowerCase();
+                                const name = String(quote?.vehicle?.name || '').toLowerCase();
+                                return id === preference || name === preference || name.includes(preference);
+                              });
                               if (!verifiedQuote || !isTrustedQuote(verifiedQuote)) {
                                 setValidationError('The selected vehicle is unavailable or could not be priced. Please check the journey and try again.');
                                 return;
