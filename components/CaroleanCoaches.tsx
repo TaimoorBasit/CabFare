@@ -1491,8 +1491,8 @@ export default function App({ embed = false }) {
     const selectedCapacity = vehicleCapacity(journey.vehiclePreference);
     const cappedJourney = {
       ...journey,
-      passengers: Math.min(selectedCapacity, Math.max(1, Number(journey.passengers) || 1)),
-      suitcaseCount: Math.min(selectedCapacity, Math.max(0, Number(journey.suitcaseCount) || 0))
+      passengers: Math.max(1, Number(journey.passengers) || 1),
+      suitcaseCount: Math.max(0, Number(journey.suitcaseCount) || 0)
     };
     setJ(cappedJourney);
     setBookingStep(2);
@@ -1607,7 +1607,7 @@ export default function App({ embed = false }) {
   }) || null;
   const activeResult = selectedQuote?.result;
   const selectedPassengerCount = selectedQuote
-    ? Math.min(Number(journey.passengers) || 1, Number(selectedQuote.vehicle.capacity) || 1)
+    ? Number(journey.passengers) || 1
     : Number(journey.passengers) || 1;
 
   const showReturnDate = journey.journeyType === "return";
