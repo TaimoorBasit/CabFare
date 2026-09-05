@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 
 
 'use client';
@@ -1332,7 +1332,9 @@ export default function App({ embed = false }) {
   const [bookingRef, setBookingRef] = useState("");
   const [submissionError, setSubmissionError] = useState("");
   const [bookingStep, setBookingStep] = useState(1);
-  const quoteRequestRef = useRef(null);
+  const quoteRequestRef = useRef<any>(null);
+  const quoteCacheRef = useRef<Map<string, any>>(new Map());
+  const inFlightQuotesRef = useRef<Map<string, Promise<any>>>(new Map());
   const [activeDatePicker, setActiveDatePicker] = useState(null); // 'departure' | 'return' | null - which field's calendar is showing in place of the form
   const fetchIdRef = useRef(0);
   const [validationError, setValidationError] = useState("");
@@ -1364,35 +1366,23 @@ export default function App({ embed = false }) {
       ? [currentJourney.wpCoords?.[0], ...currentJourney.stops.map(s => s.coords || null), currentJourney.wpCoords?.[currentJourney.wpCoords.length - 1]]
       : [currentJourney.wpCoords?.[0], currentJourney.wpCoords?.[1]];
 
-    if (!wp[0] || !wp[wp.length-1]) return;
-    const currentFetchId = ++fetchIdRef.current;
-    setLoadingQuotes(true);
-    setQ([]);
-    setSel(null);
-    setValidationError("");
-    try {
-      const { data } = await requestJson('/api/quotes/calculate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({...currentJourney, waypoints: wp, wpCoords: wc})
-      }, 20000);
-      if (currentFetchId !== fetchIdRef.current) return;
-      if (!data || !Array.isArray(data.quotes)) {
-        throw new ApiRequestError('The quote response is missing its quote list.', { code: 'invalid-response' });
-      }
-      const normalizedQuotes = data.quotes;
-      if (normalizedQuotes.some(quote => !isTrustedQuote(quote))) {
-        throw new ApiRequestError('The quote response contains invalid mileage or pricing data.', { code: 'invalid-response' });
-      }
-      if (normalizedQuotes.length === 0) {
-        setQ([]);
-        setValidationError('No configured vehicle is available for this journey. No price has been estimated.');
-        return [];
-      }
-      // Keep the vehicle the customer explicitly selected. Previously this always
-      // replaced their choice with the first vehicle large enough for the group,
-      // so selecting a coach could incorrectly show a Minibus here.
-      const preferredVehicle = normalizedQuotes.find(
+    if (!wp[0] || !wp[wp.length-1]) return [];
+
+    const cacheKey = JSON.stringify({
+      wp,
+      wc,
+      v: currentJourney.vehiclePreference || '',
+      p: currentJourney.passengers || 1,
+      s: currentJourney.suitcaseCount || 0,
+      h: currentJourney.handbagCount || 0,
+      w: currentJourney.waitingMins || 0,
+      jt: currentJourney.journeyType || 'one-way',
+      d: currentJourney.departureDate || '',
+      r: currentJourney.returnDate || ''
+    });
+
+    const applyQuotes = (quotesList: any[]) => {
+      const preferredVehicle = quotesList.find(
         quote => {
           const preference = String(currentJourney.vehiclePreference || '').toLowerCase();
           const id = String(quote.vehicle?.id || '').toLowerCase();
@@ -1401,29 +1391,93 @@ export default function App({ embed = false }) {
         }
       );
       if (currentJourney.vehiclePreference && !preferredVehicle) {
-        setQ(normalizedQuotes);
+        setQ(quotesList);
         setSel(null);
         setValidationError('The selected vehicle is not available for these dates. Please choose another vehicle or change the journey dates.');
-        return [];
+        return quotesList;
       }
       const firstAvailable = preferredVehicle
-        || normalizedQuotes.find(quote => Number(quote?.vehicle?.capacity) >= Number(currentJourney.passengers))
-        || normalizedQuotes[0];
-      setQ(normalizedQuotes);
-      setSel(firstAvailable.vehicle.id);
-      return normalizedQuotes;
-    } catch(err) {
-      if (currentFetchId !== fetchIdRef.current) return;
-      console.error(err);
-      setQ([]);
-      setSel(null);
-      setValidationError(quoteFailureMessage(err));
-      return [];
-    } finally {
-      if (currentFetchId === fetchIdRef.current) {
-        setLoadingQuotes(false);
+        || quotesList.find(quote => Number(quote?.vehicle?.capacity) >= Number(currentJourney.passengers))
+        || quotesList[0];
+      setQ(quotesList);
+      if (firstAvailable?.vehicle?.id) {
+        setSel(firstAvailable.vehicle.id);
+      }
+      return quotesList;
+    };
+
+    // 1. Return immediately from instant memory cache if present
+    if (quoteCacheRef.current.has(cacheKey)) {
+      const cached = quoteCacheRef.current.get(cacheKey);
+      if (cached && cached.length > 0) {
+        setValidationError("");
+        applyQuotes(cached);
+        return cached;
       }
     }
+
+    // 2. Return in-flight promise if an identical calculation is already running
+    if (inFlightQuotesRef.current.has(cacheKey)) {
+      try {
+        const inFlight = await inFlightQuotesRef.current.get(cacheKey);
+        if (inFlight && inFlight.length > 0) {
+          applyQuotes(inFlight);
+          return inFlight;
+        }
+      } catch (e) {
+        // Fall through to re-fetch on failure
+      }
+    }
+
+    const currentFetchId = ++fetchIdRef.current;
+    setLoadingQuotes(true);
+    setValidationError("");
+
+    const fetchPromise = (async () => {
+      try {
+        const { data } = await requestJson('/api/quotes/calculate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({...currentJourney, waypoints: wp, wpCoords: wc})
+        }, 20000);
+
+        if (!data || !Array.isArray(data.quotes)) {
+          throw new ApiRequestError('The quote response is missing its quote list.', { code: 'invalid-response' });
+        }
+        const normalizedQuotes = data.quotes;
+        if (normalizedQuotes.some(quote => !isTrustedQuote(quote))) {
+          throw new ApiRequestError('The quote response contains invalid mileage or pricing data.', { code: 'invalid-response' });
+        }
+
+        quoteCacheRef.current.set(cacheKey, normalizedQuotes);
+
+        if (currentFetchId === fetchIdRef.current) {
+          if (normalizedQuotes.length === 0) {
+            setQ([]);
+            setValidationError('No configured vehicle is available for this journey. No price has been estimated.');
+            return [];
+          }
+          applyQuotes(normalizedQuotes);
+        }
+        return normalizedQuotes;
+      } catch(err) {
+        if (currentFetchId === fetchIdRef.current) {
+          console.error(err);
+          setQ([]);
+          setSel(null);
+          setValidationError(quoteFailureMessage(err));
+        }
+        return [];
+      } finally {
+        inFlightQuotesRef.current.delete(cacheKey);
+        if (currentFetchId === fetchIdRef.current) {
+          setLoadingQuotes(false);
+        }
+      }
+    })();
+
+    inFlightQuotesRef.current.set(cacheKey, fetchPromise);
+    return fetchPromise;
   }, [journey]);
 
   // Reactive updates for parameters once calculation layout is shown
@@ -1809,8 +1863,8 @@ export default function App({ embed = false }) {
                             )}
 
                             
-                            <button type="submit" disabled={loadingQuotes || mapsStatus !== 'ready'} className="w-full py-5 bg-impact-red disabled:opacity-50 disabled:cursor-not-allowed text-white font-headline-md rounded-full hover:bg-secondary transition-all transform active:scale-[0.98] flex items-center justify-center gap-3 group shadow-xl shadow-impact-red/30 mt-4">
-                              {loadingQuotes ? 'Calculating verified quote...' : 'Continue'}
+                            <button type="submit" disabled={mapsStatus === 'error'} className="w-full py-5 bg-impact-red disabled:opacity-50 disabled:cursor-not-allowed text-white font-headline-md rounded-full hover:bg-secondary transition-all transform active:scale-[0.98] flex items-center justify-center gap-3 group shadow-xl shadow-impact-red/30 mt-4">
+                              Continue
                               <span className="material-symbols-outlined transition-transform group-hover:translate-x-2">arrow_forward</span>
                             </button>
                             <p className="text-center text-[11px] text-gray-400 mt-3">Live pricing &middot; No obligation &middot; Response in minutes</p>
@@ -1838,14 +1892,21 @@ export default function App({ embed = false }) {
                                 setValidationError("Please enter a valid phone number (min. 10 digits).");
                                 return;
                               }
-                              setValidationError('Finishing your verified quote…');
-                              const verifiedQuotes = await buildQuotes(journey);
+                              let verifiedQuotes = (quotes && quotes.length > 0) ? quotes : null;
+                              if (!verifiedQuotes && quoteRequestRef.current) {
+                                setValidationError('Finishing your verified quote…');
+                                verifiedQuotes = await quoteRequestRef.current;
+                                setValidationError('');
+                              }
+                              if (!verifiedQuotes || verifiedQuotes.length === 0) {
+                                verifiedQuotes = await buildQuotes(journey);
+                              }
                               const verifiedQuote = verifiedQuotes?.find(quote => {
                                 const preference = String(journey.vehiclePreference || '').toLowerCase();
                                 const id = String(quote?.vehicle?.id || '').toLowerCase();
                                 const name = String(quote?.vehicle?.name || '').toLowerCase();
                                 return id === preference || name === preference || name.includes(preference);
-                              });
+                              }) || verifiedQuotes?.[0];
                               if (!verifiedQuote || !isTrustedQuote(verifiedQuote)) {
                                 setValidationError('The selected vehicle is unavailable or could not be priced. Please check the journey and try again.');
                                 return;
@@ -1993,7 +2054,7 @@ export default function App({ embed = false }) {
                                 <div className="flex items-center gap-2 text-sm font-bold text-deep-navy mb-2">
                                   <SvgMap size={18}/> Route planning & mileage
                                 </div>
-                                {loadingQuotes
+                                {loadingQuotes && !activeResult
                                   ? <div className="h-[280px] rounded-xl bg-surface-container-low flex items-center justify-center text-sm text-on-surface-variant">Calculating route and pricing...</div>
                                   : <RouteMap result={activeResult} journey={journey} showMetrics={false}/>
                                 }
@@ -2003,7 +2064,7 @@ export default function App({ embed = false }) {
                                 <button type="button" onClick={()=>setBookingStep(2)} className="h-14 px-6 rounded-full border border-outline-variant text-deep-navy font-bold flex items-center justify-center gap-2">
                                   <span className="material-symbols-outlined text-[18px]">arrow_back</span> Back
                                 </button>
-                                <button type="button" onClick={handleFinalBookingSubmit} disabled={submitting || loadingQuotes || !selectedQuote} className="flex-1 h-14 bg-impact-red disabled:opacity-50 text-white rounded-full font-bold shadow-lg shadow-impact-red/20 flex items-center justify-center gap-2">
+                                <button type="button" onClick={handleFinalBookingSubmit} disabled={submitting || (!selectedQuote && loadingQuotes) || !selectedQuote} className="flex-1 h-14 bg-impact-red disabled:opacity-50 text-white rounded-full font-bold shadow-lg shadow-impact-red/20 flex items-center justify-center gap-2">
                                   {submitting ? "Confirming..." : <>Confirm Booking <span className="material-symbols-outlined text-[19px]">arrow_forward</span></>}
                                 </button>
                               </div>

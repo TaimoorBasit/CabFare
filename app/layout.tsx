@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {mapsKey && (
           <Script
             id="gm-script"
-            src={`https://maps.googleapis.com/maps/api/js?key=${mapsKey}&libraries=places,geometry&callback=__gmCb`}
+            src={`https://maps.googleapis.com/maps/api/js?key=${mapsKey}&libraries=places,geometry`}
             strategy="afterInteractive"
           />
         )}
