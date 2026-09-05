@@ -1500,14 +1500,12 @@ export default function App({ embed = false }) {
   const handleFinalBookingSubmit = async () => {
     if (submitting) return;
     let currentQuotes = quotes;
-    let currentSelected = selected;
     if (loadingQuotes && quoteRequestRef.current) {
       setValidationError('Finishing your verified quote…');
       currentQuotes = await quoteRequestRef.current;
-      currentSelected = currentSelected || currentQuotes?.[0]?.vehicle?.id;
       setValidationError('');
     }
-    const quote = currentQuotes.find(q => q?.vehicle?.id === currentSelected);
+    const quote = currentQuotes.find(q => q?.vehicle?.id === journey.vehiclePreference);
     if (!quote || !isTrustedQuote(quote)) {
       setSubmissionError('A current, verified quote is required before a booking can be submitted. Please recalculate the journey.');
       return;
@@ -1594,7 +1592,7 @@ export default function App({ embed = false }) {
     return { ...j, passengers };
   });
   const filteredQuotes = quotes;
-  const selectedQuote = quotes.find(q => q?.vehicle?.id === selected) || null;
+  const selectedQuote = quotes.find(q => q?.vehicle?.id === journey.vehiclePreference) || null;
   const activeResult = selectedQuote?.result;
   const selectedPassengerCount = selectedQuote
     ? Math.min(Number(journey.passengers) || 1, Number(selectedQuote.vehicle.capacity) || 1)
