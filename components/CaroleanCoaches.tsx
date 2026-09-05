@@ -1375,7 +1375,7 @@ export default function App({ embed = false }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({...currentJourney, waypoints: wp, wpCoords: wc})
-      }, 90000);
+      }, 20000);
       if (currentFetchId !== fetchIdRef.current) return;
       if (!data || !Array.isArray(data.quotes)) {
         throw new ApiRequestError('The quote response is missing its quote list.', { code: 'invalid-response' });
@@ -1828,18 +1828,15 @@ export default function App({ embed = false }) {
                                 setValidationError("Please enter a valid phone number (min. 10 digits).");
                                 return;
                               }
-                              if (!selectedQuote || !isTrustedQuote(selectedQuote)) {
-                                if (loadingQuotes) {
-                                  setValidationError('Finishing your verified quote…');
-                                  if (quoteRequestRef.current) await quoteRequestRef.current;
-                                  setValidationError('');
-                                  setBookingStep(3);
-                                  return;
-                                }
-                                setValidationError('The verified quote is no longer available. Please return to the journey step and calculate it again.');
+                              setValidationError('Finishing your verified quote…');
+                              const verifiedQuotes = await buildQuotes(journey);
+                              const verifiedQuote = verifiedQuotes?.find(quote => quote?.vehicle?.id === journey.vehiclePreference);
+                              if (!verifiedQuote || !isTrustedQuote(verifiedQuote)) {
+                                setValidationError('The selected vehicle is unavailable or could not be priced. Please check the journey and try again.');
                                 return;
                               }
-                              
+                              setSel(verifiedQuote.vehicle.id);
+                              setValidationError('');
                               setBookingStep(3);
                             }}>
                               <div>
