@@ -1292,7 +1292,7 @@ function DateTimePanel({ value, onChange, onBack, minValue }) {
 
 function vehicleCapacity(vehiclePreference) {
   if (vehiclePreference === 'bus') return 33;
-  if (vehiclePreference === 'coach') return 50;
+  if (vehiclePreference === 'coach') return 49;
   return 16;
 }
 
@@ -1891,7 +1891,7 @@ export default function App({ embed = false }) {
                                   }}>
                                   <option value="minibus">Minibus (16 Seats)</option>
                                   <option value="bus">Standard Bus (33 Seats)</option>
-                                  <option value="coach">Premium Coach (50 Seats)</option>
+                                <option value="coach">Premium Coach (49 Seats)</option>
                                 </select>
                                 <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[18px]">expand_more</span>
                               </div>
