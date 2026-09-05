@@ -1380,10 +1380,7 @@ export default function App({ embed = false }) {
       if (!data || !Array.isArray(data.quotes)) {
         throw new ApiRequestError('The quote response is missing its quote list.', { code: 'invalid-response' });
       }
-      const normalizedQuotes = data.quotes.map(quote => {
-        if (!/premium coach/i.test(String(quote.vehicle?.name || ''))) return quote;
-        return { ...quote, vehicle: { ...quote.vehicle, name: 'Premium Coach (50 Seats)', capacity: 50 } };
-      });
+      const normalizedQuotes = data.quotes;
       if (normalizedQuotes.some(quote => !isTrustedQuote(quote))) {
         throw new ApiRequestError('The quote response contains invalid mileage or pricing data.', { code: 'invalid-response' });
       }
