@@ -1296,8 +1296,48 @@ function vehicleCapacity(vehiclePreference) {
   return 16;
 }
 
+function matchesVehiclePreference(vehicle, preference) {
+  if (!preference) return true;
+  const pref = String(preference).trim().toLowerCase();
+  const id = String(vehicle?.id || '').trim().toLowerCase();
+  const name = String(vehicle?.name || '').trim().toLowerCase();
 
+  if (id === pref || name === pref) return true;
+  if (pref === 'bus') {
+    return id === 'bus' || (/\bbus\b/i.test(name) && !/\bminibus\b/i.test(name));
+  }
+  if (pref === 'minibus') {
+    return id === 'minibus' || /\bminibus\b/i.test(name);
+  }
+  if (pref === 'coach') {
+    return id === 'coach' || /\bcoach\b/i.test(name);
+  }
+  return false;
+}
 
+function getJourneyCacheKey(currentJourney) {
+  const hasStops = (currentJourney.stops || []).length > 0;
+  const wp = hasStops
+    ? [currentJourney.origin, ...currentJourney.stops.map(s => s.place).filter(Boolean), currentJourney.destination]
+    : [currentJourney.origin, currentJourney.destination];
+
+  const wc = hasStops
+    ? [currentJourney.wpCoords?.[0], ...currentJourney.stops.map(s => s.coords || null), currentJourney.wpCoords?.[currentJourney.wpCoords.length - 1]]
+    : [currentJourney.wpCoords?.[0], currentJourney.wpCoords?.[1]];
+
+  return JSON.stringify({
+    wp,
+    wc,
+    v: currentJourney.vehiclePreference || '',
+    p: currentJourney.passengers || 1,
+    s: currentJourney.suitcaseCount || 0,
+    h: currentJourney.handbagCount || 0,
+    w: currentJourney.waitingMins || 0,
+    jt: currentJourney.journeyType || 'one-way',
+    d: currentJourney.departureDate || '',
+    r: currentJourney.returnDate || ''
+  });
+}
 
 export default function App({ embed = false }) {
   // Customer is a public app; admin-only business data is not available here.
@@ -1335,6 +1375,7 @@ export default function App({ embed = false }) {
   const quoteRequestRef = useRef<any>(null);
   const quoteCacheRef = useRef<Map<string, any>>(new Map());
   const inFlightQuotesRef = useRef<Map<string, Promise<any>>>(new Map());
+  const currentQuoteKeyRef = useRef<string>("");
   const [activeDatePicker, setActiveDatePicker] = useState(null); // 'departure' | 'return' | null - which field's calendar is showing in place of the form
   const fetchIdRef = useRef(0);
   const [validationError, setValidationError] = useState("");
@@ -1368,27 +1409,12 @@ export default function App({ embed = false }) {
 
     if (!wp[0] || !wp[wp.length-1]) return [];
 
-    const cacheKey = JSON.stringify({
-      wp,
-      wc,
-      v: currentJourney.vehiclePreference || '',
-      p: currentJourney.passengers || 1,
-      s: currentJourney.suitcaseCount || 0,
-      h: currentJourney.handbagCount || 0,
-      w: currentJourney.waitingMins || 0,
-      jt: currentJourney.journeyType || 'one-way',
-      d: currentJourney.departureDate || '',
-      r: currentJourney.returnDate || ''
-    });
+    const cacheKey = getJourneyCacheKey(currentJourney);
 
     const applyQuotes = (quotesList: any[]) => {
+      currentQuoteKeyRef.current = cacheKey;
       const preferredVehicle = quotesList.find(
-        quote => {
-          const preference = String(currentJourney.vehiclePreference || '').toLowerCase();
-          const id = String(quote.vehicle?.id || '').toLowerCase();
-          const name = String(quote.vehicle?.name || '').toLowerCase();
-          return id === preference || name === preference || name.includes(preference);
-        }
+        quote => matchesVehiclePreference(quote?.vehicle, currentJourney.vehiclePreference)
       );
       if (currentJourney.vehiclePreference && !preferredVehicle) {
         setQ(quotesList);
@@ -1561,12 +1587,7 @@ export default function App({ embed = false }) {
       currentQuotes = await quoteRequestRef.current;
       setValidationError('');
     }
-    const quote = currentQuotes.find(q => {
-      const preference = String(journey.vehiclePreference || '').toLowerCase();
-      const id = String(q?.vehicle?.id || '').toLowerCase();
-      const name = String(q?.vehicle?.name || '').toLowerCase();
-      return id === preference || name === preference || name.includes(preference);
-    });
+    const quote = currentQuotes.find(q => matchesVehiclePreference(q?.vehicle, journey.vehiclePreference));
     if (!quote || !isTrustedQuote(quote)) {
       setSubmissionError('A current, verified quote is required before a booking can be submitted. Please recalculate the journey.');
       return;
@@ -1643,22 +1664,26 @@ export default function App({ embed = false }) {
     [stops[index], stops[nextIndex]] = [stops[nextIndex], stops[index]];
     return { ...j, stops };
   });
-  const handlePassengerChange = e => setJ(j => {
-    if (e.target.value === '') return { ...j, passengers: '' };
-    const requested = Math.max(1, Number(e.target.value) || 1);
+  const handlePassengerChange = e => {
+    const rawVal = e.target.value;
+    if (rawVal === '') {
+      setJ(j => ({ ...j, passengers: '' }));
+      return;
+    }
+    const requested = Math.max(1, Number(rawVal) || 1);
     const passengers = Math.min(50, requested);
     const suitable = passengers <= 16 ? 'Minibus' : passengers <= 33 ? 'Standard Bus' : 'Premium Coach';
-    const currentCapacity = vehicleCapacity(j.vehiclePreference);
+    const currentCapacity = vehicleCapacity(journey.vehiclePreference);
     setVehicleSuggestion(requested > 50 ? 'For groups over 50 passengers, our team will contact you to arrange the best vehicle option. Please continue with your booking request.' : passengers > currentCapacity ? `For ${passengers} passengers, ${suitable} is recommended.` : '');
-    return { ...j, passengers };
-  });
+    const updated = { ...journey, passengers };
+    setJ(updated);
+    quoteRequestRef.current = buildQuotes(updated);
+  };
   const filteredQuotes = quotes;
-  const selectedQuote = quotes.find(q => {
-    const preference = String(journey.vehiclePreference || '').toLowerCase();
-    const id = String(q?.vehicle?.id || '').toLowerCase();
-    const name = String(q?.vehicle?.name || '').toLowerCase();
-    return id === preference || name === preference || name.includes(preference);
-  }) || null;
+  const selectedQuote = quotes.find(q => matchesVehiclePreference(q?.vehicle, journey.vehiclePreference))
+    || quotes.find(q => q?.vehicle?.id === sel)
+    || quotes[0]
+    || null;
   const activeResult = selectedQuote?.result;
   const selectedPassengerCount = selectedQuote
     ? Number(journey.passengers) || 1
@@ -1892,24 +1917,41 @@ export default function App({ embed = false }) {
                                 setValidationError("Please enter a valid phone number (min. 10 digits).");
                                 return;
                               }
-                              let verifiedQuotes = (quotes && quotes.length > 0) ? quotes : null;
-                              if (!verifiedQuotes && quoteRequestRef.current) {
+                              const journeyKey = getJourneyCacheKey(journey);
+                              let verifiedQuotes = (quotes && quotes.length > 0 && currentQuoteKeyRef.current === journeyKey) ? quotes : null;
+                              let verifiedQuote = verifiedQuotes?.find(quote => matchesVehiclePreference(quote?.vehicle, journey.vehiclePreference));
+
+                              if (!verifiedQuote && quoteRequestRef.current) {
                                 setValidationError('Finishing your verified quote…');
-                                verifiedQuotes = await quoteRequestRef.current;
+                                try {
+                                  const awaited = await quoteRequestRef.current;
+                                  if (Array.isArray(awaited) && awaited.length > 0) {
+                                    verifiedQuotes = awaited;
+                                    verifiedQuote = verifiedQuotes.find(quote => matchesVehiclePreference(quote?.vehicle, journey.vehiclePreference));
+                                  }
+                                } catch (err) {
+                                  // Fall through to buildQuotes
+                                }
                                 setValidationError('');
                               }
-                              if (!verifiedQuotes || verifiedQuotes.length === 0) {
-                                verifiedQuotes = await buildQuotes(journey);
+
+                              if (!verifiedQuote) {
+                                setLoadingQuotes(true);
+                                try {
+                                  verifiedQuotes = await buildQuotes(journey);
+                                  verifiedQuote = verifiedQuotes?.find(quote => matchesVehiclePreference(quote?.vehicle, journey.vehiclePreference));
+                                } finally {
+                                  setLoadingQuotes(false);
+                                }
                               }
-                              const verifiedQuote = verifiedQuotes?.find(quote => {
-                                const preference = String(journey.vehiclePreference || '').toLowerCase();
-                                const id = String(quote?.vehicle?.id || '').toLowerCase();
-                                const name = String(quote?.vehicle?.name || '').toLowerCase();
-                                return id === preference || name === preference || name.includes(preference);
-                              }) || verifiedQuotes?.[0];
+
                               if (!verifiedQuote || !isTrustedQuote(verifiedQuote)) {
                                 setValidationError('The selected vehicle is unavailable or could not be priced. Please check the journey and try again.');
                                 return;
+                              }
+                              if (verifiedQuotes && Array.isArray(verifiedQuotes) && verifiedQuotes.length > 0) {
+                                setQ(verifiedQuotes);
+                                currentQuoteKeyRef.current = journeyKey;
                               }
                               setSel(verifiedQuote.vehicle.id);
                               setValidationError('');
@@ -1947,12 +1989,20 @@ export default function App({ embed = false }) {
                                     const v = e.target.value;
                                     const capacity = vehicleCapacity(v);
                                     setVehicleSuggestion("");
-                                    setJ(j=>({...j, vehiclePreference: v, passengers: Math.min(j.passengers || 1, capacity), handbagCount: 0, suitcaseCount: 0}));
+                                    const updatedJourney = {
+                                      ...journey,
+                                      vehiclePreference: v,
+                                      passengers: Math.min(Number(journey.passengers) || 1, capacity),
+                                      handbagCount: 0,
+                                      suitcaseCount: 0
+                                    };
+                                    setJ(updatedJourney);
                                     setSel(v);
+                                    quoteRequestRef.current = buildQuotes(updatedJourney);
                                   }}>
                                   <option value="minibus">Minibus (16 Seats)</option>
                                   <option value="bus">Standard Bus (33 Seats)</option>
-                                <option value="coach">Premium Coach (50 Seats)</option>
+                                  <option value="coach">Premium Coach (50 Seats)</option>
                                 </select>
                                 <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[18px]">expand_more</span>
                               </div>
@@ -1964,7 +2014,23 @@ export default function App({ embed = false }) {
                               <div>
                                 <label className="field-label">Passengers</label>
                                 <div className="relative h-[52px] px-2 flex items-center border border-[#c7c5d1] rounded-[14px] bg-white">
-                                  <button type="button" aria-label="Decrease passengers" onClick={()=>setJ(j=>({...j, passengers: Math.max(1, Number(j.passengers) - 1)}))} className="absolute left-3 z-10 w-7 h-7 text-gray-400">−</button><input aria-label="Passengers" type="number" min="1" max="50" value={journey.passengers} onBlur={()=>setJ(j=>({...j, passengers: Math.max(1, Number(j.passengers) || 1)}))} onChange={handlePassengerChange} className="number-input-no-spinner w-full bg-transparent text-center text-[15px] font-bold text-deep-navy outline-none" /><button type="button" aria-label="Increase passengers" onClick={()=>handlePassengerChange({ target: { value: String(Math.min(50, Number(journey.passengers) + 1)) } })} className="absolute right-3 z-10 w-7 h-7 text-gray-400">+</button>
+                                  <button type="button" aria-label="Decrease passengers" onClick={()=>{
+                                    const newPax = Math.max(1, (Number(journey.passengers) || 1) - 1);
+                                    const updated = { ...journey, passengers: newPax };
+                                    setJ(updated);
+                                    quoteRequestRef.current = buildQuotes(updated);
+                                  }} className="absolute left-3 z-10 w-7 h-7 text-gray-400">−</button>
+                                  <input aria-label="Passengers" type="number" min="1" max="50" value={journey.passengers} onBlur={()=>{
+                                    const newPax = Math.max(1, Number(journey.passengers) || 1);
+                                    const updated = { ...journey, passengers: newPax };
+                                    setJ(updated);
+                                    quoteRequestRef.current = buildQuotes(updated);
+                                  }} onChange={handlePassengerChange} className="number-input-no-spinner w-full bg-transparent text-center text-[15px] font-bold text-deep-navy outline-none" />
+                                  <button type="button" aria-label="Increase passengers" onClick={()=>{
+                                    const maxCap = vehicleCapacity(journey.vehiclePreference);
+                                    const newPax = Math.min(maxCap, (Number(journey.passengers) || 1) + 1);
+                                    handlePassengerChange({ target: { value: String(newPax) } });
+                                  }} className="absolute right-3 z-10 w-7 h-7 text-gray-400">+</button>
                                 </div>
                               </div>
 
@@ -1974,14 +2040,31 @@ export default function App({ embed = false }) {
                                   <button
                                     type="button"
                                     aria-label="Decrease 23kg suitcases"
-                                    onClick={()=>setJ(j => ({...j, suitcaseCount: Math.max(0, (j.suitcaseCount ?? 0) - 1)}))}
+                                    onClick={()=>{
+                                      const newCount = Math.max(0, (journey.suitcaseCount ?? 0) - 1);
+                                      const updated = { ...journey, suitcaseCount: newCount };
+                                      setJ(updated);
+                                      quoteRequestRef.current = buildQuotes(updated);
+                                    }}
                                     className="absolute left-3 z-10 shrink-0 text-gray-400 hover:text-impact-red rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none"
                                   ><span className="material-symbols-outlined text-[18px]">remove</span></button>
-                                  <input aria-label="Suitcases 23kg or more" type="number" min="0" max={vehicleCapacity(journey.vehiclePreference)} value={journey.suitcaseCount ?? 0} onChange={e=>setJ(j=>({...j, suitcaseCount: Math.min(vehicleCapacity(j.vehiclePreference), Math.max(0, Number(e.target.value) || 0))}))} className="number-input-no-spinner w-full h-[44px] rounded-[14px] border border-[#c7c5d1] bg-white px-8 text-center text-[15px] font-bold text-deep-navy outline-none" />
+                                  <input aria-label="Suitcases 23kg or more" type="number" min="0" max={vehicleCapacity(journey.vehiclePreference)} value={journey.suitcaseCount ?? 0} onChange={e=>{
+                                    const maxCap = vehicleCapacity(journey.vehiclePreference);
+                                    const newCount = Math.min(maxCap, Math.max(0, Number(e.target.value) || 0));
+                                    const updated = { ...journey, suitcaseCount: newCount };
+                                    setJ(updated);
+                                    quoteRequestRef.current = buildQuotes(updated);
+                                  }} className="number-input-no-spinner w-full h-[44px] rounded-[14px] border border-[#c7c5d1] bg-white px-8 text-center text-[15px] font-bold text-deep-navy outline-none" />
                                   <button
                                     type="button"
                                       aria-label="Increase 23kg suitcases"
-                                      onClick={()=>setJ(j => ({...j, suitcaseCount: Math.min(vehicleCapacity(j.vehiclePreference), (j.suitcaseCount ?? 0) + 1)}))}
+                                      onClick={()=>{
+                                        const maxCap = vehicleCapacity(journey.vehiclePreference);
+                                        const newCount = Math.min(maxCap, (journey.suitcaseCount ?? 0) + 1);
+                                        const updated = { ...journey, suitcaseCount: newCount };
+                                        setJ(updated);
+                                        quoteRequestRef.current = buildQuotes(updated);
+                                      }}
                                       className="absolute right-3 z-10 shrink-0 text-gray-400 hover:text-[#4ADE80] rounded-full transition-all w-7 h-7 flex items-center justify-center focus:outline-none"
                                     ><span className="material-symbols-outlined text-[18px]">add</span></button>
                                   </div>
