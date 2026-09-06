@@ -1,6 +1,6 @@
 const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
 const productionApiUrl = 'https://cabfare-backend.mohammad-taimoor855.workers.dev';
-const defaultApiUrl = process.env.NODE_ENV === 'production' ? productionApiUrl : 'http://localhost:5000';
+const defaultApiUrl = productionApiUrl;
 
 export const API_BASE_URL = (configuredApiUrl || defaultApiUrl).replace(/\/+$/, '');
 

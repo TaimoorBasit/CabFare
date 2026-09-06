@@ -1376,6 +1376,7 @@ export default function App({ embed = false }) {
   const quoteCacheRef = useRef<Map<string, any>>(new Map());
   const inFlightQuotesRef = useRef<Map<string, Promise<any>>>(new Map());
   const currentQuoteKeyRef = useRef<string>("");
+  const latestQuotesRef = useRef<any[]>([]);
   const [activeDatePicker, setActiveDatePicker] = useState(null); // 'departure' | 'return' | null - which field's calendar is showing in place of the form
   const fetchIdRef = useRef(0);
   const [validationError, setValidationError] = useState("");
@@ -1413,6 +1414,9 @@ export default function App({ embed = false }) {
 
     const applyQuotes = (quotesList: any[]) => {
       currentQuoteKeyRef.current = cacheKey;
+      if (Array.isArray(quotesList) && quotesList.length > 0) {
+        latestQuotesRef.current = quotesList;
+      }
       const preferredVehicle = quotesList.find(
         quote => matchesVehiclePreference(quote?.vehicle, currentJourney.vehiclePreference)
       );
@@ -1679,10 +1683,11 @@ export default function App({ embed = false }) {
     setJ(updated);
     quoteRequestRef.current = buildQuotes(updated);
   };
-  const filteredQuotes = quotes;
-  const selectedQuote = quotes.find(q => matchesVehiclePreference(q?.vehicle, journey.vehiclePreference))
-    || quotes.find(q => q?.vehicle?.id === sel)
-    || quotes[0]
+  const availableQuotes = (quotes && quotes.length > 0) ? quotes : latestQuotesRef.current;
+  const filteredQuotes = availableQuotes;
+  const selectedQuote = availableQuotes.find(q => matchesVehiclePreference(q?.vehicle, journey.vehiclePreference))
+    || availableQuotes.find(q => q?.vehicle?.id === selected)
+    || availableQuotes[0]
     || null;
   const activeResult = selectedQuote?.result;
   const selectedPassengerCount = selectedQuote
@@ -1950,6 +1955,7 @@ export default function App({ embed = false }) {
                                 return;
                               }
                               if (verifiedQuotes && Array.isArray(verifiedQuotes) && verifiedQuotes.length > 0) {
+                                latestQuotesRef.current = verifiedQuotes;
                                 setQ(verifiedQuotes);
                                 currentQuoteKeyRef.current = journeyKey;
                               }
